@@ -1,0 +1,18 @@
+# Normalize text files while preserving platform-appropriate checkouts.
+* text=auto
+
+# Cross-platform scripts require explicit line endings.
+*.sh text eol=lf
+*.bash text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files must not be modified by Git's text conversion.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary

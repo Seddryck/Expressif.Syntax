@@ -1,0 +1,42 @@
+# Tree-sitter
+node_modules/
+.tree-sitter/
+*.so
+*.dll
+*.dylib
+*.wasm
+
+# .NET / C#
+.vs/
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.pyright/
+*.egg-info/
+dist/
+
+# TypeScript / Node
+node_modules/
+coverage/
+*.tsbuildinfo
+
+# IDEs
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
