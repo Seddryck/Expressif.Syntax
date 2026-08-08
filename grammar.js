@@ -10,11 +10,83 @@
 export default grammar({
   name: "expressif",
 
-  rules: {
-    source_file: ($) => repeat($.expression),
+  extras: ($) => [/[\s\uFEFF\u2060\u200B]/],
 
-    // Initial placeholder rule. The complete Expressif syntax is introduced
-    // incrementally together with corpus tests.
-    expression: (_) => "hello",
+  rules: {
+    source_file: ($) => $.root_expression,
+
+    root_expression: ($) => choice($.open_expression, $.closed_expression),
+
+    open_expression: ($) => seq(
+      $.expression,
+      repeat(seq("|", $.expression)),
+    ),
+
+    closed_expression: ($) => seq(
+      $.value,
+      optional(seq("|", $.expression, repeat(seq("|", $.expression)))),
+    ),
+
+    expression: ($) => $.function_call,
+
+    function_call: ($) => seq(
+      field("name", $.function_name),
+      optional(seq("(", optional($.argument_list), ")")),
+    ),
+
+    function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
+
+    argument_list: ($) => seq(
+      $.positional_argument,
+      repeat(seq(",", $.positional_argument)),
+    ),
+
+    positional_argument: ($) => $.value,
+
+    value: ($) => choice(
+      $.numeric_literal,
+      $.boolean_literal,
+      $.quoted_literal,
+      $.temporal_literal,
+    ),
+
+    numeric_literal: (_) => /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/,
+
+    boolean_literal: (_) => choice("#true", "#false"),
+
+    quoted_literal: ($) => choice(
+      $.double_quoted_literal,
+      $.backtick_quoted_literal,
+    ),
+
+    double_quoted_literal: ($) => seq(
+      '"',
+      repeat(choice($.double_quoted_content, $.escape_sequence)),
+      '"',
+    ),
+
+    double_quoted_content: (_) => token.immediate(/[^"\\\r\n]+/),
+
+    escape_sequence: (_) => token.immediate(/\\["\\]/),
+
+    backtick_quoted_literal: ($) => seq(
+      "`",
+      optional($.backtick_quoted_content),
+      "`",
+    ),
+
+    backtick_quoted_content: (_) => token.immediate(/[^`\r\n]+/),
+
+    temporal_literal: ($) => choice(
+      $.date_literal,
+      $.date_time_literal,
+      $.time_literal,
+    ),
+
+    date_literal: (_) => /#"[0-9]{4}-[0-9]{2}-[0-9]{2}"/,
+
+    date_time_literal: (_) => /#"[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}"/,
+
+    time_literal: (_) => /#"[0-9]{2}:[0-9]{2}:[0-9]{2}"/,
   },
 });

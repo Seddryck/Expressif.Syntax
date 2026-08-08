@@ -1,10 +1,309 @@
 ==================
-Placeholder expression
+Bare function call
 ==================
 
-hello
+lower
 
 ---
 
 (source_file
-  (expression))
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Empty parenthesized function call
+==================
+
+lower()
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Mixed-case hyphenated function name
+==================
+
+foo-BAr-foo
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Function call with positional arguments
+==================
+
+example(10, 20)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (value
+                (numeric_literal)))
+            (positional_argument
+              (value
+                (numeric_literal)))))))))
+
+==================
+Open expression pipeline
+==================
+
+remove-chars("a") | upper | trim()
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (value
+                (quoted_literal
+                  (double_quoted_literal
+                    (double_quoted_content))))))))
+      (expression
+        (function_call
+          name: (function_name)))
+      (expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Numeric literals and pipeline
+==================
+
+-3.14 | round(2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (numeric_literal))
+      (expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (value
+                (numeric_literal)))))))))
+
+==================
+Boolean literals
+==================
+
+#true | some-function(#false)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (boolean_literal))
+      (expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (value
+                (boolean_literal)))))))))
+
+==================
+Bare boolean words are function calls
+==================
+
+true | false()
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name)))
+      (expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Double-quoted text with escape
+==================
+
+"Alice said \"hello\"."
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (quoted_literal
+          (double_quoted_literal
+            (double_quoted_content)
+            (escape_sequence)
+            (double_quoted_content)
+            (escape_sequence)
+            (double_quoted_content)))))))
+
+==================
+Empty double-quoted text
+==================
+
+""
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (quoted_literal
+          (double_quoted_literal))))))
+
+==================
+Backtick text preserves punctuation and whitespace
+==================
+
+` foo, (bar) `
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (quoted_literal
+          (backtick_quoted_literal
+            (backtick_quoted_content)))))))
+
+==================
+Date literal
+==================
+
+#"2025-12-17"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (temporal_literal
+          (date_literal))))))
+
+==================
+Datetime literal with T separator
+==================
+
+#"2025-12-17T14:30:00"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (temporal_literal
+          (date_time_literal))))))
+
+==================
+Datetime literal with space separator
+==================
+
+#"2025-12-17 14:30:00"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (temporal_literal
+          (date_time_literal))))))
+
+==================
+Time literal
+==================
+
+#"14:30:00"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (temporal_literal
+          (time_literal))))))
+
+==================
+Temporal-looking quoted text remains text
+==================
+
+"2025-12-17"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (value
+        (quoted_literal
+          (double_quoted_literal
+            (double_quoted_content)))))))
+
+==================
+Whitespace is insignificant outside literals
+==================
+
+  add( 5 , 10 ) | multiply( 2 )
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (value
+                (numeric_literal)))
+            (positional_argument
+              (value
+                (numeric_literal))))))
+      (expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (value
+                (numeric_literal)))))))))
