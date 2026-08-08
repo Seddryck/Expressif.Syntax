@@ -29,6 +29,8 @@ dist/
 node_modules/
 coverage/
 *.tsbuildinfo
+build/
+*.node
 
 # IDEs
 .idea/

@@ -1,0 +1,37 @@
+{
+  "grammars": [
+    {
+      "name": "expressif",
+      "camelcase": "Expressif",
+      "scope": "source.expressif",
+      "path": ".",
+      "file-types": [
+        "expr"
+      ],
+      "highlights": "queries/highlights.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "description": "Tree-sitter parser for the Expressif expression language",
+    "authors": [
+      {
+        "name": "Cédric L. Charlier",
+        "email": "seddryck@gmail.com"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/Seddryck/Expressif.Syntax"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": false,
+    "node": true,
+    "python": true,
+    "rust": false,
+    "swift": false,
+    "zig": false
+  }
+}

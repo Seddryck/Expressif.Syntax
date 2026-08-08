@@ -16,3 +16,6 @@
 *.ico binary
 *.pdf binary
 *.zip binary
+
+# Tree-sitter parser artifacts are generated from grammar.js.
+src/** linguist-generated=true
