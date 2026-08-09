@@ -34,7 +34,7 @@ jobs:
           "sha=$env:GITHUB_SHA" >> $env:GITHUB_OUTPUT
 
       - name: Check out release commit
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -105,7 +105,7 @@ jobs:
 
     steps:
       - name: Check out publication guard
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
