@@ -1,0 +1,35 @@
+{
+  "name": "tree-sitter-expressif",
+  "version": "0.1.0",
+  "description": "Tree-sitter parser for the Expressif expression language",
+  "type": "module",
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "files": [
+    "grammar.js",
+    "tree-sitter.json",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/**",
+    "queries/**",
+    "src/**"
+  ],
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "test": "tree-sitter test && node --test bindings/node/binding_test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seddryck/Expressif.Syntax.git"
+  },
+  "author": "Cédric L. Charlier <seddryck@gmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "tree-sitter": "^0.25.1",
+    "tree-sitter-cli": "^0.26.12"
+  },
+  "dependencies": {
+    "node-addon-api": "^8.9.1",
+    "node-gyp-build": "^4.8.4"
+  }
+}
