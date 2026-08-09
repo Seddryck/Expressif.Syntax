@@ -68,6 +68,11 @@ jobs:
           -Version '${{ steps.gitversion.outputs.semVer }}'
           -RequirePublishablePythonVersion
 
+      # Every registry or release publication step must remain below this guard.
+      - name: Enforce main-only publication
+        shell: pwsh
+        run: ./scripts/Assert-MainPublication.ps1
+
       - name: Create tagged GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
