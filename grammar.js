@@ -51,6 +51,9 @@ export default grammar({
     positional_argument: ($) => $.value,
 
     value: ($) => choice(
+      $.variable,
+      $.property_reference,
+      $.index_reference,
       $.numeric_literal,
       $.boolean_literal,
       $.quoted_literal,
@@ -58,6 +61,12 @@ export default grammar({
     ),
 
     numeric_literal: (_) => /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/,
+
+    variable: (_) => /@[A-Za-z][A-Za-z0-9]*/,
+
+    property_reference: (_) => /\[[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*\]/,
+
+    index_reference: (_) => /\[(?:0|[1-9][0-9]*)\]/,
 
     boolean_literal: (_) => choice("#true", "#false"),
 

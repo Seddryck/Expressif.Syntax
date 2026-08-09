@@ -80,20 +80,47 @@ foo--bar
         (function_name)))))
 
 ==================
-Variables are not implemented
+Empty variable
 ==================
 
-@foo
+@
+
+---
+
+(ERROR
+  (UNEXPECTED '\n'))
+
+==================
+Variable cannot start with a digit
+==================
+
+@1foo
 
 ---
 
 (source_file
   (ERROR
-    (UNEXPECTED '@'))
+    (UNEXPECTED '1')
+    (numeric_literal))
   (root_expression
     (open_expression
       (function_call
-        (function_name)))))
+        name: (function_name)))))
+
+==================
+Variable cannot contain a hyphen
+==================
+
+@foo-1
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (variable)))
+  (ERROR
+    (numeric_literal)))
 
 ==================
 Unclosed function call
@@ -317,34 +344,36 @@ Operators are not implemented
       (numeric_literal))))
 
 ==================
-Property references are not implemented
+Property reference cannot contain whitespace
 ==================
 
-[foo]
+[ name ]
 
 ---
 
 (source_file
   (ERROR
-    (UNEXPECTED '['))
+    (UNEXPECTED ' '))
   (root_expression
     (open_expression
       (function_call
-        (function_name))))
+        name: (function_name))))
   (ERROR
     (UNEXPECTED ']')))
 
 ==================
-Index references are not implemented
+Index reference cannot contain whitespace
 ==================
 
-#1
+[ 1 ]
 
 ---
 
 (source_file
   (ERROR
-    (UNEXPECTED '1'))
+    (UNEXPECTED ' '))
   (root_expression
     (closed_expression
-      (numeric_literal))))
+      (numeric_literal)))
+  (ERROR
+    (UNEXPECTED ']')))
