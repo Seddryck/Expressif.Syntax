@@ -32,10 +32,11 @@ try {
     npm pack --pack-destination $outputPath
     if ($LASTEXITCODE -ne 0) { throw 'npm pack failed.' }
 
-    $versionedPyproject = $originalPyproject -replace '(?m)^version = "[^"]+"\r?$', "version = `"$pythonVersion`""
-    if ($versionedPyproject -eq $originalPyproject) {
+    $pythonVersionPattern = '(?m)^version = "[^"]+"\r?$'
+    if (-not [regex]::IsMatch($originalPyproject, $pythonVersionPattern)) {
         throw 'Could not inject the GitVersion value into pyproject.toml.'
     }
+    $versionedPyproject = $originalPyproject -replace $pythonVersionPattern, "version = `"$pythonVersion`""
     Set-Content -LiteralPath $pyprojectPath -Value $versionedPyproject -NoNewline
     python -m build --sdist --wheel --outdir $outputPath
     if ($LASTEXITCODE -ne 0) { throw 'Python packaging failed.' }
