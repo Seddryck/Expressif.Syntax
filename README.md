@@ -4,7 +4,7 @@
 
 The parser defines the concrete syntax of Expressif independently from its runtime implementations. It is intended to provide a common syntax foundation for the C#, Python and TypeScript implementations of Expressif, as well as editor tooling and language-server support.
 
-[About](#about) | [Repository structure](#repository-structure) | [Development](#development)
+[About](#about) | [Repository structure](#repository-structure) | [Development](#development) | [Releases](#releases)
 
 ## About
 
@@ -104,6 +104,26 @@ npx tree-sitter test
 ```
 
 The grammar should remain independent from the Expressif function catalogue. Parsing determines the syntactic structure of an expression; resolution of functions, predicates, accumulators and their accepted arguments belongs to the language-specific semantic binding layer.
+
+## Releases
+
+For every push to `main`, the release workflow independently validates the parser and all bindings, builds the release packages, and calculates the repository version with GitVersion. When validation succeeds and the calculated semantic version has a patch component of `0`, it creates the corresponding `vX.Y.0` tag and GitHub release. Other versions complete package validation without creating a tag or release.
+
+Each GitHub release contains every validated package produced by `scripts/package.ps1`:
+
+* the TypeScript/Node package
+* the Python wheel and source distribution
+* the C# NuGet package
+* the native parser source archive
+
+Only the C# package is currently published to an external registry. NuGet publication uses GitHub OIDC trusted publishing to obtain a short-lived API key, so no long-lived NuGet API key is stored in the repository. Configure the trusted publishing policy on [NuGet.org](https://www.nuget.org/) with these values:
+
+* Repository Owner: `Seddryck`
+* Repository: `Expressif.Syntax`
+* Workflow File: `release.yml`
+* Environment: leave blank
+
+The policy's NuGet user must be `Seddryck`, matching the `NuGet/login` step in the workflow. Python and TypeScript/Node packages remain available as GitHub release artifacts until PyPI and npm publishing are implemented.
 
 ## Related projects
 
