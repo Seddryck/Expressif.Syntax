@@ -304,8 +304,7 @@ foo(a: 1)
       (function_call
         (function_name)
         (ERROR
-          (function_name)
-          (UNEXPECTED ':'))
+          (function_name))
         (argument_list
           (positional_argument
             (numeric_literal)))))))
