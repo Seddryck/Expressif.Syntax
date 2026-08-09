@@ -12,7 +12,8 @@
     <IsPackable>true</IsPackable>
     <IsPackable Condition="$(MSBuildProjectName.EndsWith('.Tests'))">false</IsPackable>
 
-    <Version>0.0.0</Version>
+    <!-- Release packaging supplies Version and PackageVersion from GitVersion. -->
+    <Version Condition="'$(Version)' == ''">0.0.0</Version>
     <Authors>Cédric L. Charlier</Authors>
     <Owners>Seddryck</Owners>
     <Company>nbiguity</Company>
