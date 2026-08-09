@@ -60,7 +60,7 @@ foo-
       (function_call
         (function_name))))
   (ERROR
-    (UNEXPECTED '\r')))
+    (UNEXPECTED '\n')))
 
 ==================
 Function name cannot contain consecutive hyphens
