@@ -152,7 +152,7 @@ jobs:
 
       - name: Log in to NuGet with trusted publishing
         id: nuget-login
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
         with:
           user: Seddryck
 
@@ -170,5 +170,6 @@ jobs:
           }
           dotnet nuget push $packages[0].FullName `
             --api-key $env:NUGET_API_KEY `
-            --source https://api.nuget.org/v3/index.json
+            --source https://api.nuget.org/v3/index.json `
+            --skip-duplicate
           if ($LASTEXITCODE -ne 0) { throw 'NuGet publication failed.' }
