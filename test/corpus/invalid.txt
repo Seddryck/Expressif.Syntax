@@ -8,13 +8,11 @@ Function name cannot start with a digit
 
 (source_file
   (ERROR
-    (value
-      (numeric_literal)))
+    (numeric_literal))
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name))))))
+      (function_call
+        (function_name)))))
 
 ==================
 Function name cannot contain a digit
@@ -27,9 +25,8 @@ foo1
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name)))))
+      (function_call
+        (function_name))))
   (ERROR
     (numeric_literal)))
 
@@ -46,9 +43,8 @@ Function name cannot start with a hyphen
     (UNEXPECTED 'f'))
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name))))))
+      (function_call
+        (function_name)))))
 
 ==================
 Function name cannot end with a hyphen
@@ -61,9 +57,8 @@ foo-
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name)))))
+      (function_call
+        (function_name))))
   (ERROR
     (UNEXPECTED '\n')))
 
@@ -81,9 +76,8 @@ foo--bar
     (UNEXPECTED '-'))
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name))))))
+      (function_call
+        (function_name)))))
 
 ==================
 Variables are not implemented
@@ -98,9 +92,8 @@ Variables are not implemented
     (UNEXPECTED '@'))
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name))))))
+      (function_call
+        (function_name)))))
 
 ==================
 Unclosed function call
@@ -113,14 +106,12 @@ foo(5
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal))))
-          (MISSING ")"))))))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))
+        (MISSING ")")))))
 
 ==================
 Missing first argument
@@ -133,14 +124,12 @@ foo(, 5)
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name)
-          (ERROR)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal)))))))))
+      (function_call
+        (function_name)
+        (ERROR)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
 
 ==================
 Trailing argument separator
@@ -153,14 +142,12 @@ foo(5,)
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal))))
-          (ERROR))))))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))
+        (ERROR)))))
 
 ==================
 Unquoted textual argument is rejected
@@ -173,11 +160,10 @@ remove-chars(a)
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          (function_name)
-          (ERROR
-            (function_name)))))))
+      (function_call
+        (function_name)
+        (ERROR
+          (function_name))))))
 
 ==================
 Malformed date literal
@@ -192,8 +178,7 @@ Malformed date literal
     (UNEXPECTED '-'))
   (root_expression
     (closed_expression
-      (value
-        (numeric_literal))))
+      (numeric_literal)))
   (ERROR))
 
 ==================
@@ -209,10 +194,8 @@ Malformed datetime literal
     (UNEXPECTED '"'))
   (root_expression
     (closed_expression
-      (value
-        (quoted_literal
-          (double_quoted_literal
-            (MISSING """)))))))
+      (double_quoted_literal
+        (MISSING """)))))
 
 ==================
 Malformed time literal
@@ -227,10 +210,8 @@ Malformed time literal
     (UNEXPECTED '"'))
   (root_expression
     (closed_expression
-      (value
-        (quoted_literal
-          (double_quoted_literal
-            (MISSING """)))))))
+      (double_quoted_literal
+        (MISSING """)))))
 
 ==================
 Boolean literal is case-sensitive
@@ -245,6 +226,125 @@ Boolean literal is case-sensitive
     (UNEXPECTED 'T'))
   (root_expression
     (open_expression
-      (expression
-        (function_call
+      (function_call
+        (function_name)))))
+
+==================
+Double-quoted literal cannot contain a newline
+==================
+
+"first
+second"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (double_quoted_literal
+        (double_quoted_content)
+        (ERROR
           (function_name))))))
+
+==================
+Backtick literal cannot contain a newline
+==================
+
+`first
+second`
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (backtick_quoted_literal
+        (backtick_quoted_content)
+        (ERROR
+          (function_name))))))
+
+==================
+Named arguments are not implemented
+==================
+
+foo(a: 1)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (ERROR
+          (function_name)
+          (UNEXPECTED ':'))
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Spread arguments are not implemented
+==================
+
+foo(...a)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (ERROR
+          (UNEXPECTED '.')
+          (function_name))))))
+
+==================
+Operators are not implemented
+==================
+
+1 + 2
+
+---
+
+(source_file
+  (ERROR
+    (numeric_literal)
+    (UNEXPECTED '+'))
+  (root_expression
+    (closed_expression
+      (numeric_literal))))
+
+==================
+Property references are not implemented
+==================
+
+[foo]
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED '['))
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))))
+  (ERROR
+    (UNEXPECTED ']')))
+
+==================
+Index references are not implemented
+==================
+
+#1
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED '1'))
+  (root_expression
+    (closed_expression
+      (numeric_literal))))

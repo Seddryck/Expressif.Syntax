@@ -72,5 +72,6 @@ install(FILES ${QUERIES}
         DESTINATION "${CMAKE_INSTALL_DATADIR}/tree-sitter/queries/expressif")
 
 add_custom_target(ts-test "${TREE_SITTER_CLI}" test
+                  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c"
                   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                   COMMENT "tree-sitter test")

@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "generate": "tree-sitter generate",
-    "test": "tree-sitter test"
+    "test": "tree-sitter test && node --test bindings/node/binding_test.js"
   },
   "repository": {
     "type": "git",

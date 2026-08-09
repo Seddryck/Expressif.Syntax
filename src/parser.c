@@ -17,7 +17,7 @@
 #define MAX_ALIAS_SEQUENCE_LENGTH 4
 #define MAX_RESERVED_WORD_SET_SIZE 0
 #define PRODUCTION_ID_COUNT 2
-#define SUPERTYPE_COUNT 0
+#define SUPERTYPE_COUNT 4
 
 enum ts_symbol_identifiers {
   anon_sym_PIPE = 1,
@@ -215,8 +215,9 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .named = true,
   },
   [sym_expression] = {
-    .visible = true,
+    .visible = false,
     .named = true,
+    .supertype = true,
   },
   [sym_function_call] = {
     .visible = true,
@@ -231,16 +232,18 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .named = true,
   },
   [sym_value] = {
-    .visible = true,
+    .visible = false,
     .named = true,
+    .supertype = true,
   },
   [sym_boolean_literal] = {
     .visible = true,
     .named = true,
   },
   [sym_quoted_literal] = {
-    .visible = true,
+    .visible = false,
     .named = true,
+    .supertype = true,
   },
   [sym_double_quoted_literal] = {
     .visible = true,
@@ -251,8 +254,9 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .named = true,
   },
   [sym_temporal_literal] = {
-    .visible = true,
+    .visible = false,
     .named = true,
+    .supertype = true,
   },
   [aux_sym_open_expression_repeat1] = {
     .visible = false,
@@ -334,6 +338,37 @@ static const TSStateId ts_primary_state_ids[STATE_COUNT] = {
   [36] = 36,
   [37] = 37,
   [38] = 38,
+};
+
+static const TSSymbol ts_supertype_symbols[SUPERTYPE_COUNT] = {
+  sym_expression,
+  sym_quoted_literal,
+  sym_temporal_literal,
+  sym_value,
+};
+
+static const TSMapSlice ts_supertype_map_slices[] = {
+  [sym_expression] = {.index = 0, .length = 1},
+  [sym_quoted_literal] = {.index = 1, .length = 2},
+  [sym_temporal_literal] = {.index = 3, .length = 3},
+  [sym_value] = {.index = 6, .length = 4},
+};
+
+static const TSSymbol ts_supertype_map_entries[] = {
+  [0] =
+    sym_function_call,
+  [1] =
+    sym_backtick_quoted_literal,
+    sym_double_quoted_literal,
+  [3] =
+    sym_date_literal,
+    sym_date_time_literal,
+    sym_time_literal,
+  [6] =
+    sym_boolean_literal,
+    sym_numeric_literal,
+    sym_quoted_literal,
+    sym_temporal_literal,
 };
 
 static bool ts_lex(TSLexer *lexer, TSStateId state) {
@@ -1115,6 +1150,9 @@ TS_PUBLIC const TSLanguage *tree_sitter_expressif(void) {
     .field_names = ts_field_names,
     .field_map_slices = ts_field_map_slices,
     .field_map_entries = ts_field_map_entries,
+    .supertype_map_slices = ts_supertype_map_slices,
+    .supertype_map_entries = ts_supertype_map_entries,
+    .supertype_symbols = ts_supertype_symbols,
     .symbol_metadata = ts_symbol_metadata,
     .public_symbol_map = ts_symbol_map,
     .alias_map = ts_non_terminal_alias_map,

@@ -339,6 +339,11 @@
   "precedences": [],
   "externals": [],
   "inline": [],
-  "supertypes": [],
+  "supertypes": [
+    "value",
+    "quoted_literal",
+    "temporal_literal",
+    "expression"
+  ],
   "reserved": {}
 }

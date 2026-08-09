@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Set up Tree-sitter
         uses: tree-sitter/setup-action/cli@v2
@@ -36,6 +38,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -46,7 +50,12 @@ jobs:
         id: csharp-projects
         shell: pwsh
         run: |
-          $projects = @(Get-ChildItem bindings/csharp -Recurse -Filter *.csproj)
+          $projectRoot = "bindings/csharp"
+          $projects = if (Test-Path -LiteralPath $projectRoot -PathType Container) {
+            @(Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj)
+          } else {
+            @()
+          }
           "found=$($projects.Count -gt 0)" >> $env:GITHUB_OUTPUT
           if ($projects.Count -eq 0) {
             Write-Host "No C# projects exist yet; skipping .NET validation."
@@ -56,7 +65,12 @@ jobs:
         if: steps.csharp-projects.outputs.found == 'True'
         shell: pwsh
         run: |
-          Get-ChildItem bindings/csharp -Recurse -Filter *.csproj | ForEach-Object {
+          $projectRoot = "bindings/csharp"
+          if (-not (Test-Path -LiteralPath $projectRoot -PathType Container)) {
+            Write-Host "No C# project directory exists; skipping restore."
+            exit 0
+          }
+          Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj | ForEach-Object {
             dotnet restore $_.FullName
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
@@ -65,7 +79,12 @@ jobs:
         if: steps.csharp-projects.outputs.found == 'True'
         shell: pwsh
         run: |
-          Get-ChildItem bindings/csharp -Recurse -Filter *.csproj | ForEach-Object {
+          $projectRoot = "bindings/csharp"
+          if (-not (Test-Path -LiteralPath $projectRoot -PathType Container)) {
+            Write-Host "No C# project directory exists; skipping build."
+            exit 0
+          }
+          Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj | ForEach-Object {
             dotnet build $_.FullName --configuration Release --no-restore
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
@@ -74,7 +93,12 @@ jobs:
         if: steps.csharp-projects.outputs.found == 'True'
         shell: pwsh
         run: |
-          Get-ChildItem bindings/csharp -Recurse -Filter *.csproj | ForEach-Object {
+          $projectRoot = "bindings/csharp"
+          if (-not (Test-Path -LiteralPath $projectRoot -PathType Container)) {
+            Write-Host "No C# project directory exists; skipping tests."
+            exit 0
+          }
+          Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj | ForEach-Object {
             dotnet test $_.FullName --configuration Release --no-build
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }

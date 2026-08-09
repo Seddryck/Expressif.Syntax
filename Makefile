@@ -110,7 +110,7 @@ uninstall:
 clean:
 	$(RM) $(OBJS) $(LANGUAGE_NAME).pc lib$(LANGUAGE_NAME).a lib$(LANGUAGE_NAME).$(SOEXT) lib$(LANGUAGE_NAME).dll.a
 
-test:
+test: $(PARSER)
 	$(TS) test
 
 .PHONY: all install uninstall clean test

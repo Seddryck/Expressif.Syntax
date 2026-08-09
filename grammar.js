@@ -12,6 +12,13 @@ export default grammar({
 
   extras: ($) => [/[\s\uFEFF\u2060\u200B]/],
 
+  supertypes: ($) => [
+    $.value,
+    $.quoted_literal,
+    $.temporal_literal,
+    $.expression,
+  ],
+
   rules: {
     source_file: ($) => $.root_expression,
 
@@ -59,6 +66,8 @@ export default grammar({
       $.backtick_quoted_literal,
     ),
 
+    // Quoted content is immediate and excludes CR/LF. This prevents global
+    // whitespace extras from making multiline quoted literals valid.
     double_quoted_literal: ($) => seq(
       '"',
       repeat(choice($.double_quoted_content, $.escape_sequence)),

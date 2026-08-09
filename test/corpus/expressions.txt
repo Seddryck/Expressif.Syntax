@@ -9,24 +9,25 @@ lower
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          name: (function_name))))))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Empty parenthesized function call
+:cst
 ==================
 
 lower()
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (expression
-        (function_call
-          name: (function_name))))))
+1:0 - 2:0   source_file
+1:0 - 1:7     root_expression
+1:0 - 1:7       open_expression
+1:0 - 1:7         function_call
+1:0 - 1:5           name: function_name `lower`
+1:5 - 1:6           "("
+1:6 - 1:7           ")"
 
 ==================
 Mixed-case hyphenated function name
@@ -39,9 +40,8 @@ foo-BAr-foo
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          name: (function_name))))))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Function call with positional arguments
@@ -54,16 +54,13 @@ example(10, 20)
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal)))
-            (positional_argument
-              (value
-                (numeric_literal)))))))))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))
+          (positional_argument
+            (numeric_literal)))))))
 
 ==================
 Open expression pipeline
@@ -76,21 +73,16 @@ remove-chars("a") | upper | trim()
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (quoted_literal
-                  (double_quoted_literal
-                    (double_quoted_content))))))))
-      (expression
-        (function_call
-          name: (function_name)))
-      (expression
-        (function_call
-          name: (function_name))))))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))))
+      (function_call
+        name: (function_name))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Numeric literals and pipeline
@@ -103,15 +95,12 @@ Numeric literals and pipeline
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (numeric_literal))
-      (expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal)))))))))
+      (numeric_literal)
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
 
 ==================
 Boolean literals
@@ -124,15 +113,12 @@ Boolean literals
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (boolean_literal))
-      (expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (boolean_literal)))))))))
+      (boolean_literal)
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (boolean_literal)))))))
 
 ==================
 Bare boolean words are function calls
@@ -145,12 +131,10 @@ true | false()
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          name: (function_name)))
-      (expression
-        (function_call
-          name: (function_name))))))
+      (function_call
+        name: (function_name))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Double-quoted text with escape
@@ -163,14 +147,12 @@ Double-quoted text with escape
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (quoted_literal
-          (double_quoted_literal
-            (double_quoted_content)
-            (escape_sequence)
-            (double_quoted_content)
-            (escape_sequence)
-            (double_quoted_content)))))))
+      (double_quoted_literal
+        (double_quoted_content)
+        (escape_sequence)
+        (double_quoted_content)
+        (escape_sequence)
+        (double_quoted_content)))))
 
 ==================
 Empty double-quoted text
@@ -183,25 +165,24 @@ Empty double-quoted text
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (quoted_literal
-          (double_quoted_literal))))))
+      (double_quoted_literal))))
 
 ==================
 Backtick text preserves punctuation and whitespace
+:cst
 ==================
 
 ` foo, (bar) `
 
 ---
 
-(source_file
-  (root_expression
-    (closed_expression
-      (value
-        (quoted_literal
-          (backtick_quoted_literal
-            (backtick_quoted_content)))))))
+1:0  - 2:0    source_file
+1:0  - 1:14     root_expression
+1:0  - 1:14       closed_expression
+1:0  - 1:14         backtick_quoted_literal
+1:0  - 1:1            "\`"
+1:1  - 1:13           backtick_quoted_content ` foo, (bar) `
+1:13 - 1:14           "\`"
 
 ==================
 Date literal
@@ -214,9 +195,7 @@ Date literal
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (temporal_literal
-          (date_literal))))))
+      (date_literal))))
 
 ==================
 Datetime literal with T separator
@@ -229,9 +208,7 @@ Datetime literal with T separator
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (temporal_literal
-          (date_time_literal))))))
+      (date_time_literal))))
 
 ==================
 Datetime literal with space separator
@@ -244,9 +221,7 @@ Datetime literal with space separator
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (temporal_literal
-          (date_time_literal))))))
+      (date_time_literal))))
 
 ==================
 Time literal
@@ -259,9 +234,7 @@ Time literal
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (temporal_literal
-          (time_literal))))))
+      (time_literal))))
 
 ==================
 Temporal-looking quoted text remains text
@@ -274,10 +247,8 @@ Temporal-looking quoted text remains text
 (source_file
   (root_expression
     (closed_expression
-      (value
-        (quoted_literal
-          (double_quoted_literal
-            (double_quoted_content)))))))
+      (double_quoted_literal
+        (double_quoted_content)))))
 
 ==================
 Whitespace is insignificant outside literals
@@ -290,20 +261,57 @@ Whitespace is insignificant outside literals
 (source_file
   (root_expression
     (open_expression
-      (expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal)))
-            (positional_argument
-              (value
-                (numeric_literal))))))
-      (expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (value
-                (numeric_literal)))))))))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))
+          (positional_argument
+            (numeric_literal))))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Backtick literal as a positional argument
+==================
+
+remove-chars(`a`)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (backtick_quoted_literal
+              (backtick_quoted_content))))))))
+
+==================
+Temporal and backtick literals as positional arguments
+==================
+
+foo(#"2025-12-17", #"2025-12-17T14:30:00", #"14:30:00", `bar`)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (date_literal))
+          (positional_argument
+            (date_time_literal))
+          (positional_argument
+            (time_literal))
+          (positional_argument
+            (backtick_quoted_literal
+              (backtick_quoted_content))))))))
