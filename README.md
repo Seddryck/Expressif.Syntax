@@ -19,6 +19,8 @@ The parser defines the concrete syntax of Expressif independently from its runti
 ![Still maintained](https://img.shields.io/maintenance/yes/2026.svg)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/Seddryck/Expressif.Syntax)
 
+**Continuous integration builds:** [![CI](https://github.com/Seddryck/Expressif.Syntax/actions/workflows/ci.yml/badge.svg)](https://github.com/Seddryck/Expressif.Syntax/actions/workflows/ci.yml)
+
 **Status:** [![stars badge](https://img.shields.io/github/stars/Seddryck/Expressif.Syntax.svg)](https://github.com/Seddryck/Expressif.Syntax/stargazers)
 [![Bugs badge](https://img.shields.io/github/issues/Seddryck/Expressif.Syntax/bug.svg?color=red\&label=Bugs)](https://github.com/Seddryck/Expressif.Syntax/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 [![Features badge](https://img.shields.io/github/issues/Seddryck/Expressif.Syntax/new-feature.svg?color=purple\&label=Feature%20requests)](https://github.com/Seddryck/Expressif.Syntax/issues?q=is%3Aissue+is%3Aopen+label%3Anew-feature)
