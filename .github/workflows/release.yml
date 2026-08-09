@@ -4,17 +4,19 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Package and create GitHub release
+  validate:
+    name: Validate release candidate
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.gitversion.outputs.semVer }}
 
     steps:
       - name: Check out repository
@@ -68,15 +70,43 @@ jobs:
           -Version '${{ steps.gitversion.outputs.semVer }}'
           -RequirePublishablePythonVersion
 
+      - name: Upload validated release packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-packages-${{ steps.gitversion.outputs.semVer }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish release
+    if: github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out publication guard
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
       # Every registry or release publication step must remain below this guard.
       - name: Enforce main-only publication
         shell: pwsh
         run: ./scripts/Assert-MainPublication.ps1
 
+      - name: Download validated release packages
+        uses: actions/download-artifact@v8
+        with:
+          name: release-packages-${{ needs.validate.outputs.version }}
+          path: artifacts
+
       - name: Create tagged GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.gitversion.outputs.semVer }}
+          VERSION: ${{ needs.validate.outputs.version }}
         run: >-
           gh release create "v${VERSION}" artifacts/*
           --target "${GITHUB_SHA}"
