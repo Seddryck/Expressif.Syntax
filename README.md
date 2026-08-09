@@ -116,7 +116,14 @@ Each GitHub release contains every validated package produced by `scripts/packag
 * the C# NuGet package
 * the native parser source archive
 
-Only the C# package is currently published to an external registry. Repository administrators must configure a `NUGET_API_KEY` Actions secret with permission to publish the `Expressif.Syntax` package to [NuGet.org](https://www.nuget.org/). Python and TypeScript/Node packages remain available as GitHub release artifacts until PyPI and npm publishing are implemented.
+Only the C# package is currently published to an external registry. NuGet publication uses GitHub OIDC trusted publishing to obtain a short-lived API key, so no long-lived NuGet API key is stored in the repository. Configure the trusted publishing policy on [NuGet.org](https://www.nuget.org/) with these values:
+
+* Repository Owner: `Seddryck`
+* Repository: `Expressif.Syntax`
+* Workflow File: `release.yml`
+* Environment: leave blank
+
+The policy's NuGet user must be `Seddryck`, matching the `NuGet/login` step in the workflow. Python and TypeScript/Node packages remain available as GitHub release artifacts until PyPI and npm publishing are implemented.
 
 ## Related projects
 

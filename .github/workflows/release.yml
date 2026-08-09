@@ -117,6 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - name: Check out publication guard
@@ -165,13 +166,19 @@ jobs:
             --generate-notes
           if ($LASTEXITCODE -ne 0) { throw "GitHub release '$tag' creation failed." }
 
+      - name: Log in to NuGet with trusted publishing
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: Seddryck
+
       - name: Publish NuGet package
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         shell: pwsh
         run: |
           if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
-            throw 'The NUGET_API_KEY repository secret is required to publish a release.'
+            throw 'NuGet trusted publishing did not provide a temporary API key.'
           }
           $packages = @(Get-ChildItem -LiteralPath artifacts -Filter *.nupkg)
           if ($packages.Count -ne 1) {
