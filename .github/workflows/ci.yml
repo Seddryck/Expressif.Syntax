@@ -102,3 +102,80 @@ jobs:
             dotnet test $_.FullName --configuration Release --no-build
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+
+  package:
+    name: Validate distributable packages
+    needs: [parser, csharp]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: 6.x
+
+      - name: Calculate repository version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4
+        with:
+          useConfigFile: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install packaging dependencies
+        run: |
+          npm ci
+          python -m pip install build
+
+      - name: Build packages with the repository version
+        shell: pwsh
+        run: ./scripts/package.ps1 -Version '${{ steps.gitversion.outputs.semVer }}'
+
+      - name: Upload package validation artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: packages-${{ steps.gitversion.outputs.semVer }}
+          path: artifacts/*
+          if-no-files-found: error
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [parser, csharp, package]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Require every validation job to succeed
+        shell: pwsh
+        run: |
+          $results = @{
+            parser = '${{ needs.parser.result }}'
+            csharp = '${{ needs.csharp.result }}'
+            package = '${{ needs.package.result }}'
+          }
+          $failed = @($results.GetEnumerator() | Where-Object Value -ne 'success')
+          if ($failed.Count -gt 0) {
+            $failed | ForEach-Object { Write-Error "$($_.Key) finished with result '$($_.Value)'." }
+            exit 1
+          }
+          Write-Output 'All required CI validations succeeded.'

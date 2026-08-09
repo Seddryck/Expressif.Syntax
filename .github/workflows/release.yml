@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release candidate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.gitversion.outputs.semVer }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: 6.x
+
+      - name: Calculate release version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4
+        with:
+          useConfigFile: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install packaging dependencies
+        run: |
+          npm ci
+          python -m pip install build pytest
+
+      - name: Test parser and bindings
+        run: |
+          npm test
+          python -m pip install '.[core]'
+          python -m pytest bindings/python/tests
+          dotnet test Expressif.Syntax.sln --configuration Release
+
+      - name: Build all release packages
+        shell: pwsh
+        run: >-
+          ./scripts/package.ps1
+          -Version '${{ steps.gitversion.outputs.semVer }}'
+          -RequirePublishablePythonVersion
+
+      - name: Upload validated release packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-packages-${{ steps.gitversion.outputs.semVer }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish release
+    if: github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out publication guard
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Every registry or release publication step must remain below this guard.
+      - name: Enforce main-only publication
+        shell: pwsh
+        run: ./scripts/Assert-MainPublication.ps1
+
+      - name: Download validated release packages
+        uses: actions/download-artifact@v8
+        with:
+          name: release-packages-${{ needs.validate.outputs.version }}
+          path: artifacts
+
+      - name: Create tagged GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: >-
+          gh release create "v${VERSION}" artifacts/*
+          --target "${GITHUB_SHA}"
+          --title "v${VERSION}"
+          --generate-notes
