@@ -1,0 +1,37 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expressif.Syntax", "bindings\csharp\Expressif.Syntax\Expressif.Syntax.csproj", "{01235B85-F335-46F2-BF76-BDF69822995A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expressif.Syntax.Tests", "bindings\csharp\Expressif.Syntax.Tests\Expressif.Syntax.Tests.csproj", "{A95FC9C2-A969-432D-BDF5-3B18044B0FDF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{BB71F834-E413-41F4-B433-C7EEA6079470}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01235B85-F335-46F2-BF76-BDF69822995A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01235B85-F335-46F2-BF76-BDF69822995A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01235B85-F335-46F2-BF76-BDF69822995A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01235B85-F335-46F2-BF76-BDF69822995A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A95FC9C2-A969-432D-BDF5-3B18044B0FDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A95FC9C2-A969-432D-BDF5-3B18044B0FDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A95FC9C2-A969-432D-BDF5-3B18044B0FDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A95FC9C2-A969-432D-BDF5-3B18044B0FDF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0A06DB1D-D5B4-46B7-9974-54AA97C60BA3}
+	EndGlobalSection
+EndGlobal
