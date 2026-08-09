@@ -50,7 +50,15 @@
         "named": true
       },
       {
+        "type": "index_reference",
+        "named": true
+      },
+      {
         "type": "numeric_literal",
+        "named": true
+      },
+      {
+        "type": "property_reference",
         "named": true
       },
       {
@@ -59,6 +67,10 @@
       },
       {
         "type": "temporal_literal",
+        "named": true
+      },
+      {
+        "type": "variable",
         "named": true
       }
     ]
@@ -280,11 +292,23 @@
     "named": true
   },
   {
+    "type": "index_reference",
+    "named": true
+  },
+  {
     "type": "numeric_literal",
     "named": true
   },
   {
+    "type": "property_reference",
+    "named": true
+  },
+  {
     "type": "time_literal",
+    "named": true
+  },
+  {
+    "type": "variable",
     "named": true
   },
   {
