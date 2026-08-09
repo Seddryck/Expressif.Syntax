@@ -46,6 +46,9 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Set up Tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+
       - name: Discover C# projects
         id: csharp-projects
         shell: pwsh

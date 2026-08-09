@@ -25,4 +25,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Expressif.Syntax\Expressif.Syntax.csproj" />
   </ItemGroup>
+
+  <Target Name="CopyExpressifGrammar" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+    <PropertyGroup>
+      <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Windows'))">tree-sitter-expressif.dll</ExpressifGrammarLibrary>
+      <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Linux'))">libtree-sitter-expressif.so</ExpressifGrammarLibrary>
+      <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('OSX'))">libtree-sitter-expressif.dylib</ExpressifGrammarLibrary>
+    </PropertyGroup>
+    <Copy SourceFiles="..\Expressif.Syntax\bin\$(Configuration)\$(TargetFramework)\$(ExpressifGrammarLibrary)" DestinationFolder="$(TargetDir)" />
+  </Target>
 </Project>

@@ -2,5 +2,19 @@
   <PropertyGroup>
     <PackageId>Expressif.Syntax</PackageId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Windows'))">tree-sitter-expressif.dll</ExpressifGrammarLibrary>
+    <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Linux'))">libtree-sitter-expressif.so</ExpressifGrammarLibrary>
+    <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('OSX'))">libtree-sitter-expressif.dylib</ExpressifGrammarLibrary>
+    <TreeSitterCli>tree-sitter</TreeSitterCli>
+    <TreeSitterCli Condition="$([MSBuild]::IsOSPlatform('Windows')) And Exists('$(MSBuildThisFileDirectory)..\..\..\node_modules\.bin\tree-sitter.cmd')">$(MSBuildThisFileDirectory)..\..\..\node_modules\.bin\tree-sitter.cmd</TreeSitterCli>
+    <TreeSitterCli Condition="!$([MSBuild]::IsOSPlatform('Windows')) And Exists('$(MSBuildThisFileDirectory)../../../node_modules/.bin/tree-sitter')">$(MSBuildThisFileDirectory)../../../node_modules/.bin/tree-sitter</TreeSitterCli>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TreeSitter.DotNet" Version="1.3.0" />
+  </ItemGroup>
+
+  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
+    <Exec WorkingDirectory="$(MSBuildThisFileDirectory)..\..\.." Command="&quot;$(TreeSitterCli)&quot; build -o &quot;$(TargetDir)$(ExpressifGrammarLibrary)&quot; ." />
+  </Target>
 </Project>
