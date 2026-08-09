@@ -58,7 +58,50 @@ export default grammar({
       $.boolean_literal,
       $.quoted_literal,
       $.temporal_literal,
+      $.array_literal,
+      $.tuple_literal,
+      $.record_literal,
     ),
+
+    array_literal: ($) => seq(
+      "{",
+      optional(seq($.value, repeat(seq(",", $.value)))),
+      "}",
+    ),
+
+    tuple_literal: ($) => seq(
+      "T",
+      "(",
+      $.value,
+      ",",
+      $.value,
+      repeat(seq(",", $.value)),
+      ")",
+    ),
+
+    record_literal: ($) => choice(
+      seq("{", ":", "}"),
+      seq(
+        "{",
+        $.record_field,
+        repeat(seq(",", $.record_field)),
+        "}",
+      ),
+    ),
+
+    record_field: ($) => seq(
+      field("name", $.record_field_name),
+      ":=",
+      field("value", $.value),
+    ),
+
+    record_field_name: ($) => choice(
+      $.unquoted_record_field_name,
+      $.double_quoted_literal,
+      $.backtick_quoted_literal,
+    ),
+
+    unquoted_record_field_name: (_) => /[A-Za-z]+(?:-[A-Za-z0-9]+)*/,
 
     numeric_literal: (_) => /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/,
 

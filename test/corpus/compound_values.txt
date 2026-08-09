@@ -1,0 +1,332 @@
+==================
+Empty array
+==================
+
+{}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal))))
+
+==================
+Array values and whitespace
+==================
+
+{ 1, #true, "foo", #"2025-12-17", @value, [property], [0] }
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (boolean_literal)
+        (double_quoted_literal
+          (double_quoted_content))
+        (date_literal)
+        (variable)
+        (property_reference)
+        (index_reference)))))
+
+==================
+Nested and single-element arrays
+==================
+
+{{1}, {2, 3}}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (array_literal
+          (numeric_literal))
+        (array_literal
+          (numeric_literal)
+          (numeric_literal))))))
+
+==================
+Tuple with minimum arity
+==================
+
+T(1, 2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (numeric_literal)
+        (numeric_literal)))))
+
+==================
+Mixed and nested tuples
+==================
+
+T("foo", #true, T(#"2025-12-17", [0]), @value)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (double_quoted_literal
+          (double_quoted_content))
+        (boolean_literal)
+        (tuple_literal
+          (date_literal)
+          (index_reference))
+        (variable)))))
+
+==================
+Empty record
+==================
+
+{:}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal))))
+
+==================
+Record fields and quoted names
+==================
+
+{name := "Alice", "display name" := "A", `legacy name` := 42}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          name: (record_field_name
+            (unquoted_record_field_name))
+          value: (double_quoted_literal
+            (double_quoted_content)))
+        (record_field
+          name: (record_field_name
+            (double_quoted_literal
+              (double_quoted_content)))
+          value: (double_quoted_literal
+            (double_quoted_content)))
+        (record_field
+          name: (record_field_name
+            (backtick_quoted_literal
+              (backtick_quoted_content)))
+          value: (numeric_literal))))))
+
+==================
+Nested compound values
+==================
+
+{name := "Alice", scores := {10,20,30}, metadata := {active := #true}, pair := T(1,2)}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          name: (record_field_name
+            (unquoted_record_field_name))
+          value: (double_quoted_literal
+            (double_quoted_content)))
+        (record_field
+          name: (record_field_name
+            (unquoted_record_field_name))
+          value: (array_literal
+            (numeric_literal)
+            (numeric_literal)
+            (numeric_literal)))
+        (record_field
+          name: (record_field_name
+            (unquoted_record_field_name))
+          value: (record_literal
+            (record_field
+              name: (record_field_name
+                (unquoted_record_field_name))
+              value: (boolean_literal))))
+        (record_field
+          name: (record_field_name
+            (unquoted_record_field_name))
+          value: (tuple_literal
+            (numeric_literal)
+            (numeric_literal)))))))
+
+==================
+Compound values in pipelines and arguments
+==================
+
+foo({1}, T(1,2), {name := "Alice"}) | consume
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (array_literal
+              (numeric_literal)))
+          (positional_argument
+            (tuple_literal
+              (numeric_literal)
+              (numeric_literal)))
+          (positional_argument
+            (record_literal
+              (record_field
+                name: (record_field_name
+                  (unquoted_record_field_name))
+                value: (double_quoted_literal
+                  (double_quoted_content)))))))
+      (function_call
+        name: (function_name)))))
+
+==================
+Tuple as closed-expression source
+==================
+
+T(1,2) | consume
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (numeric_literal)
+        (numeric_literal))
+      (function_call name: (function_name)))))
+
+==================
+Record as closed-expression source
+==================
+
+{name := "Alice"} | consume
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          name: (record_field_name (unquoted_record_field_name))
+          value: (double_quoted_literal (double_quoted_content))))
+      (function_call name: (function_name)))))
+
+==================
+Compound values as closed-expression sources
+==================
+
+{1,2,3} | sum
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal))
+      (function_call
+        name: (function_name)))))
+
+==================
+Compound rejects empty tuple
+==================
+
+T()
+
+---
+
+(ERROR)
+
+==================
+Compound rejects single-value tuple
+==================
+
+T(1)
+
+---
+
+(ERROR (numeric_literal))
+
+==================
+Compound reports missing closing delimiter
+==================
+
+{1,2
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (MISSING "}")))))
+
+==================
+Compound reports missing array comma
+==================
+
+{1 2}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (ERROR (numeric_literal))
+        (numeric_literal)))))
+
+==================
+Compound reports malformed record field
+==================
+
+{name "Alice"}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (ERROR
+          (record_field_name (unquoted_record_field_name)))
+        (double_quoted_literal (double_quoted_content))))))
+
+==================
+Compound rejects mixed array and record members
+==================
+
+{1, name := 2}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (ERROR (function_name))
+        (numeric_literal)))))
