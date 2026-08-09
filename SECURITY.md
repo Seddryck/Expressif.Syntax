@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you've found a security issue in Expressif-Parser, you can submit your report with [GitHub's private vulnerabilty reporting feature](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability) on the corresponding repository.
+If you've found a security issue in Expressif-Parser, you can submit your report with [GitHub's private vulnerability reporting feature](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability#privately-reporting-a-security-vulnerability) on the corresponding repository.
 
 Please include as much information as possible in your report to better help us understand and resolve the issue:
 
