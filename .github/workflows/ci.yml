@@ -149,11 +149,11 @@ jobs:
 
       - name: Build packages with the repository version
         shell: pwsh
-        run: ./scripts/package.ps1 -Version '${{ steps.gitversion.outputs.majorMinorPatch }}'
+        run: ./scripts/package.ps1 -Version '${{ steps.gitversion.outputs.semVer }}'
 
       - name: Upload package validation artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: packages-${{ steps.gitversion.outputs.majorMinorPatch }}
+          name: packages-${{ steps.gitversion.outputs.semVer }}
           path: artifacts/*
           if-no-files-found: error

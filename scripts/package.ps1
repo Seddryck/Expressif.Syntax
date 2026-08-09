@@ -4,7 +4,9 @@ param(
     [ValidatePattern('^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$')]
     [string] $Version,
 
-    [string] $OutputDirectory = 'artifacts'
+    [string] $OutputDirectory = 'artifacts',
+
+    [switch] $RequirePublishablePythonVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,6 +18,9 @@ $pyprojectPath = Join-Path $repositoryRoot 'pyproject.toml'
 $originalPackageJson = Get-Content -LiteralPath $packageJsonPath -Raw
 $originalPackageLock = Get-Content -LiteralPath $packageLockPath -Raw
 $originalPyproject = Get-Content -LiteralPath $pyprojectPath -Raw
+$pythonVersion = & (Join-Path $PSScriptRoot 'Resolve-PythonPackageVersion.ps1') `
+    -Version $Version `
+    -RequirePep440:$RequirePublishablePythonVersion
 
 New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
 
@@ -27,7 +32,7 @@ try {
     npm pack --pack-destination $outputPath
     if ($LASTEXITCODE -ne 0) { throw 'npm pack failed.' }
 
-    $versionedPyproject = $originalPyproject -replace '(?m)^version = "[^"]+"\r?$', "version = `"$Version`""
+    $versionedPyproject = $originalPyproject -replace '(?m)^version = "[^"]+"\r?$', "version = `"$pythonVersion`""
     if ($versionedPyproject -eq $originalPyproject) {
         throw 'Could not inject the GitVersion value into pyproject.toml.'
     }
