@@ -107,7 +107,7 @@ The grammar should remain independent from the Expressif function catalogue. Par
 
 ## Releases
 
-After CI succeeds for a push to `main`, the release workflow calculates the repository version with GitVersion. When the calculated semantic version has a patch component of `0`, it creates the corresponding `vX.Y.0` tag and GitHub release. Other versions complete package validation without creating a tag or release.
+For every push to `main`, the release workflow independently validates the parser and all bindings, builds the release packages, and calculates the repository version with GitVersion. When validation succeeds and the calculated semantic version has a patch component of `0`, it creates the corresponding `vX.Y.0` tag and GitHub release. Other versions complete package validation without creating a tag or release.
 
 Each GitHub release contains every validated package produced by `scripts/package.ps1`:
 

@@ -1,11 +1,9 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows:
-      - CI
-    types:
-      - completed
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -18,13 +16,7 @@ concurrency:
 jobs:
   validate:
     name: Validate release candidate
-    if: >-
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.head_branch == 'main') ||
-      (github.event_name == 'workflow_dispatch' &&
-       github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       patch: ${{ steps.gitversion.outputs.patch }}
@@ -35,19 +27,11 @@ jobs:
       - name: Resolve release commit
         id: release-context
         shell: pwsh
-        env:
-          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
-          WORKFLOW_DISPATCH_SHA: ${{ github.sha }}
         run: |
-          $sha = if ($env:GITHUB_EVENT_NAME -eq 'workflow_run') {
-            $env:WORKFLOW_RUN_SHA
-          } else {
-            $env:WORKFLOW_DISPATCH_SHA
-          }
-          if ([string]::IsNullOrWhiteSpace($sha)) {
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_SHA)) {
             throw 'Could not resolve the release commit.'
           }
-          "sha=$sha" >> $env:GITHUB_OUTPUT
+          "sha=$env:GITHUB_SHA" >> $env:GITHUB_OUTPUT
 
       - name: Check out release commit
         uses: actions/checkout@v6
