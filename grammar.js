@@ -52,8 +52,7 @@ export default grammar({
 
     value: ($) => choice(
       $.variable,
-      $.property_reference,
-      $.index_reference,
+      $.record_access,
       $.positional_element_access,
       $.numeric_literal,
       $.boolean_literal,
@@ -108,9 +107,21 @@ export default grammar({
 
     variable: (_) => /@[A-Za-z][A-Za-z0-9]*/,
 
-    property_reference: (_) => /\[[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*\]/,
+    record_access: ($) => seq(
+      optional(field("root", $.original_input)),
+      repeat1(seq(".", field("field", $.record_field_selector))),
+    ),
 
-    index_reference: (_) => /\[(?:0|[1-9][0-9]*)\]/,
+    original_input: (_) => "^",
+
+    record_field_selector: ($) => choice(
+      $.named_record_field,
+      $.positional_record_field,
+    ),
+
+    named_record_field: (_) => /[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/,
+
+    positional_record_field: (_) => /(?:0|[1-9][0-9]*)/,
 
     positional_element_access: (_) => /\$\^?(?:0|[1-9][0-9]*)/,
 

@@ -321,10 +321,13 @@ foo(...a)
   (root_expression
     (open_expression
       (function_call
-        (function_name)
-        (ERROR
-          (UNEXPECTED '.')
-          (function_name))))))
+        name: (function_name)
+        (ERROR)
+        (argument_list
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field)))))))))
 
 ==================
 Operators are not implemented
@@ -343,16 +346,16 @@ Operators are not implemented
       (numeric_literal))))
 
 ==================
-Property reference cannot contain whitespace
+Legacy property reference is rejected
 ==================
 
-[ name ]
+[name]
 
 ---
 
 (source_file
   (ERROR
-    (UNEXPECTED ' '))
+    (UNEXPECTED '['))
   (root_expression
     (open_expression
       (function_call
@@ -361,16 +364,16 @@ Property reference cannot contain whitespace
     (UNEXPECTED ']')))
 
 ==================
-Index reference cannot contain whitespace
+Legacy index reference is rejected
 ==================
 
-[ 1 ]
+[1]
 
 ---
 
 (source_file
   (ERROR
-    (UNEXPECTED ' '))
+    (UNEXPECTED '['))
   (root_expression
     (closed_expression
       (numeric_literal)))

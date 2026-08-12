@@ -182,11 +182,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "property_reference"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "index_reference"
+          "name": "record_access"
         },
         {
           "type": "SYMBOL",
@@ -422,13 +418,71 @@
       "type": "PATTERN",
       "value": "@[A-Za-z][A-Za-z0-9]*"
     },
-    "property_reference": {
-      "type": "PATTERN",
-      "value": "\\[[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*\\]"
+    "record_access": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "root",
+              "content": {
+                "type": "SYMBOL",
+                "name": "original_input"
+              }
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "."
+              },
+              {
+                "type": "FIELD",
+                "name": "field",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "record_field_selector"
+                }
+              }
+            ]
+          }
+        }
+      ]
     },
-    "index_reference": {
+    "original_input": {
+      "type": "STRING",
+      "value": "^"
+    },
+    "record_field_selector": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "named_record_field"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "positional_record_field"
+        }
+      ]
+    },
+    "named_record_field": {
       "type": "PATTERN",
-      "value": "\\[(?:0|[1-9][0-9]*)\\]"
+      "value": "[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
+    },
+    "positional_record_field": {
+      "type": "PATTERN",
+      "value": "(?:0|[1-9][0-9]*)"
     },
     "positional_element_access": {
       "type": "PATTERN",
