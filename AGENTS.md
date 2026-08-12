@@ -28,6 +28,37 @@ Every issue MUST have exactly one change-type label:
 
 The label is determined by the nature of the issue.
 
+## Conventional Commits
+
+Commit messages and pull request titles MUST use the following form:
+
+```text
+<type>(<scope>): <description>
+```
+
+The scope is optional. When the description starts with a word, that word MUST start
+with a lowercase letter. This is a repository convention in addition to the
+Conventional Commits specification.
+
+Use `ci` for CI configuration and scripts, including GitHub Actions workflows and
+their dependencies. Use `build` for the build system and external project/build
+dependencies, including NuGet, npm, and pip dependencies. These types both map to
+the repository's `build` label, but they are not semantically interchangeable.
+
+Prefer:
+
+```text
+ci(deps): bump actions/checkout from 6 to 7
+feat(parser): add array accessor
+```
+
+Avoid:
+
+```text
+ci(deps): Bump actions/checkout from 6 to 7
+feat(parser): Add array accessor
+```
+
 ## Skills
 
 Repository-specific workflows are defined under `.github/skills/`.
