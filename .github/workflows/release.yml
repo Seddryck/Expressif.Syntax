@@ -14,9 +14,49 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  native:
+    name: Build native library (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            library: tree-sitter-expressif.dll
+          - os: ubuntu-latest
+            rid: linux-x64
+            library: libtree-sitter-expressif.so
+
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+
+      - name: Build native grammar library
+        shell: pwsh
+        run: |
+          $outputDirectory = Join-Path 'native-assets' '${{ matrix.rid }}'
+          New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+          tree-sitter build -o (Join-Path $outputDirectory '${{ matrix.library }}') .
+          if ($LASTEXITCODE -ne 0) { throw 'Native grammar build failed.' }
+
+      - name: Upload native grammar library
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-${{ matrix.rid }}
+          path: native-assets/${{ matrix.rid }}/${{ matrix.library }}
+          if-no-files-found: error
+          retention-days: 7
+
   validate:
     name: Validate release candidate
     if: github.ref == 'refs/heads/main'
+    needs: native
     runs-on: ubuntu-latest
     outputs:
       patch: ${{ steps.gitversion.outputs.patch }}
@@ -79,11 +119,24 @@ jobs:
           python -m pytest bindings/python/tests
           dotnet test Expressif.Syntax.sln --configuration Release
 
+      - name: Download Windows native grammar library
+        uses: actions/download-artifact@v8
+        with:
+          name: native-win-x64
+          path: native-assets/win-x64
+
+      - name: Download Linux native grammar library
+        uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: native-assets/linux-x64
+
       - name: Build all release packages
         shell: pwsh
         run: >-
           ./scripts/package.ps1
           -Version '${{ steps.gitversion.outputs.semVer }}'
+          -NativeAssetsDirectory 'native-assets'
           -RequirePublishablePythonVersion
 
       - name: Upload validated release packages

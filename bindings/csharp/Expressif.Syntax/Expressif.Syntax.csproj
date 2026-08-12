@@ -14,7 +14,25 @@
     <PackageReference Include="TreeSitter.DotNet" Version="1.3.0" />
   </ItemGroup>
 
-  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
+  <ItemGroup Condition="'$(NativeAssetsDirectory)' != ''">
+    <None Include="$(NativeAssetsDirectory)/win-x64/tree-sitter-expressif.dll"
+          Pack="true"
+          PackagePath="runtimes/win-x64/native/"
+          Visible="false" />
+    <None Include="$(NativeAssetsDirectory)/linux-x64/libtree-sitter-expressif.so"
+          Pack="true"
+          PackagePath="runtimes/linux-x64/native/"
+          Visible="false" />
+  </ItemGroup>
+
+  <Target Name="ValidateNativePackageAssets" BeforeTargets="Pack" Condition="'$(NativeAssetsDirectory)' != ''">
+    <Error Condition="!Exists('$(NativeAssetsDirectory)/win-x64/tree-sitter-expressif.dll')"
+           Text="The Windows native grammar library was not found in '$(NativeAssetsDirectory)/win-x64'." />
+    <Error Condition="!Exists('$(NativeAssetsDirectory)/linux-x64/libtree-sitter-expressif.so')"
+           Text="The Linux native grammar library was not found in '$(NativeAssetsDirectory)/linux-x64'." />
+  </Target>
+
+  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Condition="'$(NativeAssetsDirectory)' == ''" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
     <Exec WorkingDirectory="$(MSBuildThisFileDirectory)..\..\.." Command="&quot;$(TreeSitterCli)&quot; build -o &quot;$(TargetDir)$(ExpressifGrammarLibrary)&quot; ." />
   </Target>
 </Project>
