@@ -15,6 +15,12 @@ public enum SyntaxKind
     DateTimeLiteral,
     TimeLiteral,
     PositionalElementAccess,
+    Variable,
+    RecordAccess,
+    ArrayLiteral,
+    TupleLiteral,
+    RecordLiteral,
+    RecordField,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -105,8 +111,80 @@ public sealed class PositionalArgumentSyntax : ArgumentSyntax
 
 public abstract class ValueSyntax : SyntaxNode
 {
-    protected ValueSyntax(SyntaxKind kind, SourceSpan span, string text)
-        : base(kind, span, text) { }
+    protected ValueSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
+        : base(kind, span, text, children) { }
+}
+
+public sealed class VariableSyntax : ValueSyntax
+{
+    internal VariableSyntax(SourceSpan span, string text) : base(SyntaxKind.Variable, span, text)
+        => Name = text[1..];
+
+    public string Name { get; }
+}
+
+public readonly record struct RecordFieldSelector(string? Name, int? Index)
+{
+    public bool IsNamed => Name is not null;
+    public bool IsPositional => Index is not null;
+}
+
+public sealed class RecordAccessSyntax : ValueSyntax
+{
+    internal RecordAccessSyntax(SourceSpan span, string text, bool isOriginalInput, IEnumerable<RecordFieldSelector> fields)
+        : base(SyntaxKind.RecordAccess, span, text)
+    {
+        IsOriginalInput = isOriginalInput;
+        Fields = Array.AsReadOnly(fields.ToArray());
+    }
+
+    public bool IsOriginalInput { get; }
+    public IReadOnlyList<RecordFieldSelector> Fields { get; }
+}
+
+public abstract class SequenceLiteralSyntax : ValueSyntax
+{
+    protected SequenceLiteralSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<ValueSyntax> values)
+        : base(kind, span, text, values)
+        => Values = Array.AsReadOnly(values.ToArray());
+
+    public IReadOnlyList<ValueSyntax> Values { get; }
+}
+
+public sealed class ArrayLiteralSyntax : SequenceLiteralSyntax
+{
+    internal ArrayLiteralSyntax(SourceSpan span, string text, IEnumerable<ValueSyntax> values)
+        : base(SyntaxKind.ArrayLiteral, span, text, values) { }
+}
+
+public sealed class TupleLiteralSyntax : SequenceLiteralSyntax
+{
+    internal TupleLiteralSyntax(SourceSpan span, string text, IEnumerable<ValueSyntax> values)
+        : base(SyntaxKind.TupleLiteral, span, text, values) { }
+}
+
+public sealed class RecordLiteralSyntax : ValueSyntax
+{
+    internal RecordLiteralSyntax(SourceSpan span, string text, IEnumerable<RecordFieldSyntax> fields)
+        : base(SyntaxKind.RecordLiteral, span, text, fields)
+        => Fields = Array.AsReadOnly(fields.ToArray());
+
+    public IReadOnlyList<RecordFieldSyntax> Fields { get; }
+}
+
+public sealed class RecordFieldSyntax : SyntaxNode
+{
+    internal RecordFieldSyntax(SourceSpan span, string text, string name, QuotingStyle? quotingStyle, ValueSyntax value)
+        : base(SyntaxKind.RecordField, span, text, [value])
+    {
+        Name = name;
+        QuotingStyle = quotingStyle;
+        Value = value;
+    }
+
+    public string Name { get; }
+    public QuotingStyle? QuotingStyle { get; }
+    public ValueSyntax Value { get; }
 }
 
 public sealed class PositionalElementAccessSyntax : ValueSyntax

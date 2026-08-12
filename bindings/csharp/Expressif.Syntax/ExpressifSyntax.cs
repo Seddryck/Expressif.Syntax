@@ -5,6 +5,12 @@ namespace Expressif.Syntax;
 
 public static class ExpressifSyntax
 {
+    internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
+    {
+        "array_literal", "boolean_literal", "numeric_literal", "positional_element_access",
+        "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
+    };
+
     public static RootExpressionSyntax Parse(string source)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -77,6 +83,8 @@ public static class ExpressifSyntax
 
     private static ValueSyntax BindValue(TsNode node) => node.Type switch
     {
+        "variable" => new VariableSyntax(Span(node), node.Text),
+        "record_access" => BindRecordAccess(node),
         "positional_element_access" => new PositionalElementAccessSyntax(Span(node), node.Text),
         "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
         "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
@@ -85,9 +93,43 @@ public static class ExpressifSyntax
         "date_literal" => new DateLiteralSyntax(Span(node), node.Text),
         "date_time_literal" => new DateTimeLiteralSyntax(Span(node), node.Text),
         "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
+        "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
+        "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
+        "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordField).ToArray()),
         "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
         _ => throw Unknown(node),
     };
+
+    private static RecordAccessSyntax BindRecordAccess(TsNode node)
+    {
+        var fields = node.NamedChildren
+            .Where(child => child.Type != "original_input")
+            .Select(selector => SingleNamedChild(selector, selector.Type))
+            .Select(field => field.Type switch
+            {
+                "named_record_field" => new RecordFieldSelector(field.Text.TrimStart('.'), null),
+                "positional_record_field" => new RecordFieldSelector(null,
+                    int.Parse(field.Text.AsSpan(field.Text[0] == '.' ? 1 : 0), System.Globalization.CultureInfo.InvariantCulture)),
+                _ => throw Unknown(field),
+            });
+        return new(Span(node), node.Text, node.NamedChildren.Any(child => child.Type == "original_input"), fields);
+    }
+
+    private static RecordFieldSyntax BindRecordField(TsNode node)
+    {
+        var nameContainer = node.GetChildForField("name") ?? throw Unknown(node);
+        var name = SingleNamedChild(nameContainer, nameContainer.Type);
+        var value = node.GetChildForField("value") ?? throw Unknown(node);
+        QuotingStyle? quotingStyle = name.Type switch
+        {
+            "double_quoted_literal" => QuotingStyle.DoubleQuote,
+            "backtick_quoted_literal" => QuotingStyle.Backtick,
+            "unquoted_record_field_name" => null,
+            _ => throw Unknown(name),
+        };
+        var nameText = quotingStyle is null ? name.Text : name.Text[1..^1];
+        return new(Span(node), node.Text, nameText, quotingStyle, BindValue(value));
+    }
 
     private static TsNode SingleNamedChild(TsNode node, string container)
     {

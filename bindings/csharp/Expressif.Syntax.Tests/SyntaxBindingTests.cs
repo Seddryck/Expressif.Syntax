@@ -1,5 +1,7 @@
 namespace Expressif.Syntax.Tests;
 
+using System.Text.Json;
+
 public class SyntaxBindingTests
 {
     [TestCase("lower", typeof(OpenExpressionSyntax))]
@@ -109,6 +111,70 @@ public class SyntaxBindingTests
             Assert.That(pipelineRoot.Value, Is.TypeOf<PositionalElementAccessSyntax>());
             Assert.That(pipelineRoot.Pipeline.Single().Name, Is.EqualTo("upper"));
         });
+    }
+
+    [TestCase(".name", false, "name", null)]
+    [TestCase(".10", false, null, 10)]
+    [TestCase("^.name", true, "name", null)]
+    [TestCase("^.10", true, null, 10)]
+    public void RecordAccessExposesRootAndField(string source, bool original, string? name, int? index)
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var access = (RecordAccessSyntax)root.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(access.IsOriginalInput, Is.EqualTo(original));
+            Assert.That(access.Fields.Single().Name, Is.EqualTo(name));
+            Assert.That(access.Fields.Single().Index, Is.EqualTo(index));
+        });
+    }
+
+    [Test]
+    public void NestedRecordAccessPreservesEveryField()
+    {
+        var access = (RecordAccessSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("^.customer.0")).Value;
+
+        Assert.That(access.Fields, Is.EqualTo(new[]
+        {
+            new RecordFieldSelector("customer", null),
+            new RecordFieldSelector(null, 0),
+        }));
+    }
+
+    [TestCase("@value", typeof(VariableSyntax))]
+    [TestCase("{}", typeof(ArrayLiteralSyntax))]
+    [TestCase("T(1, 2)", typeof(TupleLiteralSyntax))]
+    [TestCase("{:}", typeof(RecordLiteralSyntax))]
+    public void RemainingGrammarValuesHaveManagedSyntaxNodes(string source, Type expected)
+        => Assert.That(((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value, Is.TypeOf(expected));
+
+    [Test]
+    public void CompoundValuesBindNestedValuesAndRecordFields()
+    {
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(
+            "{name := @value, `scores` := {1, ^.total}}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(record.Fields.Select(field => field.Name), Is.EqualTo(new[] { "name", "scores" }));
+            Assert.That(record.Fields[1].QuotingStyle, Is.EqualTo(QuotingStyle.Backtick));
+            Assert.That(record.Fields[0].Value, Is.TypeOf<VariableSyntax>());
+            Assert.That(((ArrayLiteralSyntax)record.Fields[1].Value).Values[1], Is.TypeOf<RecordAccessSyntax>());
+            Assert.That(record.Children, Is.EqualTo(record.Fields));
+        });
+    }
+
+    [Test]
+    public void BinderSupportsEveryGrammarValueNodeType()
+    {
+        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "node-types.json")));
+        var value = document.RootElement.EnumerateArray().Single(node => node.GetProperty("type").GetString() == "value");
+        var grammarTypes = value.GetProperty("subtypes").EnumerateArray()
+            .Select(node => node.GetProperty("type").GetString()!)
+            .ToHashSet();
+
+        Assert.That(ExpressifSyntax.SupportedValueNodeTypes, Is.EquivalentTo(grammarTypes));
     }
 
     [Test]

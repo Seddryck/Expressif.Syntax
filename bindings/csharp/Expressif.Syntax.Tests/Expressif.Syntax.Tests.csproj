@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Expressif.Syntax\Expressif.Syntax.csproj" />
+    <Content Include="..\..\..\src\node-types.json" Link="node-types.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyExpressifGrammar" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
