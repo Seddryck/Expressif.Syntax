@@ -408,7 +408,7 @@
     },
     "unquoted_record_field_name": {
       "type": "PATTERN",
-      "value": "[A-Za-z]+(?:-[A-Za-z0-9]+)*"
+      "value": "[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
     },
     "numeric_literal": {
       "type": "PATTERN",
@@ -426,42 +426,51 @@
           "members": [
             {
               "type": "FIELD",
-              "name": "root",
+              "name": "field",
               "content": {
                 "type": "SYMBOL",
-                "name": "original_input"
+                "name": "record_field_selector"
               }
             },
             {
-              "type": "BLANK"
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "FIELD",
+                  "name": "root",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "original_input"
+                  }
+                },
+                {
+                  "type": "FIELD",
+                  "name": "field",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "original_record_field_selector"
+                  }
+                }
+              ]
             }
           ]
         },
         {
-          "type": "REPEAT1",
+          "type": "REPEAT",
           "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "."
-              },
-              {
-                "type": "FIELD",
-                "name": "field",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "record_field_selector"
-                }
-              }
-            ]
+            "type": "FIELD",
+            "name": "field",
+            "content": {
+              "type": "SYMBOL",
+              "name": "immediate_record_field_selector"
+            }
           }
         }
       ]
     },
     "original_input": {
-      "type": "STRING",
-      "value": "^"
+      "type": "PATTERN",
+      "value": "\\^\\."
     },
     "record_field_selector": {
       "type": "CHOICE",
@@ -476,13 +485,79 @@
         }
       ]
     },
+    "immediate_record_field_selector": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PATTERN",
+              "value": "\\.[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
+            }
+          },
+          "named": true,
+          "value": "named_record_field"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PATTERN",
+              "value": "\\.(?:0|[1-9][0-9]*)"
+            }
+          },
+          "named": true,
+          "value": "positional_record_field"
+        }
+      ]
+    },
+    "original_record_field_selector": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PREC",
+              "value": -1,
+              "content": {
+                "type": "PATTERN",
+                "value": "[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
+              }
+            }
+          },
+          "named": true,
+          "value": "named_record_field"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "IMMEDIATE_TOKEN",
+            "content": {
+              "type": "PREC",
+              "value": -1,
+              "content": {
+                "type": "PATTERN",
+                "value": "(?:0|[1-9][0-9]*)"
+              }
+            }
+          },
+          "named": true,
+          "value": "positional_record_field"
+        }
+      ]
+    },
     "named_record_field": {
       "type": "PATTERN",
-      "value": "[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
+      "value": "\\.[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
     },
     "positional_record_field": {
       "type": "PATTERN",
-      "value": "(?:0|[1-9][0-9]*)"
+      "value": "\\.(?:0|[1-9][0-9]*)"
     },
     "positional_element_access": {
       "type": "PATTERN",

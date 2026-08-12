@@ -30,11 +30,11 @@ Array values and whitespace
         (date_literal)
         (variable)
         (record_access
-          (original_input)
-          (record_field_selector (named_record_field)))
+          root: (original_input)
+          field: (original_record_field_selector (named_record_field)))
         (record_access
-          (original_input)
-          (record_field_selector (positional_record_field)))))))
+          root: (original_input)
+          field: (original_record_field_selector (positional_record_field)))))))
 
 ==================
 Nested and single-element arrays
@@ -87,8 +87,8 @@ T("foo", #true, T(#"2025-12-17", ^.0), @value)
         (tuple_literal
           (date_literal)
           (record_access
-            (original_input)
-            (record_field_selector (positional_record_field))))
+            root: (original_input)
+            field: (original_record_field_selector (positional_record_field))))
         (variable)))))
 
 ==================
@@ -103,6 +103,25 @@ Empty record
   (root_expression
     (closed_expression
       (record_literal))))
+
+==================
+Unquoted record field names allow digits after the first letter
+==================
+
+{a1 := 1, field-2 := 2}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          name: (record_field_name (unquoted_record_field_name))
+          value: (numeric_literal))
+        (record_field
+          name: (record_field_name (unquoted_record_field_name))
+          value: (numeric_literal))))))
 
 ==================
 Record fields and quoted names

@@ -93,7 +93,7 @@ Original input named field pipeline
     (closed_expression
       (record_access
         root: (original_input)
-        field: (record_field_selector
+        field: (original_record_field_selector
           (named_record_field)))
       (function_call
         name: (function_name)))))
@@ -111,7 +111,7 @@ Original input positional field pipeline
     (closed_expression
       (record_access
         root: (original_input)
-        field: (record_field_selector
+        field: (original_record_field_selector
           (positional_record_field)))
       (function_call
         name: (function_name)
@@ -142,7 +142,7 @@ example(@foo, .bar, ^.2)
           (positional_argument
             (record_access
               root: (original_input)
-              field: (record_field_selector
+              field: (original_record_field_selector
                 (positional_record_field)))))))))
 
 ==================
@@ -188,14 +188,14 @@ example(.customer.address, ^.customer.0)
             (record_access
               field: (record_field_selector
                 (named_record_field))
-              field: (record_field_selector
+              field: (immediate_record_field_selector
                 (named_record_field))))
           (positional_argument
             (record_access
               root: (original_input)
-              field: (record_field_selector
+              field: (original_record_field_selector
                 (named_record_field))
-              field: (record_field_selector
+              field: (immediate_record_field_selector
                 (positional_record_field)))))))))
 
 ==================

@@ -322,12 +322,9 @@ foo(...a)
     (open_expression
       (function_call
         name: (function_name)
-        (ERROR)
-        (argument_list
-          (positional_argument
-            (record_access
-              field: (record_field_selector
-                (named_record_field)))))))))
+        (ERROR
+          (UNEXPECTED '.')
+          (named_record_field))))))
 
 ==================
 Operators are not implemented
@@ -379,3 +376,66 @@ Legacy index reference is rejected
       (numeric_literal)))
   (ERROR
     (UNEXPECTED ']')))
+
+==================
+Record access rejects whitespace after dot
+==================
+
+. name
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED ' '))
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)))))
+
+==================
+Nested record access rejects whitespace around dot
+==================
+
+.customer . address
+
+---
+
+(source_file
+  (ERROR
+    (record_field_selector
+      (named_record_field))
+    (UNEXPECTED ' '))
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)))))
+
+==================
+Original input marker rejects separated selector
+==================
+
+^
+.name
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED '\n'))
+  (root_expression
+    (closed_expression
+      (record_access
+        field: (record_field_selector
+          (named_record_field))))))
+
+==================
+Original input marker requires a selector
+==================
+
+^
+
+---
+
+(ERROR
+  (UNEXPECTED '\n'))
