@@ -321,10 +321,10 @@ foo(...a)
   (root_expression
     (open_expression
       (function_call
-        (function_name)
+        name: (function_name)
         (ERROR
           (UNEXPECTED '.')
-          (function_name))))))
+          (named_record_field))))))
 
 ==================
 Operators are not implemented
@@ -343,10 +343,45 @@ Operators are not implemented
       (numeric_literal))))
 
 ==================
-Property reference cannot contain whitespace
+Legacy property reference is rejected
 ==================
 
-[ name ]
+[name]
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED '['))
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))))
+  (ERROR
+    (UNEXPECTED ']')))
+
+==================
+Legacy index reference is rejected
+==================
+
+[1]
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED '['))
+  (root_expression
+    (closed_expression
+      (numeric_literal)))
+  (ERROR
+    (UNEXPECTED ']')))
+
+==================
+Record access rejects whitespace after dot
+==================
+
+. name
 
 ---
 
@@ -356,23 +391,51 @@ Property reference cannot contain whitespace
   (root_expression
     (open_expression
       (function_call
-        name: (function_name))))
-  (ERROR
-    (UNEXPECTED ']')))
+        (function_name)))))
 
 ==================
-Index reference cannot contain whitespace
+Nested record access rejects whitespace around dot
 ==================
 
-[ 1 ]
+.customer . address
 
 ---
 
 (source_file
   (ERROR
+    (record_field_selector
+      (named_record_field))
     (UNEXPECTED ' '))
   (root_expression
-    (closed_expression
-      (numeric_literal)))
+    (open_expression
+      (function_call
+        (function_name)))))
+
+==================
+Original input marker rejects separated selector
+==================
+
+^
+.name
+
+---
+
+(source_file
   (ERROR
-    (UNEXPECTED ']')))
+    (UNEXPECTED '\n'))
+  (root_expression
+    (closed_expression
+      (record_access
+        field: (record_field_selector
+          (named_record_field))))))
+
+==================
+Original input marker requires a selector
+==================
+
+^
+
+---
+
+(ERROR
+  (UNEXPECTED '\n'))

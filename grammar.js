@@ -52,8 +52,7 @@ export default grammar({
 
     value: ($) => choice(
       $.variable,
-      $.property_reference,
-      $.index_reference,
+      $.record_access,
       $.positional_element_access,
       $.numeric_literal,
       $.boolean_literal,
@@ -102,15 +101,43 @@ export default grammar({
       $.backtick_quoted_literal,
     ),
 
-    unquoted_record_field_name: (_) => /[A-Za-z]+(?:-[A-Za-z0-9]+)*/,
+    unquoted_record_field_name: (_) => /[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/,
 
     numeric_literal: (_) => /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/,
 
     variable: (_) => /@[A-Za-z][A-Za-z0-9]*/,
 
-    property_reference: (_) => /\[[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*\]/,
+    record_access: ($) => seq(
+      choice(
+        field("field", $.record_field_selector),
+        seq(
+          field("root", $.original_input),
+          field("field", $.original_record_field_selector),
+        ),
+      ),
+      repeat(field("field", $.immediate_record_field_selector)),
+    ),
 
-    index_reference: (_) => /\[(?:0|[1-9][0-9]*)\]/,
+    original_input: (_) => /\^\./,
+
+    record_field_selector: ($) => choice(
+      $.named_record_field,
+      $.positional_record_field,
+    ),
+
+    immediate_record_field_selector: ($) => choice(
+      alias(token.immediate(/\.[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/), $.named_record_field),
+      alias(token.immediate(/\.(?:0|[1-9][0-9]*)/), $.positional_record_field),
+    ),
+
+    original_record_field_selector: ($) => choice(
+      alias(token.immediate(prec(-1, /[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/)), $.named_record_field),
+      alias(token.immediate(prec(-1, /(?:0|[1-9][0-9]*)/)), $.positional_record_field),
+    ),
+
+    named_record_field: (_) => /\.[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/,
+
+    positional_record_field: (_) => /\.(?:0|[1-9][0-9]*)/,
 
     positional_element_access: (_) => /\$\^?(?:0|[1-9][0-9]*)/,
 

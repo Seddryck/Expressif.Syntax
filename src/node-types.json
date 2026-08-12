@@ -54,10 +54,6 @@
         "named": true
       },
       {
-        "type": "index_reference",
-        "named": true
-      },
-      {
         "type": "numeric_literal",
         "named": true
       },
@@ -66,11 +62,11 @@
         "named": true
       },
       {
-        "type": "property_reference",
+        "type": "quoted_literal",
         "named": true
       },
       {
-        "type": "quoted_literal",
+        "type": "record_access",
         "named": true
       },
       {
@@ -206,6 +202,25 @@
     }
   },
   {
+    "type": "immediate_record_field_selector",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "named_record_field",
+          "named": true
+        },
+        {
+          "type": "positional_record_field",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "open_expression",
     "named": true,
     "fields": {},
@@ -215,6 +230,25 @@
       "types": [
         {
           "type": "expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "original_record_field_selector",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "named_record_field",
+          "named": true
+        },
+        {
+          "type": "positional_record_field",
           "named": true
         }
       ]
@@ -233,6 +267,40 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "record_access",
+    "named": true,
+    "fields": {
+      "field": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "immediate_record_field_selector",
+            "named": true
+          },
+          {
+            "type": "original_record_field_selector",
+            "named": true
+          },
+          {
+            "type": "record_field_selector",
+            "named": true
+          }
+        ]
+      },
+      "root": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "original_input",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -279,6 +347,25 @@
         },
         {
           "type": "unquoted_record_field_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "record_field_selector",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "named_record_field",
+          "named": true
+        },
+        {
+          "type": "positional_record_field",
           "named": true
         }
       ]
@@ -414,7 +501,7 @@
     "named": true
   },
   {
-    "type": "index_reference",
+    "type": "named_record_field",
     "named": true
   },
   {
@@ -422,11 +509,15 @@
     "named": true
   },
   {
+    "type": "original_input",
+    "named": true
+  },
+  {
     "type": "positional_element_access",
     "named": true
   },
   {
-    "type": "property_reference",
+    "type": "positional_record_field",
     "named": true
   },
   {

@@ -6,7 +6,10 @@ Single-letter variable
 
 ---
 
-(source_file (root_expression (closed_expression (variable))))
+(source_file
+  (root_expression
+    (closed_expression
+      (variable))))
 
 ==================
 Variable names support letters digits and mixed case
@@ -22,16 +25,20 @@ example(@foo, @foo1, @fo1o, @Foo)
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (variable))
-          (positional_argument (variable))
-          (positional_argument (variable))
-          (positional_argument (variable)))))))
+          (positional_argument
+            (variable))
+          (positional_argument
+            (variable))
+          (positional_argument
+            (variable))
+          (positional_argument
+            (variable)))))))
 
 ==================
-Property and index references are distinct
+Current record named and positional fields
 ==================
 
-example([name], [birth-date], [0], [10])
+example(.name, .birth-date, .0, .10)
 
 ---
 
@@ -41,10 +48,22 @@ example([name], [birth-date], [0], [10])
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (property_reference))
-          (positional_argument (property_reference))
-          (positional_argument (index_reference))
-          (positional_argument (index_reference)))))))
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (positional_record_field))))
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (positional_record_field)))))))))
 
 ==================
 Variable pipeline
@@ -58,44 +77,53 @@ Variable pipeline
   (root_expression
     (closed_expression
       (variable)
-      (function_call name: (function_name)))))
+      (function_call
+        name: (function_name)))))
 
 ==================
-Property reference pipeline
+Original input named field pipeline
 ==================
 
-[name] | upper
+^.name | upper
 
 ---
 
 (source_file
   (root_expression
     (closed_expression
-      (property_reference)
-      (function_call name: (function_name)))))
+      (record_access
+        root: (original_input)
+        field: (original_record_field_selector
+          (named_record_field)))
+      (function_call
+        name: (function_name)))))
 
 ==================
-Index reference pipeline
+Original input positional field pipeline
 ==================
 
-[1] | add(5)
+^.1 | add(5)
 
 ---
 
 (source_file
   (root_expression
     (closed_expression
-      (index_reference)
+      (record_access
+        root: (original_input)
+        field: (original_record_field_selector
+          (positional_record_field)))
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (numeric_literal)))))))
+          (positional_argument
+            (numeric_literal)))))))
 
 ==================
-All reference forms are positional arguments
+Record access forms are positional arguments
 ==================
 
-example(@foo, [bar], [2])
+example(@foo, .bar, ^.2)
 
 ---
 
@@ -105,15 +133,23 @@ example(@foo, [bar], [2])
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (variable))
-          (positional_argument (property_reference))
-          (positional_argument (index_reference)))))))
+          (positional_argument
+            (variable))
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              root: (original_input)
+              field: (original_record_field_selector
+                (positional_record_field)))))))))
 
 ==================
-Index references remain distinct from typed literals
+Positional record fields remain distinct from typed literals
 ==================
 
-example([1], #true, #false, #"2025-12-17")
+example(.1, #true, #false, #"2025-12-17")
 
 ---
 
@@ -123,10 +159,44 @@ example([1], #true, #false, #"2025-12-17")
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (index_reference))
-          (positional_argument (boolean_literal))
-          (positional_argument (boolean_literal))
-          (positional_argument (date_literal)))))))
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (positional_record_field))))
+          (positional_argument
+            (boolean_literal))
+          (positional_argument
+            (boolean_literal))
+          (positional_argument
+            (date_literal)))))))
+
+==================
+Nested current and original record access
+==================
+
+example(.customer.address, ^.customer.0)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field))
+              field: (immediate_record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              root: (original_input)
+              field: (original_record_field_selector
+                (named_record_field))
+              field: (immediate_record_field_selector
+                (positional_record_field)))))))))
 
 ==================
 Surrounding whitespace is insignificant
@@ -136,7 +206,10 @@ Surrounding whitespace is insignificant
 
 ---
 
-(source_file (root_expression (closed_expression (variable))))
+(source_file
+  (root_expression
+    (closed_expression
+      (variable))))
 
 ==================
 Forward positional element access
@@ -152,8 +225,10 @@ example($0, $1)
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (positional_element_access))
-          (positional_argument (positional_element_access)))))))
+          (positional_argument
+            (positional_element_access))
+          (positional_argument
+            (positional_element_access)))))))
 
 ==================
 Reverse positional element access
@@ -169,8 +244,10 @@ example($^0, $^1)
       (function_call
         name: (function_name)
         (argument_list
-          (positional_argument (positional_element_access))
-          (positional_argument (positional_element_access)))))))
+          (positional_argument
+            (positional_element_access))
+          (positional_argument
+            (positional_element_access)))))))
 
 ==================
 Positional element access pipeline
@@ -184,4 +261,5 @@ $^0 | upper
   (root_expression
     (closed_expression
       (positional_element_access)
-      (function_call name: (function_name)))))
+      (function_call
+        name: (function_name)))))
