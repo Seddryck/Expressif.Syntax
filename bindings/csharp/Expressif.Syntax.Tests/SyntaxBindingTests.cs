@@ -79,6 +79,38 @@ public class SyntaxBindingTests
         Assert.That(root.Value, Is.TypeOf(expected).With.Property(nameof(SyntaxNode.Text)).EqualTo(source));
     }
 
+    [TestCase("$0", 0, false)]
+    [TestCase("$1", 1, false)]
+    [TestCase("$^0", 0, true)]
+    [TestCase("$^1", 1, true)]
+    public void PositionalElementAccessExposesDirectionAndIndex(string source, int index, bool fromEnd)
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var access = (PositionalElementAccessSyntax)root.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(access.Index, Is.EqualTo(index));
+            Assert.That(access.FromEnd, Is.EqualTo(fromEnd));
+            Assert.That(access.Text, Is.EqualTo(source));
+        });
+    }
+
+    [Test]
+    public void PositionalElementAccessCanBeAnArgumentAndPipelineSource()
+    {
+        var argumentRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("select($1)");
+        var pipelineRoot = (ClosedExpressionSyntax)ExpressifSyntax.Parse("$^0 | upper");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(argumentRoot.Pipeline.Single().Arguments.Single().Value,
+                Is.TypeOf<PositionalElementAccessSyntax>());
+            Assert.That(pipelineRoot.Value, Is.TypeOf<PositionalElementAccessSyntax>());
+            Assert.That(pipelineRoot.Pipeline.Single().Name, Is.EqualTo("upper"));
+        });
+    }
+
     [Test]
     public void SourceTextAndRangesAreLossless()
     {

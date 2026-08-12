@@ -190,6 +190,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "positional_element_access"
+        },
+        {
+          "type": "SYMBOL",
           "name": "numeric_literal"
         },
         {
@@ -425,6 +429,10 @@
     "index_reference": {
       "type": "PATTERN",
       "value": "\\[(?:0|[1-9][0-9]*)\\]"
+    },
+    "positional_element_access": {
+      "type": "PATTERN",
+      "value": "\\$\\^?(?:0|[1-9][0-9]*)"
     },
     "boolean_literal": {
       "type": "CHOICE",

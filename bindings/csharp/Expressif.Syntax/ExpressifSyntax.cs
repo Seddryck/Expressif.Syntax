@@ -77,6 +77,7 @@ public static class ExpressifSyntax
 
     private static ValueSyntax BindValue(TsNode node) => node.Type switch
     {
+        "positional_element_access" => new PositionalElementAccessSyntax(Span(node), node.Text),
         "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
         "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
         "double_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.DoubleQuote),
