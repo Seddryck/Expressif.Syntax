@@ -137,3 +137,51 @@ Surrounding whitespace is insignificant
 ---
 
 (source_file (root_expression (closed_expression (variable))))
+
+==================
+Forward positional element access
+==================
+
+example($0, $1)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument (positional_element_access))
+          (positional_argument (positional_element_access)))))))
+
+==================
+Reverse positional element access
+==================
+
+example($^0, $^1)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument (positional_element_access))
+          (positional_argument (positional_element_access)))))))
+
+==================
+Positional element access pipeline
+==================
+
+$^0 | upper
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (positional_element_access)
+      (function_call name: (function_name)))))

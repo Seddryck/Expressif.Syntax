@@ -62,6 +62,10 @@
         "named": true
       },
       {
+        "type": "positional_element_access",
+        "named": true
+      },
+      {
         "type": "property_reference",
         "named": true
       },
@@ -415,6 +419,10 @@
   },
   {
     "type": "numeric_literal",
+    "named": true
+  },
+  {
+    "type": "positional_element_access",
     "named": true
   },
   {

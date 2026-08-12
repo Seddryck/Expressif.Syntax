@@ -57,6 +57,25 @@ This separation allows the same parser to support:
 * language servers
 * syntax highlighting and other editor tooling
 
+### Structural access
+
+Expressif distinguishes record fields from elements of ordered values:
+
+```text
+.name       named field of the current record
+.0          positional field of the current record
+$0          first element of the current tuple or array
+$1          second element of the current tuple or array
+$^0         last element of the current tuple or array
+$^1         second-to-last element of the current tuple or array
+```
+
+Element positions are zero-based. `$n` counts from the beginning and `$^n`
+counts from the end. The parser represents both tuple and array access with the
+same `positional_element_access` node; downstream binders decide whether the
+runtime value supports positional access and how invalid or out-of-range access
+is handled.
+
 ## Repository structure
 
 ```text

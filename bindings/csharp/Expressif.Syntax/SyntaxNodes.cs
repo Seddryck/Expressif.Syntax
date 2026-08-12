@@ -14,6 +14,7 @@ public enum SyntaxKind
     DateLiteral,
     DateTimeLiteral,
     TimeLiteral,
+    PositionalElementAccess,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -106,6 +107,19 @@ public abstract class ValueSyntax : SyntaxNode
 {
     protected ValueSyntax(SyntaxKind kind, SourceSpan span, string text)
         : base(kind, span, text) { }
+}
+
+public sealed class PositionalElementAccessSyntax : ValueSyntax
+{
+    internal PositionalElementAccessSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.PositionalElementAccess, span, text)
+    {
+        FromEnd = text[1] == '^';
+        Index = int.Parse(text.AsSpan(FromEnd ? 2 : 1), System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    public int Index { get; }
+    public bool FromEnd { get; }
 }
 
 public sealed class NumericLiteralSyntax : ValueSyntax
