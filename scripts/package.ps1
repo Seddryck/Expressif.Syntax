@@ -6,6 +6,8 @@ param(
 
     [string] $OutputDirectory = 'artifacts',
 
+    [string] $NativeAssetsDirectory = '',
+
     [switch] $RequirePublishablePythonVersion
 )
 
@@ -41,11 +43,19 @@ try {
     python -m build --sdist --wheel --outdir $outputPath
     if ($LASTEXITCODE -ne 0) { throw 'Python packaging failed.' }
 
-    dotnet pack bindings/csharp/Expressif.Syntax/Expressif.Syntax.csproj `
-        --configuration Release `
-        --output $outputPath `
-        /p:Version=$Version `
-        /p:PackageVersion=$Version
+    $dotnetPackArguments = @(
+        'pack'
+        'bindings/csharp/Expressif.Syntax/Expressif.Syntax.csproj'
+        '--configuration', 'Release'
+        '--output', $outputPath
+        "/p:Version=$Version"
+        "/p:PackageVersion=$Version"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($NativeAssetsDirectory)) {
+        $nativeAssetsPath = Join-Path $repositoryRoot $NativeAssetsDirectory
+        $dotnetPackArguments += "/p:NativeAssetsDirectory=$nativeAssetsPath"
+    }
+    dotnet @dotnetPackArguments
     if ($LASTEXITCODE -ne 0) { throw 'NuGet packaging failed.' }
 
     $nativeArchive = Join-Path $outputPath "tree-sitter-expressif-c-$Version.tar.gz"
