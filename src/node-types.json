@@ -150,6 +150,10 @@
           "named": true
         },
         {
+          "type": "map_shorthand",
+          "named": true
+        },
+        {
           "type": "value",
           "named": true
         }
@@ -218,6 +222,22 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "map_shorthand",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "open_expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -429,6 +449,10 @@
           "named": true
         },
         {
+          "type": "map_shorthand",
+          "named": true
+        },
+        {
           "type": "open_expression",
           "named": true
         }
@@ -568,6 +592,10 @@
   },
   {
     "type": "|",
+    "named": false
+  },
+  {
+    "type": "|>",
     "named": false
   },
   {

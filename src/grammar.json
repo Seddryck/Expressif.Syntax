@@ -16,6 +16,10 @@
         {
           "type": "SYMBOL",
           "name": "closed_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "map_shorthand"
         }
       ]
     },
@@ -52,41 +56,73 @@
           "name": "value"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "|"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "expression"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": "|"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "expression"
-                      }
-                    ]
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "|"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "expression"
                   }
-                }
-              ]
+                ]
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_pipeline_map_shorthand"
+                },
+                "named": true,
+                "value": "map_shorthand"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "map_shorthand": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "|>"
+        },
+        {
+          "type": "FIELD",
+          "name": "expression",
+          "content": {
+            "type": "SYMBOL",
+            "name": "open_expression"
+          }
+        }
+      ]
+    },
+    "_pipeline_map_shorthand": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "|>"
+        },
+        {
+          "type": "FIELD",
+          "name": "expression",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "expression"
             },
-            {
-              "type": "BLANK"
-            }
-          ]
+            "named": true,
+            "value": "open_expression"
+          }
         }
       ]
     },

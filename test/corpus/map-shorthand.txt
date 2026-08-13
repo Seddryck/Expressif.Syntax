@@ -1,0 +1,143 @@
+==================
+Simple map shorthand
+==================
+
+|> upper
+
+---
+
+(source_file
+  (root_expression
+    (map_shorthand
+      expression: (open_expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Mapped function with arguments
+==================
+
+|> add(1)
+
+---
+
+(source_file
+  (root_expression
+    (map_shorthand
+      expression: (open_expression
+        (function_call
+          name: (function_name)
+          (argument_list
+            (positional_argument
+              (numeric_literal))))))))
+
+==================
+Mapped multi-step open expression
+==================
+
+|> lower | trim
+
+---
+
+(source_file
+  (root_expression
+    (map_shorthand
+      expression: (open_expression
+        (function_call
+          name: (function_name))
+        (function_call
+          name: (function_name))))))
+
+==================
+Map shorthand after a closed-expression source
+==================
+
+{1,2,3} |> add(1)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal))
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)
+            (argument_list
+              (positional_argument
+                (numeric_literal)))))))))
+
+==================
+Map shorthand preserves the outer pipeline boundary
+==================
+
+{1,2,3} |> add(1) | sum
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal))
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)
+            (argument_list
+              (positional_argument
+                (numeric_literal))))))
+      (function_call
+        name: (function_name)))))
+
+==================
+Map shorthand without whitespace
+==================
+
+|>upper
+
+---
+
+(source_file
+  (root_expression
+    (map_shorthand
+      expression: (open_expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Map shorthand with additional whitespace
+==================
+
+  |>   upper  
+
+---
+
+(source_file
+  (root_expression
+    (map_shorthand
+      expression: (open_expression
+        (function_call
+          name: (function_name))))))
+
+==================
+Ordinary pipeline is not map shorthand
+==================
+
+lower | upper
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))
+      (function_call
+        name: (function_name)))))

@@ -361,6 +361,22 @@ Legacy property reference is rejected
     (UNEXPECTED ']')))
 
 ==================
+Map shorthand operator must be contiguous
+==================
+
+| > upper
+
+---
+
+(source_file
+  (ERROR
+    (UNEXPECTED '>'))
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)))))
+
+==================
 Legacy index reference is rejected
 ==================
 
