@@ -22,7 +22,11 @@ export default grammar({
   rules: {
     source_file: ($) => $.root_expression,
 
-    root_expression: ($) => choice($.open_expression, $.closed_expression),
+    root_expression: ($) => choice(
+      $.open_expression,
+      $.closed_expression,
+      $.map_shorthand,
+    ),
 
     open_expression: ($) => seq(
       $.expression,
@@ -31,7 +35,23 @@ export default grammar({
 
     closed_expression: ($) => seq(
       $.value,
-      optional(seq("|", $.expression, repeat(seq("|", $.expression)))),
+      repeat(choice(
+        seq("|", $.expression),
+        alias($._pipeline_map_shorthand, $.map_shorthand),
+      )),
+    ),
+
+    map_shorthand: ($) => seq(
+      "|>",
+      field("expression", $.open_expression),
+    ),
+
+    // In a closed-expression pipeline, the next ordinary `|` belongs to the
+    // outer pipeline. Alias the single mapped operation as an open expression
+    // so both forms expose the same CST shape.
+    _pipeline_map_shorthand: ($) => seq(
+      "|>",
+      field("expression", alias($.expression, $.open_expression)),
     ),
 
     expression: ($) => $.function_call,
