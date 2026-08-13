@@ -42,12 +42,12 @@ public static class ExpressifSyntax
 
     private static OpenExpressionSyntax BindOpen(TsNode node)
     {
-        var children = node.NamedChildren.ToArray();
-        var source = children.FirstOrDefault()?.Type == "tuple_projection"
-            ? BindTupleProjection(children[0])
+        var expressions = node.NamedChildren.Select(BindExpression).ToArray();
+        var source = expressions.FirstOrDefault() is TupleProjectionSyntax
+            ? expressions[0]
             : null;
-        var calls = children.Skip(source is null ? 0 : 1).Select(BindFunctionCall).ToArray();
-        return new(Span(node), node.Text, source, calls);
+        var pipeline = expressions.Skip(source is null ? 0 : 1).ToArray();
+        return new(Span(node), node.Text, source, pipeline);
     }
 
     private static ClosedExpressionSyntax BindClosed(TsNode node)
@@ -57,8 +57,8 @@ public static class ExpressifSyntax
             throw Unknown(node);
 
         var value = BindValue(children[0]);
-        var calls = children.Skip(1).Select(BindFunctionCall).ToArray();
-        return new(Span(node), node.Text, value, calls);
+        var pipeline = children.Skip(1).Select(BindExpression).ToArray();
+        return new(Span(node), node.Text, value, pipeline);
     }
 
     private static FunctionCallSyntax BindFunctionCall(TsNode node)
@@ -95,6 +95,7 @@ public static class ExpressifSyntax
 
     private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
     {
+        "function_call" => BindFunctionCall(node),
         "parameterized_expression" => BindParameterizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),
         _ => BindValue(node),
