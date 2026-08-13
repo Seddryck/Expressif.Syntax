@@ -54,7 +54,22 @@ export default grammar({
       field("expression", alias($.expression, $.open_expression)),
     ),
 
-    expression: ($) => $.function_call,
+    expression: ($) => choice(
+      $.function_call,
+      $.tuple_projection,
+    ),
+
+    tuple_projection: ($) => choice(
+      seq(
+        field("direction", alias("$", $.from_start)),
+        field("index", alias(token.immediate(prec(-1, /(?:0|[1-9][0-9]*)/)), $.tuple_index)),
+      ),
+      seq(
+        "$",
+        field("direction", alias(token.immediate("^"), $.from_end)),
+        field("index", alias(token.immediate(prec(-1, /(?:0|[1-9][0-9]*)/)), $.tuple_index)),
+      ),
+    ),
 
     function_call: ($) => seq(
       field("name", $.function_name),
@@ -68,11 +83,15 @@ export default grammar({
       repeat(seq(",", $.positional_argument)),
     ),
 
-    positional_argument: ($) => choice($.value, $.parameterized_expression),
+    positional_argument: ($) => choice(
+      $.value,
+      $.tuple_projection,
+      $.parameterized_expression,
+    ),
 
     parameterized_expression: ($) => seq(
       "{",
-      field("source", $.value),
+      field("source", choice($.value, $.tuple_projection)),
       "|",
       field("expression", $.open_expression),
       "}",
@@ -81,7 +100,6 @@ export default grammar({
     value: ($) => choice(
       $.variable,
       $.record_access,
-      $.positional_element_access,
       $.numeric_literal,
       $.boolean_literal,
       $.quoted_literal,
@@ -166,8 +184,6 @@ export default grammar({
     named_record_field: (_) => /\.[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/,
 
     positional_record_field: (_) => /\.(?:0|[1-9][0-9]*)/,
-
-    positional_element_access: (_) => /\$\^?(?:0|[1-9][0-9]*)/,
 
     boolean_literal: (_) => choice("#true", "#false"),
 

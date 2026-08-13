@@ -6,6 +6,10 @@
       {
         "type": "function_call",
         "named": true
+      },
+      {
+        "type": "tuple_projection",
+        "named": true
       }
     ]
   },
@@ -55,10 +59,6 @@
       },
       {
         "type": "numeric_literal",
-        "named": true
-      },
-      {
-        "type": "positional_element_access",
         "named": true
       },
       {
@@ -293,6 +293,10 @@
         "required": true,
         "types": [
           {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
             "type": "value",
             "named": true
           }
@@ -310,6 +314,10 @@
       "types": [
         {
           "type": "parameterized_expression",
+          "named": true
+        },
+        {
+          "type": "tuple_projection",
           "named": true
         },
         {
@@ -491,6 +499,36 @@
     }
   },
   {
+    "type": "tuple_projection",
+    "named": true,
+    "fields": {
+      "direction": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "from_end",
+            "named": true
+          },
+          {
+            "type": "from_start",
+            "named": true
+          }
+        ]
+      },
+      "index": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tuple_index",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "\"",
     "named": false
   },
@@ -500,6 +538,10 @@
   },
   {
     "type": "#true",
+    "named": false
+  },
+  {
+    "type": "$",
     "named": false
   },
   {
@@ -551,6 +593,14 @@
     "named": true
   },
   {
+    "type": "from_end",
+    "named": true
+  },
+  {
+    "type": "from_start",
+    "named": true
+  },
+  {
     "type": "function_name",
     "named": true
   },
@@ -567,15 +617,15 @@
     "named": true
   },
   {
-    "type": "positional_element_access",
-    "named": true
-  },
-  {
     "type": "positional_record_field",
     "named": true
   },
   {
     "type": "time_literal",
+    "named": true
+  },
+  {
+    "type": "tuple_index",
     "named": true
   },
   {

@@ -127,8 +127,105 @@
       ]
     },
     "expression": {
-      "type": "SYMBOL",
-      "name": "function_call"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "function_call"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tuple_projection"
+        }
+      ]
+    },
+    "tuple_projection": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "direction",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "STRING",
+                  "value": "$"
+                },
+                "named": true,
+                "value": "from_start"
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "index",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "PREC",
+                    "value": -1,
+                    "content": {
+                      "type": "PATTERN",
+                      "value": "(?:0|[1-9][0-9]*)"
+                    }
+                  }
+                },
+                "named": true,
+                "value": "tuple_index"
+              }
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "$"
+            },
+            {
+              "type": "FIELD",
+              "name": "direction",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "STRING",
+                    "value": "^"
+                  }
+                },
+                "named": true,
+                "value": "from_end"
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "index",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "PREC",
+                    "value": -1,
+                    "content": {
+                      "type": "PATTERN",
+                      "value": "(?:0|[1-9][0-9]*)"
+                    }
+                  }
+                },
+                "named": true,
+                "value": "tuple_index"
+              }
+            }
+          ]
+        }
+      ]
     },
     "function_call": {
       "type": "SEQ",
@@ -214,6 +311,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "tuple_projection"
+        },
+        {
+          "type": "SYMBOL",
           "name": "parameterized_expression"
         }
       ]
@@ -229,8 +330,17 @@
           "type": "FIELD",
           "name": "source",
           "content": {
-            "type": "SYMBOL",
-            "name": "value"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "value"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "tuple_projection"
+              }
+            ]
           }
         },
         {
@@ -261,10 +371,6 @@
         {
           "type": "SYMBOL",
           "name": "record_access"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "positional_element_access"
         },
         {
           "type": "SYMBOL",
@@ -636,10 +742,6 @@
     "positional_record_field": {
       "type": "PATTERN",
       "value": "\\.(?:0|[1-9][0-9]*)"
-    },
-    "positional_element_access": {
-      "type": "PATTERN",
-      "value": "\\$\\^?(?:0|[1-9][0-9]*)"
     },
     "boolean_literal": {
       "type": "CHOICE",

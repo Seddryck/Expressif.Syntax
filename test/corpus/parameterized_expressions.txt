@@ -28,7 +28,9 @@ foo({@foo | lower}, {.name | upper}, {$1 | add(5)}, {10 | multiply(2)}, {#true |
                   name: (function_name)))))
           (positional_argument
             (parameterized_expression
-              source: (positional_element_access)
+              source: (tuple_projection
+                direction: (from_start)
+                index: (tuple_index))
               expression: (open_expression
                 (function_call
                   name: (function_name)

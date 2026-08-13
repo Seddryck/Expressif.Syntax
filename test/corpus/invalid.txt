@@ -455,3 +455,62 @@ Original input marker requires a selector
 
 (ERROR
   (UNEXPECTED '\n'))
+
+==================
+Tuple projection requires an index
+==================
+
+$
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        (from_start)
+        (MISSING tuple_index)))))
+
+==================
+End-relative tuple projection requires an index
+==================
+
+$^
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        (from_end)
+        (MISSING tuple_index)))))
+
+==================
+Tuple projection rejects whitespace before index
+==================
+
+$ 0
+
+---
+
+(source_file
+  (ERROR)
+  (root_expression
+    (closed_expression
+      (numeric_literal))))
+
+==================
+End-relative tuple projection rejects internal whitespace
+==================
+
+$^ 0
+
+---
+
+(source_file
+  (ERROR
+    (from_end))
+  (root_expression
+    (closed_expression
+      (numeric_literal))))

@@ -7,7 +7,7 @@ public static class ExpressifSyntax
 {
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
-        "array_literal", "boolean_literal", "numeric_literal", "positional_element_access",
+        "array_literal", "boolean_literal", "numeric_literal",
         "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
@@ -42,8 +42,12 @@ public static class ExpressifSyntax
 
     private static OpenExpressionSyntax BindOpen(TsNode node)
     {
-        var calls = node.NamedChildren.Select(BindFunctionCall).ToArray();
-        return new(Span(node), node.Text, calls);
+        var children = node.NamedChildren.ToArray();
+        var source = children.FirstOrDefault()?.Type == "tuple_projection"
+            ? BindTupleProjection(children[0])
+            : null;
+        var calls = children.Skip(source is null ? 0 : 1).Select(BindFunctionCall).ToArray();
+        return new(Span(node), node.Text, source, calls);
     }
 
     private static ClosedExpressionSyntax BindClosed(TsNode node)
@@ -78,9 +82,7 @@ public static class ExpressifSyntax
             throw Unknown(node);
 
         var valueNode = SingleNamedChild(node, "positional_argument");
-        ExpressionSyntax value = valueNode.Type == "parameterized_expression"
-            ? BindParameterizedExpression(valueNode)
-            : BindValue(valueNode);
+        var value = BindExpression(valueNode);
         return new(Span(node), node.Text, value);
     }
 
@@ -88,14 +90,34 @@ public static class ExpressifSyntax
     {
         var source = node.GetChildForField("source") ?? throw Unknown(node);
         var expression = node.GetChildForField("expression") ?? throw Unknown(node);
-        return new(Span(node), node.Text, BindValue(source), BindOpen(expression));
+        return new(Span(node), node.Text, BindExpression(source), BindOpen(expression));
+    }
+
+    private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
+    {
+        "parameterized_expression" => BindParameterizedExpression(node),
+        "tuple_projection" => BindTupleProjection(node),
+        _ => BindValue(node),
+    };
+
+    private static TupleProjectionSyntax BindTupleProjection(TsNode node)
+    {
+        var direction = node.GetChildForField("direction") ?? throw Unknown(node);
+        var index = node.GetChildForField("index") ?? throw Unknown(node);
+        var parsedDirection = direction.Type switch
+        {
+            "from_start" => TupleProjectionDirection.FromStart,
+            "from_end" => TupleProjectionDirection.FromEnd,
+            _ => throw Unknown(direction),
+        };
+        return new(Span(node), node.Text, parsedDirection,
+            int.Parse(index.Text, System.Globalization.CultureInfo.InvariantCulture));
     }
 
     private static ValueSyntax BindValue(TsNode node) => node.Type switch
     {
         "variable" => new VariableSyntax(Span(node), node.Text),
         "record_access" => BindRecordAccess(node),
-        "positional_element_access" => new PositionalElementAccessSyntax(Span(node), node.Text),
         "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
         "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
         "double_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.DoubleQuote),
