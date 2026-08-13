@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement Syntax"
+  short_description: "Implement grammar and typed CST features"
+  default_prompt: "Use $implement-syntax to implement syntax from the specified issue."
