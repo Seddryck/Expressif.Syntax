@@ -14,7 +14,7 @@ public enum SyntaxKind
     DateLiteral,
     DateTimeLiteral,
     TimeLiteral,
-    PositionalElementAccess,
+    TupleProjection,
     Variable,
     RecordAccess,
     ArrayLiteral,
@@ -55,10 +55,15 @@ public abstract class RootExpressionSyntax : ExpressionSyntax
 
 public sealed class OpenExpressionSyntax : RootExpressionSyntax
 {
-    internal OpenExpressionSyntax(SourceSpan span, string text, IEnumerable<FunctionCallSyntax> pipeline)
-        : base(SyntaxKind.OpenExpression, span, text, pipeline)
-        => Pipeline = Array.AsReadOnly(pipeline.ToArray());
+    internal OpenExpressionSyntax(SourceSpan span, string text, ExpressionSyntax? source, IEnumerable<FunctionCallSyntax> pipeline)
+        : base(SyntaxKind.OpenExpression, span, text,
+            (source is null ? [] : new[] { source }).Concat<SyntaxNode>(pipeline))
+    {
+        Source = source;
+        Pipeline = Array.AsReadOnly(pipeline.ToArray());
+    }
 
+    public ExpressionSyntax? Source { get; }
     public IReadOnlyList<FunctionCallSyntax> Pipeline { get; }
 }
 
@@ -98,14 +103,14 @@ public sealed class FunctionCallSyntax : ExpressionSyntax
 
 public sealed class ParameterizedExpressionSyntax : ExpressionSyntax
 {
-    internal ParameterizedExpressionSyntax(SourceSpan span, string text, ValueSyntax source, OpenExpressionSyntax expression)
+    internal ParameterizedExpressionSyntax(SourceSpan span, string text, ExpressionSyntax source, OpenExpressionSyntax expression)
         : base(SyntaxKind.ParameterizedExpression, span, text, [source, expression])
     {
         Source = source;
         Expression = expression;
     }
 
-    public ValueSyntax Source { get; }
+    public ExpressionSyntax Source { get; }
     public OpenExpressionSyntax Expression { get; }
 }
 
@@ -201,17 +206,19 @@ public sealed class RecordFieldSyntax : SyntaxNode
     public ValueSyntax Value { get; }
 }
 
-public sealed class PositionalElementAccessSyntax : ValueSyntax
+public enum TupleProjectionDirection { FromStart, FromEnd }
+
+public sealed class TupleProjectionSyntax : ExpressionSyntax
 {
-    internal PositionalElementAccessSyntax(SourceSpan span, string text)
-        : base(SyntaxKind.PositionalElementAccess, span, text)
+    internal TupleProjectionSyntax(SourceSpan span, string text, TupleProjectionDirection direction, int index)
+        : base(SyntaxKind.TupleProjection, span, text, null)
     {
-        FromEnd = text[1] == '^';
-        Index = int.Parse(text.AsSpan(FromEnd ? 2 : 1), System.Globalization.CultureInfo.InvariantCulture);
+        Direction = direction;
+        Index = index;
     }
 
     public int Index { get; }
-    public bool FromEnd { get; }
+    public TupleProjectionDirection Direction { get; }
 }
 
 public sealed class NumericLiteralSyntax : ValueSyntax

@@ -85,30 +85,32 @@ public class SyntaxBindingTests
     [TestCase("$1", 1, false)]
     [TestCase("$^0", 0, true)]
     [TestCase("$^1", 1, true)]
-    public void PositionalElementAccessExposesDirectionAndIndex(string source, int index, bool fromEnd)
+    public void TupleProjectionExposesDirectionAndIndex(string source, int index, bool fromEnd)
     {
-        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
-        var access = (PositionalElementAccessSyntax)root.Value;
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var projection = (TupleProjectionSyntax)root.Source!;
 
         Assert.Multiple(() =>
         {
-            Assert.That(access.Index, Is.EqualTo(index));
-            Assert.That(access.FromEnd, Is.EqualTo(fromEnd));
-            Assert.That(access.Text, Is.EqualTo(source));
+            Assert.That(projection.Index, Is.EqualTo(index));
+            Assert.That(projection.Direction, Is.EqualTo(fromEnd
+                ? TupleProjectionDirection.FromEnd
+                : TupleProjectionDirection.FromStart));
+            Assert.That(projection.Text, Is.EqualTo(source));
         });
     }
 
     [Test]
-    public void PositionalElementAccessCanBeAnArgumentAndPipelineSource()
+    public void TupleProjectionCanBeAnArgumentAndPipelineSource()
     {
         var argumentRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("select($1)");
-        var pipelineRoot = (ClosedExpressionSyntax)ExpressifSyntax.Parse("$^0 | upper");
+        var pipelineRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("$^0 | upper");
 
         Assert.Multiple(() =>
         {
             Assert.That(argumentRoot.Pipeline.Single().Arguments.Single().Value,
-                Is.TypeOf<PositionalElementAccessSyntax>());
-            Assert.That(pipelineRoot.Value, Is.TypeOf<PositionalElementAccessSyntax>());
+                Is.TypeOf<TupleProjectionSyntax>());
+            Assert.That(pipelineRoot.Source, Is.TypeOf<TupleProjectionSyntax>());
             Assert.That(pipelineRoot.Pipeline.Single().Name, Is.EqualTo("upper"));
         });
     }

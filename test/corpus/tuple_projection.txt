@@ -1,0 +1,148 @@
+==================
+Tuple projection from start
+==================
+
+$0
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index)))))
+
+==================
+Tuple projection with multi-digit index
+==================
+
+$10
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index)))))
+
+==================
+Tuple projection from end
+==================
+
+$^0
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_end)
+        index: (tuple_index)))))
+
+==================
+Tuple projection from end with multi-digit index
+==================
+
+$^12
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_end)
+        index: (tuple_index)))))
+
+==================
+Tuple projection in pipeline
+==================
+
+$1 | add(5)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Tuple projections as function arguments
+==================
+
+foo($0, $^0)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (tuple_projection
+              direction: (from_start)
+              index: (tuple_index)))
+          (positional_argument
+            (tuple_projection
+              direction: (from_end)
+              index: (tuple_index))))))))
+
+==================
+Tuple projection is distinct from field access
+==================
+
+$0 | foo(.name, ^.name)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              root: (original_input)
+              field: (original_record_field_selector
+                (named_record_field)))))))))
+
+==================
+Surrounding whitespace is insignificant
+==================
+
+foo(  $0  )
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (tuple_projection
+              direction: (from_start)
+              index: (tuple_index))))))))

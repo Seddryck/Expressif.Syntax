@@ -212,7 +212,7 @@ Surrounding whitespace is insignificant
       (variable))))
 
 ==================
-Forward positional element access
+Forward tuple projection
 ==================
 
 example($0, $1)
@@ -226,12 +226,16 @@ example($0, $1)
         name: (function_name)
         (argument_list
           (positional_argument
-            (positional_element_access))
+            (tuple_projection
+              direction: (from_start)
+              index: (tuple_index)))
           (positional_argument
-            (positional_element_access)))))))
+            (tuple_projection
+              direction: (from_start)
+              index: (tuple_index))))))))
 
 ==================
-Reverse positional element access
+Reverse tuple projection
 ==================
 
 example($^0, $^1)
@@ -245,12 +249,16 @@ example($^0, $^1)
         name: (function_name)
         (argument_list
           (positional_argument
-            (positional_element_access))
+            (tuple_projection
+              direction: (from_end)
+              index: (tuple_index)))
           (positional_argument
-            (positional_element_access)))))))
+            (tuple_projection
+              direction: (from_end)
+              index: (tuple_index))))))))
 
 ==================
-Positional element access pipeline
+Tuple projection pipeline
 ==================
 
 $^0 | upper
@@ -259,7 +267,9 @@ $^0 | upper
 
 (source_file
   (root_expression
-    (closed_expression
-      (positional_element_access)
+    (open_expression
+      (tuple_projection
+        direction: (from_end)
+        index: (tuple_index))
       (function_call
         name: (function_name)))))
