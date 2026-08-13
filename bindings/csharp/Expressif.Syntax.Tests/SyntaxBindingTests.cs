@@ -166,6 +166,23 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void ParameterizedExpressionsPreserveSourceAndPipeline()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("skip-last-chars({@length | subtract(1) | max(0)})");
+        var argument = root.Pipeline.Single().Arguments.Single();
+        var parameterized = (ParameterizedExpressionSyntax)argument.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(parameterized.Source, Is.TypeOf<VariableSyntax>());
+            Assert.That(((VariableSyntax)parameterized.Source).Name, Is.EqualTo("length"));
+            Assert.That(parameterized.Expression.Pipeline.Select(call => call.Name), Is.EqualTo(new[] { "subtract", "max" }));
+            Assert.That(parameterized.Children, Is.EqualTo(new SyntaxNode[] { parameterized.Source, parameterized.Expression }));
+            Assert.That(parameterized.Text, Is.EqualTo("{@length | subtract(1) | max(0)}"));
+        });
+    }
+
+    [Test]
     public void BinderSupportsEveryGrammarValueNodeType()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "node-types.json")));

@@ -1,0 +1,257 @@
+==================
+Parameterized expression source values
+==================
+
+foo({@foo | lower}, {.name | upper}, {$1 | add(5)}, {10 | multiply(2)}, {#true | some-function}, {"hello" | upper}, {#"2025-12-17" | some-function})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              source: (variable)
+              expression: (open_expression
+                (function_call
+                  name: (function_name)))))
+          (positional_argument
+            (parameterized_expression
+              source: (record_access
+                field: (record_field_selector
+                  (named_record_field)))
+              expression: (open_expression
+                (function_call
+                  name: (function_name)))))
+          (positional_argument
+            (parameterized_expression
+              source: (positional_element_access)
+              expression: (open_expression
+                (function_call
+                  name: (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))
+          (positional_argument
+            (parameterized_expression
+              source: (numeric_literal)
+              expression: (open_expression
+                (function_call
+                  name: (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))
+          (positional_argument
+            (parameterized_expression
+              source: (boolean_literal)
+              expression: (open_expression
+                (function_call
+                  name: (function_name)))))
+          (positional_argument
+            (parameterized_expression
+              source: (double_quoted_literal
+                (double_quoted_content))
+              expression: (open_expression
+                (function_call
+                  name: (function_name)))))
+          (positional_argument
+            (parameterized_expression
+              source: (date_literal)
+              expression: (open_expression
+                (function_call
+                  name: (function_name))))))))))
+
+==================
+Compound sources and multi-function pipeline
+==================
+
+foo({{1,2,3} | sum | add(1)}, {T(1,2) | some-function}, {{name := "Alice"} | some-function})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              source: (array_literal
+                (numeric_literal)
+                (numeric_literal)
+                (numeric_literal))
+              expression: (open_expression
+                (function_call
+                  name: (function_name))
+                (function_call
+                  name: (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))
+          (positional_argument
+            (parameterized_expression
+              source: (tuple_literal
+                (numeric_literal)
+                (numeric_literal))
+              expression: (open_expression
+                (function_call
+                  name: (function_name)))))
+          (positional_argument
+            (parameterized_expression
+              source: (record_literal
+                (record_field
+                  name: (record_field_name
+                    (unquoted_record_field_name))
+                  value: (double_quoted_literal
+                    (double_quoted_content))))
+              expression: (open_expression
+                (function_call
+                  name: (function_name))))))))))
+
+==================
+Parameterized expression whitespace
+==================
+
+foo( { @foo|lower | trim } )
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              source: (variable)
+              expression: (open_expression
+                (function_call
+                  name: (function_name))
+                (function_call
+                  name: (function_name))))))))))
+
+==================
+Arrays and records remain distinct
+==================
+
+foo({1,2,3}, {name := "Alice"}, {@foo | lower})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (array_literal
+              (numeric_literal)
+              (numeric_literal)
+              (numeric_literal)))
+          (positional_argument
+            (record_literal
+              (record_field
+                name: (record_field_name
+                  (unquoted_record_field_name))
+                value: (double_quoted_literal
+                  (double_quoted_content)))))
+          (positional_argument
+            (parameterized_expression
+              source: (variable)
+              expression: (open_expression
+                (function_call
+                  name: (function_name))))))))))
+
+==================
+Missing parameterized source
+==================
+
+foo({| lower})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              (MISSING numeric_literal)
+              (open_expression
+                (function_call
+                  (function_name))))))))))
+
+==================
+Missing parameterized separator
+==================
+
+foo({@foo lower})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (array_literal
+              (variable)
+              (ERROR
+                (function_name)))))))))
+
+==================
+Missing parameterized expression
+==================
+
+foo({@foo | })
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (array_literal
+              (variable)
+              (ERROR))))))))
+
+==================
+Malformed nested parameterized expression
+==================
+
+foo({@foo | bar({ | baz})})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              source: (variable)
+              expression: (open_expression
+                (function_call
+                  name: (function_name)
+                  (argument_list
+                    (positional_argument
+                      (parameterized_expression
+                        source: (MISSING numeric_literal)
+                        expression: (open_expression
+                          (function_call
+                            name: (function_name)))))))))))))))
