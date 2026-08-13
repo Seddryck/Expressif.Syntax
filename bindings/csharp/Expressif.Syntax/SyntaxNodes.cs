@@ -21,6 +21,7 @@ public enum SyntaxKind
     TupleLiteral,
     RecordLiteral,
     RecordField,
+    ParameterizedExpression,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -46,7 +47,7 @@ public abstract class SyntaxNode
     public IReadOnlyList<SyntaxNode> Children => children;
 }
 
-public abstract class RootExpressionSyntax : SyntaxNode
+public abstract class RootExpressionSyntax : ExpressionSyntax
 {
     protected RootExpressionSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode> children)
         : base(kind, span, text, children) { }
@@ -76,7 +77,7 @@ public sealed class ClosedExpressionSyntax : RootExpressionSyntax
 
 public abstract class ExpressionSyntax : SyntaxNode
 {
-    protected ExpressionSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode> children)
+    protected ExpressionSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children)
         : base(kind, span, text, children) { }
 }
 
@@ -95,6 +96,19 @@ public sealed class FunctionCallSyntax : ExpressionSyntax
     public IReadOnlyList<PositionalArgumentSyntax> Arguments { get; }
 }
 
+public sealed class ParameterizedExpressionSyntax : ExpressionSyntax
+{
+    internal ParameterizedExpressionSyntax(SourceSpan span, string text, ValueSyntax source, OpenExpressionSyntax expression)
+        : base(SyntaxKind.ParameterizedExpression, span, text, [source, expression])
+    {
+        Source = source;
+        Expression = expression;
+    }
+
+    public ValueSyntax Source { get; }
+    public OpenExpressionSyntax Expression { get; }
+}
+
 public abstract class ArgumentSyntax : SyntaxNode
 {
     protected ArgumentSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode> children)
@@ -103,13 +117,13 @@ public abstract class ArgumentSyntax : SyntaxNode
 
 public sealed class PositionalArgumentSyntax : ArgumentSyntax
 {
-    internal PositionalArgumentSyntax(SourceSpan span, string text, ValueSyntax value)
+    internal PositionalArgumentSyntax(SourceSpan span, string text, ExpressionSyntax value)
         : base(SyntaxKind.PositionalArgument, span, text, [value]) => Value = value;
 
-    public ValueSyntax Value { get; }
+    public ExpressionSyntax Value { get; }
 }
 
-public abstract class ValueSyntax : SyntaxNode
+public abstract class ValueSyntax : ExpressionSyntax
 {
     protected ValueSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
         : base(kind, span, text, children) { }

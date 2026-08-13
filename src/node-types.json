@@ -255,6 +255,32 @@
     }
   },
   {
+    "type": "parameterized_expression",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "open_expression",
+            "named": true
+          }
+        ]
+      },
+      "source": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "positional_argument",
     "named": true,
     "fields": {},
@@ -262,6 +288,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "parameterized_expression",
+          "named": true
+        },
         {
           "type": "value",
           "named": true

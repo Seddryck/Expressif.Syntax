@@ -166,6 +166,40 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void ParameterizedExpressionsPreserveSourceAndPipeline()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("skip-last-chars({@length | subtract(1) | max(0)})");
+        var argument = root.Pipeline.Single().Arguments.Single();
+        var parameterized = (ParameterizedExpressionSyntax)argument.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(parameterized.Source, Is.TypeOf<VariableSyntax>());
+            Assert.That(((VariableSyntax)parameterized.Source).Name, Is.EqualTo("length"));
+            Assert.That(parameterized.Expression.Pipeline.Select(call => call.Name), Is.EqualTo(new[] { "subtract", "max" }));
+            Assert.That(parameterized.Children, Is.EqualTo(new SyntaxNode[] { parameterized.Source, parameterized.Expression }));
+            Assert.That(parameterized.Text, Is.EqualTo("{@length | subtract(1) | max(0)}"));
+        });
+    }
+
+    [TestCase("{{1, 2} | sum}", typeof(ArrayLiteralSyntax), "{1, 2}")]
+    [TestCase("{T(1, 2) | some-function}", typeof(TupleLiteralSyntax), "T(1, 2)")]
+    [TestCase("{{name := \"Alice\"} | some-function}", typeof(RecordLiteralSyntax), "{name := \"Alice\"}")]
+    public void ParameterizedExpressionsPreserveCompoundSources(string argument, Type sourceType, string sourceText)
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse($"foo({argument})");
+        var parameterized = (ParameterizedExpressionSyntax)root.Pipeline.Single().Arguments.Single().Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(parameterized.Source, Is.TypeOf(sourceType));
+            Assert.That(parameterized.Source.Text, Is.EqualTo(sourceText));
+            Assert.That(parameterized.Text, Is.EqualTo(argument));
+            Assert.That(parameterized.Expression.Pipeline, Has.Count.EqualTo(1));
+        });
+    }
+
+    [Test]
     public void BinderSupportsEveryGrammarValueNodeType()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "node-types.json")));
@@ -193,12 +227,17 @@ public class SyntaxBindingTests
         });
     }
 
-    [TestCase("add(")]
-    [TestCase("10 |")]
-    [TestCase("\"unterminated")]
-    public void MalformedInputExposesTreeSitterErrors(string source)
+    [TestCase("add(", false)]
+    [TestCase("10 |", false)]
+    [TestCase("\"unterminated", false)]
+    [TestCase("foo({| lower})", true)]
+    public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
     {
         var exception = Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
-        Assert.That(exception!.Errors, Is.Not.Empty);
+        Assert.Multiple(() =>
+        {
+            Assert.That(exception!.Errors, Is.Not.Empty);
+            Assert.That(exception.Errors.Any(error => error.IsMissing), Is.EqualTo(hasMissingError));
+        });
     }
 }

@@ -78,7 +78,17 @@ public static class ExpressifSyntax
             throw Unknown(node);
 
         var valueNode = SingleNamedChild(node, "positional_argument");
-        return new(Span(node), node.Text, BindValue(valueNode));
+        ExpressionSyntax value = valueNode.Type == "parameterized_expression"
+            ? BindParameterizedExpression(valueNode)
+            : BindValue(valueNode);
+        return new(Span(node), node.Text, value);
+    }
+
+    private static ParameterizedExpressionSyntax BindParameterizedExpression(TsNode node)
+    {
+        var source = node.GetChildForField("source") ?? throw Unknown(node);
+        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindValue(source), BindOpen(expression));
     }
 
     private static ValueSyntax BindValue(TsNode node) => node.Type switch

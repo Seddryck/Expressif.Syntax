@@ -48,7 +48,15 @@ export default grammar({
       repeat(seq(",", $.positional_argument)),
     ),
 
-    positional_argument: ($) => $.value,
+    positional_argument: ($) => choice($.value, $.parameterized_expression),
+
+    parameterized_expression: ($) => seq(
+      "{",
+      field("source", $.value),
+      "|",
+      field("expression", $.open_expression),
+      "}",
+    ),
 
     value: ($) => choice(
       $.variable,
