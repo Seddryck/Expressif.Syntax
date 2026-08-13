@@ -169,7 +169,49 @@ foo({1,2,3}, {name := "Alice"}, {@foo | lower})
                   name: (function_name))))))))))
 
 ==================
-Missing parameterized source
+Top-level braces do not form a parameterized expression
+==================
+
+{@foo | lower}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (variable)
+        (MISSING "}"))
+      (function_call
+        (function_name))))
+  (ERROR))
+
+==================
+Nested braces recover as a positional parameterized expression, not an array element
+==================
+
+foo({{@foo | lower}})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              (array_literal
+                (variable)
+                (MISSING "}"))
+              (open_expression
+                (function_call
+                  (function_name))))))
+        (ERROR)))))
+
+==================
+Missing source recovery snapshot rejects the parameterized expression
 ==================
 
 foo({| lower})
@@ -184,13 +226,14 @@ foo({| lower})
         (argument_list
           (positional_argument
             (parameterized_expression
+              ; Tree-sitter currently synthesizes a numeric source here.
               (MISSING numeric_literal)
               (open_expression
                 (function_call
                   (function_name))))))))))
 
 ==================
-Missing parameterized separator
+Missing separator recovery snapshot rejects an array literal
 ==================
 
 foo({@foo lower})
@@ -210,7 +253,7 @@ foo({@foo lower})
                 (function_name)))))))))
 
 ==================
-Missing parameterized expression
+Missing right-hand expression recovery snapshot rejects an array literal
 ==================
 
 foo({@foo | })
@@ -229,7 +272,7 @@ foo({@foo | })
               (ERROR))))))))
 
 ==================
-Malformed nested parameterized expression
+Malformed nested source recovery snapshot rejects the expression
 ==================
 
 foo({@foo | bar({ | baz})})
@@ -251,6 +294,7 @@ foo({@foo | bar({ | baz})})
                   (argument_list
                     (positional_argument
                       (parameterized_expression
+                        ; Tree-sitter currently synthesizes a numeric source here.
                         source: (MISSING numeric_literal)
                         expression: (open_expression
                           (function_call
