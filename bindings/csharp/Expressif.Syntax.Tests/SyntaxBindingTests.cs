@@ -21,9 +21,10 @@ public class SyntaxBindingTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(root.Pipeline.Select(x => x.Name), Is.EqualTo(new[] { "LOWER", "text-to-lower", "unknown" }));
-            Assert.That(root.Pipeline.Select(x => x.HasParentheses), Is.EqualTo(new[] { false, true, true }));
-            Assert.That(root.Pipeline[2].Arguments.Select(x => x.Value.Text), Is.EqualTo(new[] { "5", "10" }));
+            var calls = root.Pipeline.Cast<FunctionCallSyntax>().ToArray();
+            Assert.That(calls.Select(x => x.Name), Is.EqualTo(new[] { "LOWER", "text-to-lower", "unknown" }));
+            Assert.That(calls.Select(x => x.HasParentheses), Is.EqualTo(new[] { false, true, true }));
+            Assert.That(calls[2].Arguments.Select(x => x.Value.Text), Is.EqualTo(new[] { "5", "10" }));
         });
     }
 
@@ -51,7 +52,7 @@ public class SyntaxBindingTests
     public void BareBooleanWordsRemainFunctionCalls(string source)
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
-        Assert.That(root.Pipeline.Single().Name, Is.EqualTo(source));
+        Assert.That(((FunctionCallSyntax)root.Pipeline.Single()).Name, Is.EqualTo(source));
     }
 
     [TestCase("\"foo\"", QuotingStyle.DoubleQuote)]
@@ -108,10 +109,25 @@ public class SyntaxBindingTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(argumentRoot.Pipeline.Single().Arguments.Single().Value,
+            Assert.That(((FunctionCallSyntax)argumentRoot.Pipeline.Single()).Arguments.Single().Value,
                 Is.TypeOf<TupleProjectionSyntax>());
             Assert.That(pipelineRoot.Source, Is.TypeOf<TupleProjectionSyntax>());
-            Assert.That(pipelineRoot.Pipeline.Single().Name, Is.EqualTo("upper"));
+            Assert.That(pipelineRoot.Pipeline.Single(),
+                Is.TypeOf<FunctionCallSyntax>().With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("upper"));
+        });
+    }
+
+    [Test]
+    public void TupleProjectionCanFollowAFunctionCallInAnOpenPipeline()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("lower | $0");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Source, Is.Null);
+            Assert.That(root.Pipeline, Has.Count.EqualTo(2));
+            Assert.That(root.Pipeline[0], Is.TypeOf<FunctionCallSyntax>());
+            Assert.That(root.Pipeline[1], Is.TypeOf<TupleProjectionSyntax>());
         });
     }
 
@@ -171,14 +187,15 @@ public class SyntaxBindingTests
     public void ParameterizedExpressionsPreserveSourceAndPipeline()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("skip-last-chars({@length | subtract(1) | max(0)})");
-        var argument = root.Pipeline.Single().Arguments.Single();
+        var argument = ((FunctionCallSyntax)root.Pipeline.Single()).Arguments.Single();
         var parameterized = (ParameterizedExpressionSyntax)argument.Value;
 
         Assert.Multiple(() =>
         {
             Assert.That(parameterized.Source, Is.TypeOf<VariableSyntax>());
             Assert.That(((VariableSyntax)parameterized.Source).Name, Is.EqualTo("length"));
-            Assert.That(parameterized.Expression.Pipeline.Select(call => call.Name), Is.EqualTo(new[] { "subtract", "max" }));
+            Assert.That(parameterized.Expression.Pipeline.Cast<FunctionCallSyntax>().Select(call => call.Name),
+                Is.EqualTo(new[] { "subtract", "max" }));
             Assert.That(parameterized.Children, Is.EqualTo(new SyntaxNode[] { parameterized.Source, parameterized.Expression }));
             Assert.That(parameterized.Text, Is.EqualTo("{@length | subtract(1) | max(0)}"));
         });
@@ -190,7 +207,7 @@ public class SyntaxBindingTests
     public void ParameterizedExpressionsPreserveCompoundSources(string argument, Type sourceType, string sourceText)
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse($"foo({argument})");
-        var parameterized = (ParameterizedExpressionSyntax)root.Pipeline.Single().Arguments.Single().Value;
+        var parameterized = (ParameterizedExpressionSyntax)((FunctionCallSyntax)root.Pipeline.Single()).Arguments.Single().Value;
 
         Assert.Multiple(() =>
         {
@@ -224,8 +241,9 @@ public class SyntaxBindingTests
             Assert.That(root.Text, Is.EqualTo(source));
             Assert.That(root.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
             Assert.That(root.Value.Span, Is.EqualTo(new SourceSpan(0, 2)));
-            Assert.That(root.Pipeline.Single().Span, Is.EqualTo(new SourceSpan(5, 6)));
-            Assert.That(root.Pipeline.Single().Arguments.Single().Span, Is.EqualTo(new SourceSpan(9, 1)));
+            var call = (FunctionCallSyntax)root.Pipeline.Single();
+            Assert.That(call.Span, Is.EqualTo(new SourceSpan(5, 6)));
+            Assert.That(call.Arguments.Single().Span, Is.EqualTo(new SourceSpan(9, 1)));
         });
     }
 

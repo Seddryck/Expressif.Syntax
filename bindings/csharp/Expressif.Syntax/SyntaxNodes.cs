@@ -55,7 +55,7 @@ public abstract class RootExpressionSyntax : ExpressionSyntax
 
 public sealed class OpenExpressionSyntax : RootExpressionSyntax
 {
-    internal OpenExpressionSyntax(SourceSpan span, string text, ExpressionSyntax? source, IEnumerable<FunctionCallSyntax> pipeline)
+    internal OpenExpressionSyntax(SourceSpan span, string text, ExpressionSyntax? source, IEnumerable<ExpressionSyntax> pipeline)
         : base(SyntaxKind.OpenExpression, span, text,
             (source is null ? [] : new[] { source }).Concat<SyntaxNode>(pipeline))
     {
@@ -64,12 +64,12 @@ public sealed class OpenExpressionSyntax : RootExpressionSyntax
     }
 
     public ExpressionSyntax? Source { get; }
-    public IReadOnlyList<FunctionCallSyntax> Pipeline { get; }
+    public IReadOnlyList<ExpressionSyntax> Pipeline { get; }
 }
 
 public sealed class ClosedExpressionSyntax : RootExpressionSyntax
 {
-    internal ClosedExpressionSyntax(SourceSpan span, string text, ValueSyntax value, IEnumerable<FunctionCallSyntax> pipeline)
+    internal ClosedExpressionSyntax(SourceSpan span, string text, ValueSyntax value, IEnumerable<ExpressionSyntax> pipeline)
         : base(SyntaxKind.ClosedExpression, span, text, new SyntaxNode[] { value }.Concat(pipeline))
     {
         Value = value;
@@ -77,7 +77,7 @@ public sealed class ClosedExpressionSyntax : RootExpressionSyntax
     }
 
     public ValueSyntax Value { get; }
-    public IReadOnlyList<FunctionCallSyntax> Pipeline { get; }
+    public IReadOnlyList<ExpressionSyntax> Pipeline { get; }
 }
 
 public abstract class ExpressionSyntax : SyntaxNode
