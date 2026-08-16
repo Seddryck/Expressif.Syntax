@@ -95,6 +95,7 @@ public static class ExpressifSyntax
 
     private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
     {
+        "closed_expression" => BindClosed(node),
         "function_call" => BindFunctionCall(node),
         "parameterized_expression" => BindParameterizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),

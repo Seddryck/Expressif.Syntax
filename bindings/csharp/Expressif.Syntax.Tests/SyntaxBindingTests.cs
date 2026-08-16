@@ -219,6 +219,29 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void ClosedExpressionCanBeAPositionalArgument()
+    {
+        const string source = "append(.firstName | Titlecase)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = call.Arguments.Single();
+        var nested = (ClosedExpressionSyntax)argument.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(nested.Value, Is.TypeOf<RecordAccessSyntax>());
+            Assert.That(((RecordAccessSyntax)nested.Value).Fields.Single().Name, Is.EqualTo("firstName"));
+            Assert.That(nested.Pipeline.Cast<FunctionCallSyntax>().Select(item => item.Name),
+                Is.EqualTo(new[] { "Titlecase" }));
+            Assert.That(nested.Children, Is.EqualTo(new SyntaxNode[] { nested.Value, nested.Pipeline.Single() }));
+            Assert.That(nested.Text, Is.EqualTo(".firstName | Titlecase"));
+            Assert.That(nested.Span, Is.EqualTo(new SourceSpan(7, 22)));
+            Assert.That(argument.Text, Is.EqualTo(nested.Text));
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { nested }));
+        });
+    }
+
+    [Test]
     public void BinderSupportsEveryGrammarValueNodeType()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "node-types.json")));
@@ -250,7 +273,8 @@ public class SyntaxBindingTests
     [TestCase("add(", false)]
     [TestCase("10 |", false)]
     [TestCase("\"unterminated", false)]
-    [TestCase("foo({| lower})", true)]
+    [TestCase("foo({| lower})", false)]
+    [TestCase("append(.firstName |)", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
     {
         var exception = Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));

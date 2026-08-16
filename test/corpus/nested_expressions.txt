@@ -1,0 +1,45 @@
+==================
+Closed expression as a positional argument
+==================
+
+append(.firstName | Titlecase)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (closed_expression
+              (record_access
+                field: (record_field_selector
+                  (named_record_field)))
+              (function_call
+                name: (function_name)))))))))
+
+==================
+Nested expression with multiple pipeline operations
+==================
+
+append(.firstName | Titlecase | trim)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (closed_expression
+              (record_access
+                field: (record_field_selector
+                  (named_record_field)))
+              (function_call
+                name: (function_name))
+              (function_call
+                name: (function_name)))))))))
