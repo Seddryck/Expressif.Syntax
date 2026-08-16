@@ -33,13 +33,13 @@ export default grammar({
 
     open_expression: ($) => prec.right(seq(
       $.expression,
-      repeat(seq("|", $.expression)),
+      repeat(seq("|", $._pipeline_expression)),
     )),
 
     closed_expression: ($) => seq(
       $.value,
       repeat(choice(
-        seq("|", $.expression),
+        seq("|", $._pipeline_expression),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       )),
     ),
@@ -52,16 +52,53 @@ export default grammar({
     // In a closed-expression pipeline, the next ordinary `|` belongs to the
     // outer pipeline. Alias the single mapped operation as an open expression
     // so both forms expose the same CST shape.
-    _pipeline_map_shorthand: ($) => seq(
-      "|>",
-      field("expression", alias($.expression, $.open_expression)),
+    _pipeline_map_shorthand: ($) => choice(
+      prec(1, seq(
+        "|>",
+        field("expression", alias($.parenthesized_open_expression, $.open_expression)),
+      )),
+      seq(
+        "|>",
+        field("expression", alias($.expression, $.open_expression)),
+      ),
     ),
 
     expression: ($) => choice(
       $.function_call,
       $.map_shorthand,
       $.tuple_projection,
+      $.parenthesized_expression,
     ),
+
+    _pipeline_expression: ($) => choice(
+      $.function_call,
+      $.tuple_projection,
+      alias($._parenthesized_pipeline_expression, $.parenthesized_expression),
+    ),
+
+    _parenthesized_pipeline_expression: ($) => seq(
+      "(",
+      field("expression", choice(
+        alias($._pipeline_open_expression, $.open_expression),
+        $.closed_expression,
+      )),
+      ")",
+    ),
+
+    _pipeline_open_expression: ($) => prec.right(seq(
+      $._pipeline_expression,
+      repeat(seq("|", $._pipeline_expression)),
+    )),
+
+    parenthesized_expression: ($) => seq(
+      "(",
+      field("expression", $.root_expression),
+      ")",
+    ),
+
+    // Preserve the open-expression shape expected by map shorthand while
+    // retaining the parenthesized expression as its single operation.
+    parenthesized_open_expression: ($) => prec(1, $.parenthesized_expression),
 
     tuple_projection: ($) => choice(
       seq(
@@ -101,13 +138,14 @@ export default grammar({
       $.tuple_projection,
       alias($._nested_open_expression, $.open_expression),
       $.parameterized_expression,
+      $.parenthesized_expression,
     ),
 
     // Parentheses delimit the nested expression, so a function call or
     // function pipeline can be passed directly as a higher-order argument.
     _nested_open_expression: ($) => seq(
       $.function_call,
-      repeat(seq("|", $.expression)),
+      repeat(seq("|", $._pipeline_expression)),
     ),
 
     // A positional argument is already delimited by its function call's
@@ -117,8 +155,8 @@ export default grammar({
     _nested_closed_expression: ($) => seq(
       $.value,
       "|",
-      $.expression,
-      repeat(seq("|", $.expression)),
+      $._pipeline_expression,
+      repeat(seq("|", $._pipeline_expression)),
     ),
 
     parameterized_expression: ($) => seq(

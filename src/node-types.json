@@ -12,6 +12,10 @@
         "named": true
       },
       {
+        "type": "parenthesized_expression",
+        "named": true
+      },
+      {
         "type": "tuple_projection",
         "named": true
       }
@@ -162,7 +166,19 @@
       "required": true,
       "types": [
         {
-          "type": "expression",
+          "type": "function_call",
+          "named": true
+        },
+        {
+          "type": "map_shorthand",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "tuple_projection",
           "named": true
         },
         {
@@ -401,6 +417,10 @@
             "named": true
           },
           {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
             "type": "tuple_projection",
             "named": true
           },
@@ -477,6 +497,30 @@
     }
   },
   {
+    "type": "parenthesized_expression",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "root_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "positional_argument",
     "named": true,
     "fields": {},
@@ -494,6 +538,10 @@
         },
         {
           "type": "parameterized_expression",
+          "named": true
+        },
+        {
+          "type": "parenthesized_expression",
           "named": true
         },
         {

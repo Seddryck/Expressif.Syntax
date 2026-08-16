@@ -1,0 +1,146 @@
+==================
+Parenthesized operation pipeline
+==================
+
+(absolute | add(5))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (parenthesized_expression
+        expression: (root_expression
+          (open_expression
+            (function_call
+              name: (function_name))
+            (function_call
+              name: (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal))))))))))
+
+==================
+Parenthesized map pipeline preserves outer pipeline
+==================
+
+{-1,2,-3} |> (absolute | add(5)) | reverse
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal))
+      (map_shorthand
+        expression: (open_expression
+          (parenthesized_expression
+            expression: (root_expression
+              (open_expression
+                (function_call
+                  name: (function_name))
+                (function_call
+                  name: (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))))
+      (function_call
+        name: (function_name)))))
+
+==================
+Parenthesized closed pipeline
+==================
+
+(5 | add(2)) | multiply(3)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (parenthesized_expression
+        expression: (root_expression
+          (closed_expression
+            (numeric_literal)
+            (function_call
+              name: (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal)))))))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Incomplete parenthesized pipeline
+==================
+
+(absolute |
+
+---
+
+(ERROR
+  (function_call
+    name: (function_name)))
+
+==================
+Standalone parenthesized map shorthand
+==================
+
+(|> absolute)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (parenthesized_expression
+        expression: (root_expression
+          (open_expression
+            (map_shorthand
+              expression: (open_expression
+                (function_call
+                  name: (function_name))))))))))
+
+==================
+Map shorthand with parenthesized operation
+==================
+
+|> (absolute)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (parenthesized_expression
+            expression: (root_expression
+              (open_expression
+                (function_call
+                  name: (function_name))))))))))
+
+==================
+Parenthesized map shorthand cannot follow an ordinary pipe
+==================
+
+absolute | (|> absolute)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))
+      (parenthesized_expression
+        (ERROR)
+        expression: (open_expression
+          (function_call
+            name: (function_name)))))))

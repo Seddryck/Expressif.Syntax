@@ -442,6 +442,99 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void ParenthesizedPipelineIsLossless()
+    {
+        const string source = "(absolute | add(5))";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var grouped = (ParenthesizedExpressionSyntax)root.Pipeline.Single();
+        var expression = (OpenExpressionSyntax)grouped.Expression;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(grouped.Kind, Is.EqualTo(SyntaxKind.ParenthesizedExpression));
+            Assert.That(grouped.Text, Is.EqualTo(source));
+            Assert.That(grouped.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(grouped.Children, Is.EqualTo(new SyntaxNode[] { expression }));
+            Assert.That(expression.Text, Is.EqualTo("absolute | add(5)"));
+            Assert.That(expression.Pipeline.Cast<FunctionCallSyntax>().Select(call => call.Name),
+                Is.EqualTo(new[] { "absolute", "add" }));
+        });
+    }
+
+    [Test]
+    public void ParenthesizedPipelineComposesAsAnArgumentAndPipelineOperation()
+    {
+        var argumentRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("map((absolute | add(5)))");
+        var pipelineRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("trim | (lower | upper)");
+
+        Assert.Multiple(() =>
+        {
+            var map = (FunctionCallSyntax)argumentRoot.Pipeline.Single();
+            Assert.That(map.Arguments.Single().Value, Is.TypeOf<ParenthesizedExpressionSyntax>());
+            Assert.That(pipelineRoot.Pipeline[1], Is.TypeOf<ParenthesizedExpressionSyntax>());
+        });
+    }
+
+    [Test]
+    public void ParenthesizedClosedPipelineCanBeGrouped()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("(5 | add(2)) | multiply(3)");
+        var grouped = (ParenthesizedExpressionSyntax)root.Pipeline[0];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(grouped.Expression, Is.TypeOf<ClosedExpressionSyntax>());
+            Assert.That(root.Pipeline[1],
+                Is.TypeOf<FunctionCallSyntax>().With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("multiply"));
+        });
+    }
+
+    [Test]
+    public void ParenthesizedMapPipelinePreservesOuterPipelineBoundary()
+    {
+        const string source = "{-1,2,-3} |> (absolute | add(5)) | reverse";
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var map = (MapShorthandSyntax)root.Pipeline[0];
+        var grouped = (ParenthesizedExpressionSyntax)map.Expression.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(map.Kind, Is.EqualTo(SyntaxKind.MapShorthand));
+            Assert.That(map.Text, Is.EqualTo("|> (absolute | add(5))"));
+            Assert.That(map.Children, Is.EqualTo(new SyntaxNode[] { map.Expression }));
+            Assert.That(((OpenExpressionSyntax)grouped.Expression).Pipeline.Cast<FunctionCallSyntax>().Select(call => call.Name),
+                Is.EqualTo(new[] { "absolute", "add" }));
+            Assert.That(root.Pipeline[1],
+                Is.TypeOf<FunctionCallSyntax>().With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("reverse"));
+        });
+    }
+
+    [Test]
+    public void ParenthesizedMapShorthandIsValidAtTheRoot()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("(|> absolute)");
+        var grouped = (ParenthesizedExpressionSyntax)root.Pipeline.Single();
+        var inner = (OpenExpressionSyntax)grouped.Expression;
+
+        Assert.That(inner.Pipeline.Single(), Is.TypeOf<MapShorthandSyntax>());
+    }
+
+    [Test]
+    public void MapShorthandAcceptsAParenthesizedOperation()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("|> (absolute)");
+        var shorthand = (MapShorthandSyntax)root.Pipeline.Single();
+
+        Assert.That(shorthand.Expression.Pipeline.Single(), Is.TypeOf<ParenthesizedExpressionSyntax>());
+    }
+
+    [Test]
+    public void ParenthesizedMapShorthandCannotFollowAnOrdinaryPipe()
+        => Assert.That(
+            () => ExpressifSyntax.Parse("absolute | (|> absolute)"),
+            Throws.TypeOf<ExpressifSyntaxException>());
+
+    [Test]
     public void BinderSupportsEveryGrammarValueNodeType()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "node-types.json")));

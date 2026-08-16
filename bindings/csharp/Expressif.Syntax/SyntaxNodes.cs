@@ -25,6 +25,7 @@ public enum SyntaxKind
     RecordSpread,
     IncomingValue,
     ParameterizedExpression,
+    ParenthesizedExpression,
     IntervalLiteral,
     MapShorthand,
 }
@@ -117,6 +118,15 @@ public sealed class ParameterizedExpressionSyntax : ExpressionSyntax
 
     public ExpressionSyntax Source { get; }
     public OpenExpressionSyntax Expression { get; }
+}
+
+public sealed class ParenthesizedExpressionSyntax : ExpressionSyntax
+{
+    internal ParenthesizedExpressionSyntax(SourceSpan span, string text, RootExpressionSyntax expression)
+        : base(SyntaxKind.ParenthesizedExpression, span, text, [expression])
+        => Expression = expression;
+
+    public RootExpressionSyntax Expression { get; }
 }
 
 public sealed class MapShorthandSyntax : ExpressionSyntax
