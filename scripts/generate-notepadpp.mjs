@@ -35,11 +35,16 @@ function terminalStrings(rule) {
   )];
 }
 
-function literalPrefix(pattern) {
+function literalPrefixBeforeCharacterClass(pattern) {
   let prefix = "";
+  let index = 0;
 
-  for (let index = 0; index < pattern.length;) {
+  while (index < pattern.length) {
     const character = pattern[index];
+
+    if (character === "[") {
+      return prefix && !prefix.includes('"') && !prefix.includes("\\") ? prefix : "";
+    }
 
     if (character === "\\" && index + 1 < pattern.length) {
       const escaped = pattern[index + 1];
@@ -48,24 +53,24 @@ function literalPrefix(pattern) {
         index += 2;
         continue;
       }
-      break;
+      return "";
     }
 
-    if (/[^A-Za-z0-9[({?*+|.^$]/.test(character)) {
+    if (/[^A-Za-z0-9(){}?*+|.^$]/.test(character)) {
       prefix += character;
       index += 1;
       continue;
     }
 
-    break;
+    return "";
   }
 
-  return prefix;
+  return "";
 }
 
 function lexicalPrefixes(grammar) {
   const patterns = collectNodes(grammar.rules, (node) => node.type === "PATTERN" && typeof node.value === "string")
-    .map((node) => literalPrefix(node.value))
+    .map((node) => literalPrefixBeforeCharacterClass(node.value))
     .filter(Boolean);
 
   return [...new Set(patterns)].sort((left, right) => right.length - left.length || left.localeCompare(right));
