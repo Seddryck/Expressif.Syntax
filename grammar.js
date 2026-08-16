@@ -83,11 +83,19 @@ export default grammar({
     function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
 
     argument_list: ($) => seq(
-      $.positional_argument,
-      repeat(seq(",", $.positional_argument)),
+      choice($.positional_argument, $.named_argument),
+      repeat(seq(",", choice($.positional_argument, $.named_argument))),
     ),
 
-    positional_argument: ($) => choice(
+    positional_argument: ($) => $._argument_value,
+
+    named_argument: ($) => seq(
+      field("name", alias($.function_name, $.argument_name)),
+      ":=",
+      field("value", $._argument_value),
+    ),
+
+    _argument_value: ($) => choice(
       alias($._nested_closed_expression, $.closed_expression),
       $.value,
       $.tuple_projection,

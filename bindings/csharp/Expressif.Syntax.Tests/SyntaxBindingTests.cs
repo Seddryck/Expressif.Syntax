@@ -350,6 +350,40 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void NamedArgumentPreservesNameValueAndAuthoredSource()
+    {
+        const string source = "record(customer-name := .name)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = (NamedArgumentSyntax)call.Arguments.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(argument.Kind, Is.EqualTo(SyntaxKind.NamedArgument));
+            Assert.That(argument.Name, Is.EqualTo("customer-name"));
+            Assert.That(argument.Value, Is.TypeOf<RecordAccessSyntax>());
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { argument.Value }));
+            Assert.That(argument.Text, Is.EqualTo("customer-name := .name"));
+            Assert.That(argument.Span, Is.EqualTo(new SourceSpan(7, 22)));
+            Assert.That(call.Text, Is.EqualTo(source));
+        });
+    }
+
+    [Test]
+    public void FunctionCallPreservesMixedArgumentOrder()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("example(10, rounding-mode := \"up\", 20)");
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+
+        Assert.That(call.Arguments.Select(argument => argument.Kind), Is.EqualTo(new[]
+        {
+            SyntaxKind.PositionalArgument,
+            SyntaxKind.NamedArgument,
+            SyntaxKind.PositionalArgument,
+        }));
+    }
+
+    [Test]
     public void OpenExpressionCanBeAPositionalArgument()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("broadcast(sum)");
@@ -468,6 +502,7 @@ public class SyntaxBindingTests
     [TestCase("\"unterminated", false)]
     [TestCase("foo({| lower})", false)]
     [TestCase("append(.firstName |)", false)]
+    [TestCase("foo(name :=)", false)]
     [TestCase("....", false)]
     [TestCase("{ ..., }", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)

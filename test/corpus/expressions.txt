@@ -63,6 +63,49 @@ example(10, 20)
             (numeric_literal)))))))
 
 ==================
+Function call with named argument
+==================
+
+record(customer-name := .name)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (named_argument
+            name: (argument_name)
+            value: (record_access
+              field: (record_field_selector
+                (named_record_field)))))))))
+
+==================
+Function call with mixed arguments
+==================
+
+example(10, rounding-mode := "up", 20)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))
+          (named_argument
+            name: (argument_name)
+            value: (double_quoted_literal
+              (double_quoted_content)))
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
 Open expression pipeline
 ==================
 

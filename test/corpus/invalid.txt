@@ -275,7 +275,7 @@ second`
           (function_name))))))
 
 ==================
-Named arguments are not implemented
+Colon is not a named argument separator
 ==================
 
 foo(a: 1)

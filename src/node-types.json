@@ -104,6 +104,10 @@
       "required": true,
       "types": [
         {
+          "type": "named_argument",
+          "named": true
+        },
+        {
           "type": "positional_argument",
           "named": true
         }
@@ -360,6 +364,48 @@
         "types": [
           {
             "type": "open_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "named_argument",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "argument_name",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "parameterized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "value",
             "named": true
           }
         ]
@@ -754,6 +800,10 @@
   {
     "type": "`",
     "named": false
+  },
+  {
+    "type": "argument_name",
+    "named": true
   },
   {
     "type": "backtick_quoted_content",

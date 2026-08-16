@@ -76,14 +76,25 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, name.Text, suffix.StartsWith("("), arguments);
     }
 
-    private static PositionalArgumentSyntax BindArgument(TsNode node)
+    private static ArgumentSyntax BindArgument(TsNode node) => node.Type switch
     {
-        if (node.Type != "positional_argument")
-            throw Unknown(node);
+        "positional_argument" => BindPositionalArgument(node),
+        "named_argument" => BindNamedArgument(node),
+        _ => throw Unknown(node),
+    };
 
+    private static PositionalArgumentSyntax BindPositionalArgument(TsNode node)
+    {
         var valueNode = SingleNamedChild(node, "positional_argument");
         var value = BindExpression(valueNode);
         return new(Span(node), node.Text, value);
+    }
+
+    private static NamedArgumentSyntax BindNamedArgument(TsNode node)
+    {
+        var name = node.GetChildForField("name") ?? throw Unknown(node);
+        var value = node.GetChildForField("value") ?? throw Unknown(node);
+        return new(Span(node), node.Text, name.Text, BindExpression(value));
     }
 
     private static ParameterizedExpressionSyntax BindParameterizedExpression(TsNode node)
