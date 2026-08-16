@@ -378,6 +378,74 @@ public class SyntaxBindingTests
         });
     }
 
+    [TestCase("I[1, 10]", true, true)]
+    [TestCase("I[1, 10)", true, false)]
+    [TestCase("I[1, 10[", true, false)]
+    [TestCase("I(1, 10]", false, true)]
+    [TestCase("I]1, 10]", false, true)]
+    [TestCase("I(1, 10)", false, false)]
+    [TestCase("I]1, 10[", false, false)]
+    public void IntervalDelimitersExposeNormalizedInclusivity(string source, bool lowerInclusive, bool upperInclusive)
+    {
+        var interval = (IntervalLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(interval.LowerBound.Value, Is.TypeOf<NumericLiteralSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("1"));
+            Assert.That(interval.UpperBound.Value, Is.TypeOf<NumericLiteralSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("10"));
+            Assert.That(interval.IsLowerInclusive, Is.EqualTo(lowerInclusive));
+            Assert.That(interval.IsUpperInclusive, Is.EqualTo(upperInclusive));
+            Assert.That(interval.Children, Is.EqualTo(new[] { interval.LowerBound.Value, interval.UpperBound.Value }));
+        });
+    }
+
+    [Test]
+    public void InfiniteAndTemporalBoundsRetainTheirSemantics()
+    {
+        var infinite = (IntervalLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("I[-INF, +INF]")).Value;
+        var temporal = (IntervalLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(
+            "I[#\"2022-12-10\", #\"2022-12-31\"[")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(infinite.LowerBound.Kind, Is.EqualTo(IntervalBoundKind.NegativeInfinity));
+            Assert.That(infinite.UpperBound.Kind, Is.EqualTo(IntervalBoundKind.PositiveInfinity));
+            Assert.That(infinite.Children, Is.Empty);
+            Assert.That(temporal.LowerBound.Value, Is.TypeOf<DateLiteralSyntax>());
+            Assert.That(temporal.UpperBound.Value, Is.TypeOf<DateLiteralSyntax>());
+            Assert.That(temporal.IsUpperInclusive, Is.False);
+        });
+    }
+
+    [TestCase("I(0+)", IntervalBoundKind.Finite, IntervalBoundKind.PositiveInfinity, true, true)]
+    [TestCase("I(+)", IntervalBoundKind.Finite, IntervalBoundKind.PositiveInfinity, false, true)]
+    [TestCase("I(0-)", IntervalBoundKind.NegativeInfinity, IntervalBoundKind.Finite, true, true)]
+    [TestCase("I(-)", IntervalBoundKind.NegativeInfinity, IntervalBoundKind.Finite, true, false)]
+    public void IntervalShorthandsMapToFirstClassSemantics(
+        string source,
+        IntervalBoundKind lowerKind,
+        IntervalBoundKind upperKind,
+        bool lowerInclusive,
+        bool upperInclusive)
+    {
+        var interval = (IntervalLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(interval.LowerBound.Kind, Is.EqualTo(lowerKind));
+            Assert.That(interval.UpperBound.Kind, Is.EqualTo(upperKind));
+            Assert.That(interval.LowerBound.Value?.Text ?? interval.UpperBound.Value?.Text, Is.EqualTo("0"));
+            Assert.That(interval.IsLowerInclusive, Is.EqualTo(lowerInclusive));
+            Assert.That(interval.IsUpperInclusive, Is.EqualTo(upperInclusive));
+        });
+    }
+
+    [Test]
+    public void BareDateLookingIntervalBoundsAreRejected()
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("I[2022-12-10, 2022-12-31]"));
+
     [TestCase("add(", false)]
     [TestCase("10 |", false)]
     [TestCase("\"unterminated", false)]

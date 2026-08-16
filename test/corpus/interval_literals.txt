@@ -1,0 +1,146 @@
+==================
+Bounded interval spellings
+==================
+
+{I[1, 10], I[1, 10), I(1, 10], I(1, 10), I[1, 10[, I]1, 10], I]1, 10[}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (numeric_literal)))))))
+
+==================
+Infinite interval bounds
+==================
+
+{I[-INF, +INF], I[0, +INF], I]0, +INF], I[-INF, 0], I[-INF, 0[}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (interval_literal
+          (interval_bound
+            (infinite_bound))
+          (interval_bound
+            (infinite_bound)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (infinite_bound)))
+        (interval_literal
+          (interval_bound
+            (numeric_literal))
+          (interval_bound
+            (infinite_bound)))
+        (interval_literal
+          (interval_bound
+            (infinite_bound))
+          (interval_bound
+            (numeric_literal)))
+        (interval_literal
+          (interval_bound
+            (infinite_bound))
+          (interval_bound
+            (numeric_literal)))))))
+
+==================
+Sign-oriented interval shorthands
+==================
+
+{I(0+), I(+), I(0-), I(-)}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))))))
+
+==================
+Canonical temporal interval bounds
+==================
+
+I[#"2022-12-10", #"2022-12-31"[
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (interval_literal
+        (interval_bound
+          (date_literal))
+        (interval_bound
+          (date_literal))))))
+
+==================
+Bare date-looking bounds are rejected
+==================
+
+I[2022-12-10, 2022-12-31]
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (interval_literal
+        (interval_bound
+          (numeric_literal))
+        (ERROR
+          (numeric_literal)
+          (numeric_literal))
+        (interval_bound
+          (numeric_literal))
+        (ERROR
+          (numeric_literal)
+          (numeric_literal))))))

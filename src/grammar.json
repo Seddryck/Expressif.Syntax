@@ -445,6 +445,154 @@
         {
           "type": "SYMBOL",
           "name": "record_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "interval_literal"
+        }
+      ]
+    },
+    "interval_literal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "I"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "FIELD",
+                  "name": "lower_delimiter",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "["
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "("
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "]"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "FIELD",
+                  "name": "lower_bound",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "interval_bound"
+                  }
+                },
+                {
+                  "type": "STRING",
+                  "value": ","
+                },
+                {
+                  "type": "FIELD",
+                  "name": "upper_bound",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "interval_bound"
+                  }
+                },
+                {
+                  "type": "FIELD",
+                  "name": "upper_delimiter",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "]"
+                      },
+                      {
+                        "type": "STRING",
+                        "value": ")"
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "["
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "interval_shorthand"
+            }
+          ]
+        }
+      ]
+    },
+    "interval_bound": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "numeric_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "boolean_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "quoted_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "temporal_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "infinite_bound"
+        }
+      ]
+    },
+    "infinite_bound": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "+INF"
+        },
+        {
+          "type": "STRING",
+          "value": "-INF"
+        }
+      ]
+    },
+    "interval_shorthand": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "(0+)"
+        },
+        {
+          "type": "STRING",
+          "value": "(+)"
+        },
+        {
+          "type": "STRING",
+          "value": "(0-)"
+        },
+        {
+          "type": "STRING",
+          "value": "(-)"
         }
       ]
     },
