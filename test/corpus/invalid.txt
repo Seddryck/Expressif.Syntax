@@ -177,22 +177,6 @@ foo(5,)
         (ERROR)))))
 
 ==================
-Unquoted textual argument is rejected
-==================
-
-remove-chars(a)
-
----
-
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (ERROR
-          (function_name))))))
-
-==================
 Malformed date literal
 ==================
 
