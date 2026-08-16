@@ -8,6 +8,7 @@ public enum SyntaxKind
     ClosedExpression,
     FunctionCall,
     PositionalArgument,
+    NamedArgument,
     NumericLiteral,
     BooleanLiteral,
     QuotedLiteral,
@@ -91,7 +92,7 @@ public abstract class ExpressionSyntax : SyntaxNode
 
 public sealed class FunctionCallSyntax : ExpressionSyntax
 {
-    internal FunctionCallSyntax(SourceSpan span, string text, string name, bool hasParentheses, IEnumerable<PositionalArgumentSyntax> arguments)
+    internal FunctionCallSyntax(SourceSpan span, string text, string name, bool hasParentheses, IEnumerable<ArgumentSyntax> arguments)
         : base(SyntaxKind.FunctionCall, span, text, arguments)
     {
         Name = name;
@@ -101,7 +102,7 @@ public sealed class FunctionCallSyntax : ExpressionSyntax
 
     public string Name { get; }
     public bool HasParentheses { get; }
-    public IReadOnlyList<PositionalArgumentSyntax> Arguments { get; }
+    public IReadOnlyList<ArgumentSyntax> Arguments { get; }
 }
 
 public sealed class ParameterizedExpressionSyntax : ExpressionSyntax
@@ -121,6 +122,8 @@ public abstract class ArgumentSyntax : SyntaxNode
 {
     protected ArgumentSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode> children)
         : base(kind, span, text, children) { }
+
+    public abstract ExpressionSyntax Value { get; }
 }
 
 public sealed class PositionalArgumentSyntax : ArgumentSyntax
@@ -128,7 +131,20 @@ public sealed class PositionalArgumentSyntax : ArgumentSyntax
     internal PositionalArgumentSyntax(SourceSpan span, string text, ExpressionSyntax value)
         : base(SyntaxKind.PositionalArgument, span, text, [value]) => Value = value;
 
-    public ExpressionSyntax Value { get; }
+    public override ExpressionSyntax Value { get; }
+}
+
+public sealed class NamedArgumentSyntax : ArgumentSyntax
+{
+    internal NamedArgumentSyntax(SourceSpan span, string text, string name, ExpressionSyntax value)
+        : base(SyntaxKind.NamedArgument, span, text, [value])
+    {
+        Name = name;
+        Value = value;
+    }
+
+    public string Name { get; }
+    public override ExpressionSyntax Value { get; }
 }
 
 public abstract class ValueSyntax : ExpressionSyntax
