@@ -478,6 +478,31 @@ map(lower | trim)
                 (function_name)))))))))
 
 ==================
+Map accepts a function pipeline with arguments
+==================
+
+map(replace("a") | trim)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (double_quoted_literal
+                      (double_quoted_content)))))
+              (function_call
+                (function_name)))))))))
+
+==================
 Filter accepts a function-call argument
 ==================
 

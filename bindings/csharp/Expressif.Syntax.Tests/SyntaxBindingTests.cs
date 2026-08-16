@@ -350,6 +350,23 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void OpenExpressionCanBeAPositionalArgument()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("broadcast(sum)");
+        var broadcast = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = broadcast.Arguments.Single();
+        var nested = (OpenExpressionSyntax)argument.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(broadcast.Name, Is.EqualTo("broadcast"));
+            Assert.That(nested.Pipeline.Single(),
+                Is.TypeOf<FunctionCallSyntax>().With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("sum"));
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { nested }));
+        });
+    }
+
+    [Test]
     public void BinderSupportsEveryGrammarValueNodeType()
     {
         using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "node-types.json")));
