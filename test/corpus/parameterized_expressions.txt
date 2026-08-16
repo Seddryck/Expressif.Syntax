@@ -227,12 +227,12 @@ foo({| lower})
         (function_name)
         (argument_list
           (positional_argument
-            (parameterized_expression
-              ; Tree-sitter currently synthesizes a numeric source here.
-              (MISSING numeric_literal)
-              (open_expression
-                (function_call
-                  (function_name))))))))))
+            (closed_expression
+              (array_literal
+                (MISSING "}"))
+              (function_call
+                (function_name)))))
+        (ERROR)))))
 
 ==================
 Missing separator recovery snapshot rejects an array literal
@@ -292,12 +292,8 @@ foo({@foo | bar({ | baz})})
               source: (variable)
               expression: (open_expression
                 (function_call
-                  name: (function_name)
-                  (argument_list
-                    (positional_argument
-                      (parameterized_expression
-                        ; Tree-sitter currently synthesizes a numeric source here.
-                        source: (MISSING numeric_literal)
-                        expression: (open_expression
-                          (function_call
-                            name: (function_name)))))))))))))))
+                  name: (function_name))
+                (ERROR)
+                (function_call
+                  name: (function_name)))))))))
+  (ERROR))

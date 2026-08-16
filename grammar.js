@@ -84,9 +84,21 @@ export default grammar({
     ),
 
     positional_argument: ($) => choice(
+      alias($._nested_closed_expression, $.closed_expression),
       $.value,
       $.tuple_projection,
       $.parameterized_expression,
+    ),
+
+    // A positional argument is already delimited by its function call's
+    // parentheses, so a closed pipeline does not need additional braces.
+    // Require at least one pipeline operation here to keep literal arguments
+    // unambiguous with the ordinary value alternative above.
+    _nested_closed_expression: ($) => seq(
+      $.value,
+      "|",
+      $.expression,
+      repeat(seq("|", $.expression)),
     ),
 
     parameterized_expression: ($) => seq(

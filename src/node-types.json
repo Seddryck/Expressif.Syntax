@@ -313,6 +313,10 @@
       "required": true,
       "types": [
         {
+          "type": "closed_expression",
+          "named": true
+        },
+        {
           "type": "parameterized_expression",
           "named": true
         },

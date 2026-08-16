@@ -306,6 +306,15 @@
       "type": "CHOICE",
       "members": [
         {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_nested_closed_expression"
+          },
+          "named": true,
+          "value": "closed_expression"
+        },
+        {
           "type": "SYMBOL",
           "name": "value"
         },
@@ -316,6 +325,39 @@
         {
           "type": "SYMBOL",
           "name": "parameterized_expression"
+        }
+      ]
+    },
+    "_nested_closed_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "value"
+        },
+        {
+          "type": "STRING",
+          "value": "|"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "expression"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "|"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "expression"
+              }
+            ]
+          }
         }
       ]
     },
