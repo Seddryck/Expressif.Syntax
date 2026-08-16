@@ -322,9 +322,11 @@ foo(...a)
     (open_expression
       (function_call
         name: (function_name)
+        (argument_list
+          (positional_argument
+            (incoming_value)))
         (ERROR
-          (UNEXPECTED '.')
-          (named_record_field))))))
+          (function_name))))))
 
 ==================
 Operators are not implemented

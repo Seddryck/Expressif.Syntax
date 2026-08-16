@@ -184,6 +184,93 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void IncomingValueIsALosslessValueNode()
+    {
+        var incoming = (IncomingValueSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("...")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(incoming.Kind, Is.EqualTo(SyntaxKind.IncomingValue));
+            Assert.That(incoming.Text, Is.EqualTo("..."));
+            Assert.That(incoming.Span, Is.EqualTo(new SourceSpan(0, 3)));
+            Assert.That(incoming.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void IncomingValueCanBeEmbeddedInARecordField()
+    {
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{ original := ... }")).Value;
+        var field = record.Fields.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(field.Value, Is.TypeOf<IncomingValueSyntax>());
+            Assert.That(field.Value.Kind, Is.EqualTo(SyntaxKind.IncomingValue));
+            Assert.That(field.Value.Text, Is.EqualTo("..."));
+            Assert.That(field.Value.Span, Is.EqualTo(new SourceSpan(14, 3)));
+            Assert.That(field.Children, Is.EqualTo(new SyntaxNode[] { field.Value }));
+        });
+    }
+
+    [Test]
+    public void IncomingValueComposesAsAnArgumentAndPipelineSource()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("foo(...)")).Pipeline.Single();
+        var pipeline = (ClosedExpressionSyntax)ExpressifSyntax.Parse("... | upper");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(call.Arguments.Single().Value, Is.TypeOf<IncomingValueSyntax>());
+            Assert.That(pipeline.Value, Is.TypeOf<IncomingValueSyntax>());
+            Assert.That(pipeline.Pipeline.Single(),
+                Is.TypeOf<FunctionCallSyntax>().With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("upper"));
+        });
+    }
+
+    [Test]
+    public void RecordSpreadRemainsDistinctAndPreservesEntryOrder()
+    {
+        const string source = "{ before := .name, ..., after := #true }";
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var spread = (RecordSpreadSyntax)record.Entries[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(record.Entries, Has.Count.EqualTo(3));
+            Assert.That(record.Entries.Select(entry => entry.Kind), Is.EqualTo(new[]
+            {
+                SyntaxKind.RecordField,
+                SyntaxKind.RecordSpread,
+                SyntaxKind.RecordField,
+            }));
+            Assert.That(record.Fields.Select(field => field.Name), Is.EqualTo(new[] { "before", "after" }));
+            Assert.That(record.Children, Is.EqualTo(record.Entries));
+            Assert.That(spread.Text, Is.EqualTo("..."));
+            Assert.That(spread.Span, Is.EqualTo(new SourceSpan(19, 3)));
+            Assert.That(spread.Children, Is.Empty);
+            Assert.That(record.Text, Is.EqualTo(source));
+        });
+    }
+
+    [Test]
+    public void SingletonIncomingValueInBracesIsARecordSpread()
+    {
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{...}")).Value;
+
+        Assert.That(record.Entries.Single(), Is.TypeOf<RecordSpreadSyntax>());
+    }
+
+    [Test]
+    public void IncomingValueCanAppearInAnArrayWhenAnotherValueDisambiguatesIt()
+    {
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{..., #true}")).Value;
+
+        Assert.That(array.Values.Select(value => value.Kind),
+            Is.EqualTo(new[] { SyntaxKind.IncomingValue, SyntaxKind.BooleanLiteral }));
+    }
+
+    [Test]
     public void ParameterizedExpressionsPreserveSourceAndPipeline()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("skip-last-chars({@length | subtract(1) | max(0)})");
@@ -275,6 +362,8 @@ public class SyntaxBindingTests
     [TestCase("\"unterminated", false)]
     [TestCase("foo({| lower})", false)]
     [TestCase("append(.firstName |)", false)]
+    [TestCase("....", false)]
+    [TestCase("{ ..., }", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
     {
         var exception = Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
