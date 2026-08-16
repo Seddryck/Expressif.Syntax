@@ -91,7 +91,15 @@ export default grammar({
       alias($._nested_closed_expression, $.closed_expression),
       $.value,
       $.tuple_projection,
+      alias($._nested_open_expression, $.open_expression),
       $.parameterized_expression,
+    ),
+
+    // Parentheses delimit the nested expression, so a function call or
+    // function pipeline can be passed directly as a higher-order argument.
+    _nested_open_expression: ($) => seq(
+      $.function_call,
+      repeat(seq("|", $.expression)),
     ),
 
     // A positional argument is already delimited by its function call's

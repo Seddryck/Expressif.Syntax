@@ -398,3 +398,154 @@ Incoming value in an array
       (array_literal
         (incoming_value)
         (boolean_literal)))))
+
+==================
+Broadcast accepts a function argument
+==================
+
+broadcast(sum)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)))))))))
+
+==================
+Scan accepts a function argument
+==================
+
+scan(sum)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)))))))))
+
+==================
+Fold accepts a function argument
+==================
+
+fold(sum)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)))))))))
+
+==================
+Map accepts an open-expression argument
+==================
+
+map(lower | trim)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name))
+              (function_call
+                (function_name)))))))))
+
+==================
+Filter accepts a function-call argument
+==================
+
+filter(greater-than(2))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (numeric_literal)))))))))))
+
+==================
+Array pipeline filters with a function argument
+==================
+
+{1,2,3,4,5} | filter(even)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)))))))))
+
+==================
+Array pipeline maps with a function-call argument
+==================
+
+{1,2,3} | map(add(10))
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (numeric_literal)
+        (numeric_literal)
+        (numeric_literal))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (numeric_literal)))))))))))

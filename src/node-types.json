@@ -326,6 +326,10 @@
           "named": true
         },
         {
+          "type": "open_expression",
+          "named": true
+        },
+        {
           "type": "parameterized_expression",
           "named": true
         },

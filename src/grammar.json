@@ -323,8 +323,42 @@
           "name": "tuple_projection"
         },
         {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_nested_open_expression"
+          },
+          "named": true,
+          "value": "open_expression"
+        },
+        {
           "type": "SYMBOL",
           "name": "parameterized_expression"
+        }
+      ]
+    },
+    "_nested_open_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "function_call"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "|"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "expression"
+              }
+            ]
+          }
         }
       ]
     },
