@@ -21,6 +21,8 @@ public enum SyntaxKind
     TupleLiteral,
     RecordLiteral,
     RecordField,
+    RecordSpread,
+    IncomingValue,
     ParameterizedExpression,
 }
 
@@ -142,6 +144,11 @@ public sealed class VariableSyntax : ValueSyntax
     public string Name { get; }
 }
 
+public sealed class IncomingValueSyntax : ValueSyntax
+{
+    internal IncomingValueSyntax(SourceSpan span, string text) : base(SyntaxKind.IncomingValue, span, text) { }
+}
+
 public readonly record struct RecordFieldSelector(string? Name, int? Index)
 {
     public bool IsNamed => Name is not null;
@@ -184,14 +191,24 @@ public sealed class TupleLiteralSyntax : SequenceLiteralSyntax
 
 public sealed class RecordLiteralSyntax : ValueSyntax
 {
-    internal RecordLiteralSyntax(SourceSpan span, string text, IEnumerable<RecordFieldSyntax> fields)
-        : base(SyntaxKind.RecordLiteral, span, text, fields)
-        => Fields = Array.AsReadOnly(fields.ToArray());
+    internal RecordLiteralSyntax(SourceSpan span, string text, IEnumerable<RecordEntrySyntax> entries)
+        : base(SyntaxKind.RecordLiteral, span, text, entries)
+    {
+        Entries = Array.AsReadOnly(entries.ToArray());
+        Fields = Array.AsReadOnly(Entries.OfType<RecordFieldSyntax>().ToArray());
+    }
 
+    public IReadOnlyList<RecordEntrySyntax> Entries { get; }
     public IReadOnlyList<RecordFieldSyntax> Fields { get; }
 }
 
-public sealed class RecordFieldSyntax : SyntaxNode
+public abstract class RecordEntrySyntax : SyntaxNode
+{
+    protected RecordEntrySyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
+        : base(kind, span, text, children) { }
+}
+
+public sealed class RecordFieldSyntax : RecordEntrySyntax
 {
     internal RecordFieldSyntax(SourceSpan span, string text, string name, QuotingStyle? quotingStyle, ValueSyntax value)
         : base(SyntaxKind.RecordField, span, text, [value])
@@ -204,6 +221,11 @@ public sealed class RecordFieldSyntax : SyntaxNode
     public string Name { get; }
     public QuotingStyle? QuotingStyle { get; }
     public ValueSyntax Value { get; }
+}
+
+public sealed class RecordSpreadSyntax : RecordEntrySyntax
+{
+    internal RecordSpreadSyntax(SourceSpan span, string text) : base(SyntaxKind.RecordSpread, span, text) { }
 }
 
 public enum TupleProjectionDirection { FromStart, FromEnd }

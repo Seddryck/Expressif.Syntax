@@ -7,7 +7,7 @@ public static class ExpressifSyntax
 {
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
-        "array_literal", "boolean_literal", "numeric_literal",
+        "array_literal", "boolean_literal", "incoming_value", "numeric_literal",
         "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
@@ -119,6 +119,7 @@ public static class ExpressifSyntax
     private static ValueSyntax BindValue(TsNode node) => node.Type switch
     {
         "variable" => new VariableSyntax(Span(node), node.Text),
+        "incoming_value" => new IncomingValueSyntax(Span(node), node.Text),
         "record_access" => BindRecordAccess(node),
         "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
         "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
@@ -129,8 +130,15 @@ public static class ExpressifSyntax
         "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
         "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
         "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
-        "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordField).ToArray()),
+        "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
         "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
+        _ => throw Unknown(node),
+    };
+
+    private static RecordEntrySyntax BindRecordEntry(TsNode node) => node.Type switch
+    {
+        "record_field" => BindRecordField(node),
+        "record_spread" => new RecordSpreadSyntax(Span(node), node.Text),
         _ => throw Unknown(node),
     };
 

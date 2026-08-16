@@ -19,6 +19,10 @@ export default grammar({
     $.expression,
   ],
 
+  conflicts: ($) => [
+    [$.record_spread, $.incoming_value],
+  ],
+
   rules: {
     source_file: ($) => $.root_expression,
 
@@ -110,6 +114,7 @@ export default grammar({
     ),
 
     value: ($) => choice(
+      $.incoming_value,
       $.variable,
       $.record_access,
       $.numeric_literal,
@@ -139,12 +144,17 @@ export default grammar({
 
     record_literal: ($) => choice(
       seq("{", ":", "}"),
-      seq(
+      prec.dynamic(1, seq(
         "{",
-        $.record_field,
-        repeat(seq(",", $.record_field)),
+        $._record_entry,
+        repeat(seq(",", $._record_entry)),
         "}",
-      ),
+      )),
+    ),
+
+    _record_entry: ($) => choice(
+      $.record_field,
+      $.record_spread,
     ),
 
     record_field: ($) => seq(
@@ -152,6 +162,10 @@ export default grammar({
       ":=",
       field("value", $.value),
     ),
+
+    record_spread: (_) => "...",
+
+    incoming_value: (_) => "...",
 
     record_field_name: ($) => choice(
       $.unquoted_record_field_name,

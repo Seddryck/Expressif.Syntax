@@ -58,6 +58,10 @@
         "named": true
       },
       {
+        "type": "incoming_value",
+        "named": true
+      },
+      {
         "type": "numeric_literal",
         "named": true
       },
@@ -223,6 +227,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "incoming_value",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "map_shorthand",
@@ -444,9 +453,18 @@
         {
           "type": "record_field",
           "named": true
+        },
+        {
+          "type": "record_spread",
+          "named": true
         }
       ]
     }
+  },
+  {
+    "type": "record_spread",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "root_expression",
@@ -558,6 +576,10 @@
   },
   {
     "type": ",",
+    "named": false
+  },
+  {
+    "type": "...",
     "named": false
   },
   {
