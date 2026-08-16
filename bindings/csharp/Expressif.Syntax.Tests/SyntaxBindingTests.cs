@@ -254,6 +254,27 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void RecordLiteralMaterializesEntriesOnlyOnce()
+    {
+        static IEnumerable<RecordEntrySyntax> CreateEntries()
+        {
+            yield return new RecordFieldSyntax(
+                new SourceSpan(2, 10), "value := 1", "value", null,
+                new NumericLiteralSyntax(new SourceSpan(11, 1), "1"));
+            yield return new RecordSpreadSyntax(new SourceSpan(14, 3), "...");
+        }
+
+        var record = new RecordLiteralSyntax(new SourceSpan(0, 18), "{ value := 1, ... }", CreateEntries());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(record.Children[0], Is.SameAs(record.Entries[0]));
+            Assert.That(record.Children[1], Is.SameAs(record.Entries[1]));
+            Assert.That(record.Fields[0], Is.SameAs(record.Entries[0]));
+        });
+    }
+
+    [Test]
     public void SingletonIncomingValueInBracesIsARecordSpread()
     {
         var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{...}")).Value;
