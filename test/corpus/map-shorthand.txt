@@ -8,10 +8,11 @@ Simple map shorthand
 
 (source_file
   (root_expression
-    (map_shorthand
-      expression: (open_expression
-        (function_call
-          name: (function_name))))))
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)))))))
 
 ==================
 Mapped function with arguments
@@ -23,13 +24,14 @@ Mapped function with arguments
 
 (source_file
   (root_expression
-    (map_shorthand
-      expression: (open_expression
-        (function_call
-          name: (function_name)
-          (argument_list
-            (positional_argument
-              (numeric_literal))))))))
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)
+            (argument_list
+              (positional_argument
+                (numeric_literal)))))))))
 
 ==================
 Mapped multi-step open expression
@@ -41,12 +43,13 @@ Mapped multi-step open expression
 
 (source_file
   (root_expression
-    (map_shorthand
-      expression: (open_expression
-        (function_call
-          name: (function_name))
-        (function_call
-          name: (function_name))))))
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name))
+          (function_call
+            name: (function_name)))))))
 
 ==================
 Map shorthand after a closed-expression source
@@ -106,10 +109,11 @@ Map shorthand without whitespace
 
 (source_file
   (root_expression
-    (map_shorthand
-      expression: (open_expression
-        (function_call
-          name: (function_name))))))
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)))))))
 
 ==================
 Map shorthand with additional whitespace
@@ -121,10 +125,11 @@ Map shorthand with additional whitespace
 
 (source_file
   (root_expression
-    (map_shorthand
-      expression: (open_expression
-        (function_call
-          name: (function_name))))))
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)))))))
 
 ==================
 Ordinary pipeline is not map shorthand

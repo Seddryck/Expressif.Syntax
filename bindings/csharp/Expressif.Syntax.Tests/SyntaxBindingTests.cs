@@ -11,8 +11,49 @@ public class SyntaxBindingTests
     [TestCase("10 | add(5)", typeof(ClosedExpressionSyntax))]
     [TestCase("#true", typeof(ClosedExpressionSyntax))]
     [TestCase("\"foo\"", typeof(ClosedExpressionSyntax))]
+    [TestCase("|> add(1)", typeof(OpenExpressionSyntax))]
     public void ParsePreservesRootExpressionKind(string source, Type expected)
         => Assert.That(ExpressifSyntax.Parse(source), Is.TypeOf(expected));
+
+    [Test]
+    public void MapShorthandPreservesAuthoredSyntaxAndNestedOpenExpression()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("|> add(1)");
+        var shorthand = (MapShorthandSyntax)root.Pipeline.Single();
+        var call = (FunctionCallSyntax)shorthand.Expression.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Kind, Is.EqualTo(SyntaxKind.OpenExpression));
+            Assert.That(root.Text, Is.EqualTo("|> add(1)"));
+            Assert.That(root.Span, Is.EqualTo(new SourceSpan(0, 9)));
+            Assert.That(root.Children, Is.EqualTo(new SyntaxNode[] { shorthand }));
+            Assert.That(shorthand.Kind, Is.EqualTo(SyntaxKind.MapShorthand));
+            Assert.That(shorthand.Text, Is.EqualTo("|> add(1)"));
+            Assert.That(shorthand.Span, Is.EqualTo(new SourceSpan(0, 9)));
+            Assert.That(shorthand.Children, Is.EqualTo(new SyntaxNode[] { shorthand.Expression }));
+            Assert.That(shorthand.Expression.Text, Is.EqualTo("add(1)"));
+            Assert.That(shorthand.Expression.Span, Is.EqualTo(new SourceSpan(3, 6)));
+            Assert.That(call.Name, Is.EqualTo("add"));
+            Assert.That(call.Arguments.Single().Value.Text, Is.EqualTo("1"));
+        });
+    }
+
+    [Test]
+    public void MapShorthandComposesInAClosedExpressionPipeline()
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse("{1,2,3} |> add(1) | sum");
+        var shorthand = (MapShorthandSyntax)root.Pipeline[0];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Pipeline, Has.Count.EqualTo(2));
+            Assert.That(shorthand.Text, Is.EqualTo("|> add(1)"));
+            Assert.That(shorthand.Expression.Pipeline.Single(), Is.TypeOf<FunctionCallSyntax>());
+            Assert.That(root.Pipeline[1], Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("sum"));
+        });
+    }
 
     [Test]
     public void PipelinesAndFunctionCallDetailsPreserveSourceOrder()
