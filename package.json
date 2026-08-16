@@ -11,12 +11,14 @@
     "binding.gyp",
     "prebuilds/**",
     "bindings/node/**",
+    "editors/notepadpp/**",
     "queries/**",
     "src/**"
   ],
   "scripts": {
-    "generate": "tree-sitter generate",
-    "test": "tree-sitter test && node --test bindings/node/binding_test.js"
+    "generate": "tree-sitter generate && node scripts/generate-notepadpp.mjs",
+    "generate:notepadpp": "node scripts/generate-notepadpp.mjs",
+    "test": "tree-sitter test && node --test bindings/node/binding_test.js tests/notepadpp.test.mjs"
   },
   "repository": {
     "type": "git",
