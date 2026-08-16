@@ -192,9 +192,12 @@ public sealed class TupleLiteralSyntax : SequenceLiteralSyntax
 public sealed class RecordLiteralSyntax : ValueSyntax
 {
     internal RecordLiteralSyntax(SourceSpan span, string text, IEnumerable<RecordEntrySyntax> entries)
+        : this(span, text, entries.ToArray()) { }
+
+    private RecordLiteralSyntax(SourceSpan span, string text, RecordEntrySyntax[] entries)
         : base(SyntaxKind.RecordLiteral, span, text, entries)
     {
-        Entries = Array.AsReadOnly(entries.ToArray());
+        Entries = Array.AsReadOnly(entries);
         Fields = Array.AsReadOnly(Entries.OfType<RecordFieldSyntax>().ToArray());
     }
 
