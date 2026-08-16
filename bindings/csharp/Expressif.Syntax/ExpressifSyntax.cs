@@ -8,7 +8,7 @@ public static class ExpressifSyntax
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
         "array_literal", "boolean_literal", "incoming_value", "numeric_literal",
-        "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
+        "interval_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
     public static RootExpressionSyntax Parse(string source)
@@ -132,9 +132,52 @@ public static class ExpressifSyntax
         "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
         "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
         "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
+        "interval_literal" => BindInterval(node),
         "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
         _ => throw Unknown(node),
     };
+
+    private static IntervalLiteralSyntax BindInterval(TsNode node)
+    {
+        var shorthand = node.NamedChildren.FirstOrDefault(child => child.Type == "interval_shorthand");
+        if (shorthand is not null)
+        {
+            var zeroIndex = node.Text.IndexOf('0');
+            var zero = zeroIndex < 0
+                ? null
+                : new NumericLiteralSyntax(new SourceSpan(node.StartIndex + zeroIndex, 1), "0");
+            return shorthand.Text switch
+            {
+                "(0+)" => new(Span(node), node.Text,
+                    new(IntervalBoundKind.Finite, zero), new(IntervalBoundKind.PositiveInfinity, null), true, true),
+                "(+)" => new(Span(node), node.Text,
+                    new(IntervalBoundKind.Finite, new NumericLiteralSyntax(new SourceSpan(node.StartIndex + 2, 0), "0")),
+                    new(IntervalBoundKind.PositiveInfinity, null), false, true),
+                "(0-)" => new(Span(node), node.Text,
+                    new(IntervalBoundKind.NegativeInfinity, null), new(IntervalBoundKind.Finite, zero), true, true),
+                "(-)" => new(Span(node), node.Text,
+                    new(IntervalBoundKind.NegativeInfinity, null),
+                    new(IntervalBoundKind.Finite, new NumericLiteralSyntax(new SourceSpan(node.StartIndex + 2, 0), "0")), true, false),
+                _ => throw Unknown(shorthand),
+            };
+        }
+
+        var lower = node.GetChildForField("lower_bound") ?? throw Unknown(node);
+        var upper = node.GetChildForField("upper_bound") ?? throw Unknown(node);
+        var lowerDelimiter = node.GetChildForField("lower_delimiter") ?? throw Unknown(node);
+        var upperDelimiter = node.GetChildForField("upper_delimiter") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindIntervalBound(lower), BindIntervalBound(upper),
+            lowerDelimiter.Text == "[",
+            upperDelimiter.Text == "]");
+    }
+
+    private static IntervalBound BindIntervalBound(TsNode node)
+    {
+        var bound = SingleNamedChild(node, "interval_bound");
+        return bound.Type == "infinite_bound"
+            ? new(bound.Text == "+INF" ? IntervalBoundKind.PositiveInfinity : IntervalBoundKind.NegativeInfinity, null)
+            : new(IntervalBoundKind.Finite, BindValue(bound));
+    }
 
     private static RecordEntrySyntax BindRecordEntry(TsNode node) => node.Type switch
     {

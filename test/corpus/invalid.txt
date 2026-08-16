@@ -323,7 +323,7 @@ Operators are not implemented
 (source_file
   (ERROR
     (numeric_literal)
-    (UNEXPECTED '+'))
+    (UNEXPECTED ' '))
   (root_expression
     (closed_expression
       (numeric_literal))))
@@ -337,14 +337,12 @@ Legacy property reference is rejected
 ---
 
 (source_file
-  (ERROR
-    (UNEXPECTED '['))
+  (ERROR)
   (root_expression
     (open_expression
       (function_call
         name: (function_name))))
-  (ERROR
-    (UNEXPECTED ']')))
+  (ERROR))
 
 ==================
 Map shorthand operator must be contiguous
@@ -371,13 +369,11 @@ Legacy index reference is rejected
 ---
 
 (source_file
-  (ERROR
-    (UNEXPECTED '['))
+  (ERROR)
   (root_expression
     (closed_expression
       (numeric_literal)))
-  (ERROR
-    (UNEXPECTED ']')))
+  (ERROR))
 
 ==================
 Record access rejects whitespace after dot

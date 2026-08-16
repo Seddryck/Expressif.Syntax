@@ -24,6 +24,7 @@ public enum SyntaxKind
     RecordSpread,
     IncomingValue,
     ParameterizedExpression,
+    IntervalLiteral,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -287,4 +288,35 @@ public sealed class DateTimeLiteralSyntax : TemporalLiteralSyntax
 public sealed class TimeLiteralSyntax : TemporalLiteralSyntax
 {
     internal TimeLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.TimeLiteral, span, text) { }
+}
+
+public enum IntervalBoundKind { Finite, NegativeInfinity, PositiveInfinity }
+
+public readonly record struct IntervalBound(IntervalBoundKind Kind, ValueSyntax? Value)
+{
+    public bool IsInfinite => Kind is not IntervalBoundKind.Finite;
+}
+
+public sealed class IntervalLiteralSyntax : ValueSyntax
+{
+    internal IntervalLiteralSyntax(
+        SourceSpan span,
+        string text,
+        IntervalBound lowerBound,
+        IntervalBound upperBound,
+        bool isLowerInclusive,
+        bool isUpperInclusive)
+        : base(SyntaxKind.IntervalLiteral, span, text,
+            new[] { lowerBound.Value, upperBound.Value }.OfType<ValueSyntax>())
+    {
+        LowerBound = lowerBound;
+        UpperBound = upperBound;
+        IsLowerInclusive = isLowerInclusive;
+        IsUpperInclusive = isUpperInclusive;
+    }
+
+    public IntervalBound LowerBound { get; }
+    public IntervalBound UpperBound { get; }
+    public bool IsLowerInclusive { get; }
+    public bool IsUpperInclusive { get; }
 }
