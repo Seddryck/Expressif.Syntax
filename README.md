@@ -1,5 +1,7 @@
 # Expressif.Syntax
 
+![Expressif logo](misc/icon/expressif-icon-256.png)
+
 `Expressif.Syntax` provides the [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) parser for the [Expressif](https://github.com/Seddryck/Expressif) expression language, together with bindings for supported programming languages.
 
 The parser defines the concrete syntax of Expressif independently from its runtime implementations. It is intended to provide a common syntax foundation for the C#, Python and TypeScript implementations of Expressif, as well as editor tooling and language-server support.

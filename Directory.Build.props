@@ -22,6 +22,7 @@
     <RepositoryUrl>https://github.com/Seddryck/Expressif.Syntax</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <PackageIcon>misc\icon\expressif-icon-128.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>expressif;syntax;parser;tree-sitter</PackageTags>
     <Description>Tree-sitter syntax bindings for the Expressif expression language.</Description>
@@ -38,5 +39,6 @@
 
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Link="README.md" />
+    <None Include="$(MSBuildThisFileDirectory)misc\icon\expressif-icon-*.png" Pack="true" PackagePath="misc\icon\" />
   </ItemGroup>
 </Project>
