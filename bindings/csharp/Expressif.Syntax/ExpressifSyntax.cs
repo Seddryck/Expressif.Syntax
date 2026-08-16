@@ -97,6 +97,7 @@ public static class ExpressifSyntax
     {
         "closed_expression" => BindClosed(node),
         "function_call" => BindFunctionCall(node),
+        "open_expression" => BindOpen(node),
         "parameterized_expression" => BindParameterizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),
         _ => BindValue(node),
