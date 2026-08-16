@@ -132,7 +132,34 @@ export default grammar({
       $.array_literal,
       $.tuple_literal,
       $.record_literal,
+      $.interval_literal,
     ),
+
+    interval_literal: ($) => seq(
+      "I",
+      choice(
+        seq(
+          field("lower_delimiter", choice("[", "(", "]")),
+          field("lower_bound", $.interval_bound),
+          ",",
+          field("upper_bound", $.interval_bound),
+          field("upper_delimiter", choice("]", ")", "[")),
+        ),
+        $.interval_shorthand,
+      ),
+    ),
+
+    interval_bound: ($) => choice(
+      $.numeric_literal,
+      $.boolean_literal,
+      $.quoted_literal,
+      $.temporal_literal,
+      $.infinite_bound,
+    ),
+
+    infinite_bound: (_) => choice("+INF", "-INF"),
+
+    interval_shorthand: (_) => choice("(0+)", "(+)", "(0-)", "(-)"),
 
     array_literal: ($) => seq(
       "{",
