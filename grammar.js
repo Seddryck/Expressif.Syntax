@@ -29,13 +29,12 @@ export default grammar({
     root_expression: ($) => choice(
       $.open_expression,
       $.closed_expression,
-      $.map_shorthand,
     ),
 
-    open_expression: ($) => seq(
+    open_expression: ($) => prec.right(seq(
       $.expression,
       repeat(seq("|", $.expression)),
-    ),
+    )),
 
     closed_expression: ($) => seq(
       $.value,
@@ -60,6 +59,7 @@ export default grammar({
 
     expression: ($) => choice(
       $.function_call,
+      $.map_shorthand,
       $.tuple_projection,
     ),
 

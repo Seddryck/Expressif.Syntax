@@ -8,6 +8,10 @@
         "named": true
       },
       {
+        "type": "map_shorthand",
+        "named": true
+      },
+      {
         "type": "tuple_projection",
         "named": true
       }
@@ -159,10 +163,6 @@
       "types": [
         {
           "type": "expression",
-          "named": true
-        },
-        {
-          "type": "map_shorthand",
           "named": true
         },
         {
@@ -643,10 +643,6 @@
       "types": [
         {
           "type": "closed_expression",
-          "named": true
-        },
-        {
-          "type": "map_shorthand",
           "named": true
         },
         {

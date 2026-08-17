@@ -104,10 +104,17 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, BindExpression(source), BindOpen(expression));
     }
 
+    private static MapShorthandSyntax BindMapShorthand(TsNode node)
+    {
+        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindOpen(expression));
+    }
+
     private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
     {
         "closed_expression" => BindClosed(node),
         "function_call" => BindFunctionCall(node),
+        "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
         "parameterized_expression" => BindParameterizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),

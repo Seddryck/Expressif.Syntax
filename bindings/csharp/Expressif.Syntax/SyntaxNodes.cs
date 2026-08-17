@@ -26,6 +26,7 @@ public enum SyntaxKind
     IncomingValue,
     ParameterizedExpression,
     IntervalLiteral,
+    MapShorthand,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -115,6 +116,15 @@ public sealed class ParameterizedExpressionSyntax : ExpressionSyntax
     }
 
     public ExpressionSyntax Source { get; }
+    public OpenExpressionSyntax Expression { get; }
+}
+
+public sealed class MapShorthandSyntax : ExpressionSyntax
+{
+    internal MapShorthandSyntax(SourceSpan span, string text, OpenExpressionSyntax expression)
+        : base(SyntaxKind.MapShorthand, span, text, [expression])
+        => Expression = expression;
+
     public OpenExpressionSyntax Expression { get; }
 }
 
