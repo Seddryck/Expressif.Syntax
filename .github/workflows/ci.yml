@@ -15,104 +15,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  parser:
-    name: Test Tree-sitter parser
+  version:
+    name: Calculate package version
     runs-on: ubuntu-latest
+    outputs:
+      semver: ${{ steps.gitversion.outputs.semVer }}
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Set up Tree-sitter
-        uses: tree-sitter/setup-action/cli@v2
-
-      - name: Test parser
-        uses: tree-sitter/parser-test-action@v3
-
-  csharp:
-    name: Build and test C# binding
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Set up Tree-sitter
-        uses: tree-sitter/setup-action/cli@v2
-
-      - name: Discover C# projects
-        id: csharp-projects
-        shell: pwsh
-        run: |
-          $projectRoot = "bindings/csharp"
-          $projects = if (Test-Path -LiteralPath $projectRoot -PathType Container) {
-            @(Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj)
-          } else {
-            @()
-          }
-          "found=$($projects.Count -gt 0)" >> $env:GITHUB_OUTPUT
-          if ($projects.Count -eq 0) {
-            Write-Host "No C# projects exist yet; skipping .NET validation."
-          }
-
-      - name: Restore C# projects
-        if: steps.csharp-projects.outputs.found == 'True'
-        shell: pwsh
-        run: |
-          $projectRoot = "bindings/csharp"
-          if (-not (Test-Path -LiteralPath $projectRoot -PathType Container)) {
-            Write-Host "No C# project directory exists; skipping restore."
-            exit 0
-          }
-          Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj | ForEach-Object {
-            dotnet restore $_.FullName
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-
-      - name: Build C# projects
-        if: steps.csharp-projects.outputs.found == 'True'
-        shell: pwsh
-        run: |
-          $projectRoot = "bindings/csharp"
-          if (-not (Test-Path -LiteralPath $projectRoot -PathType Container)) {
-            Write-Host "No C# project directory exists; skipping build."
-            exit 0
-          }
-          Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj | ForEach-Object {
-            dotnet build $_.FullName --configuration Release --no-restore
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-
-      - name: Test C# projects
-        if: steps.csharp-projects.outputs.found == 'True'
-        shell: pwsh
-        run: |
-          $projectRoot = "bindings/csharp"
-          if (-not (Test-Path -LiteralPath $projectRoot -PathType Container)) {
-            Write-Host "No C# project directory exists; skipping tests."
-            exit 0
-          }
-          Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter *.csproj | ForEach-Object {
-            dotnet test $_.FullName --configuration Release --no-build
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-
-  package:
-    name: Validate distributable packages
-    needs: [parser, csharp]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
+      - name: Check out repository history
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -129,42 +39,200 @@ jobs:
         with:
           useConfigFile: true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
+  parser:
+    name: Test Tree-sitter parser
+    runs-on: ubuntu-latest
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
         with:
-          python-version: '3.12'
+          persist-credentials: false
+
+      - name: Set up Tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+
+      - name: Test parser
+        uses: tree-sitter/parser-test-action@v3
+
+  native:
+    name: Build native library (${{ matrix.rid }})
+    needs: parser
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            library: tree-sitter-expressif.dll
+          - os: ubuntu-latest
+            rid: linux-x64
+            library: libtree-sitter-expressif.so
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+
+      - name: Build native grammar library
+        shell: pwsh
+        run: |
+          $outputDirectory = Join-Path 'native-assets' '${{ matrix.rid }}'
+          New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+          tree-sitter build -o (Join-Path $outputDirectory '${{ matrix.library }}') .
+          if ($LASTEXITCODE -ne 0) { throw 'Native grammar build failed.' }
+
+      - name: Upload native grammar library
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-${{ matrix.rid }}
+          path: native-assets/${{ matrix.rid }}/${{ matrix.library }}
+          if-no-files-found: error
+
+  package:
+    name: Build C# package
+    needs: [version, native]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
-      - name: Install packaging dependencies
-        run: |
-          npm ci
-          python -m pip install build
+      - name: Download Windows native grammar library
+        uses: actions/download-artifact@v8
+        with:
+          name: native-win-x64
+          path: native-assets/win-x64
 
-      - name: Build packages with the repository version
+      - name: Download Linux native grammar library
+        uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: native-assets/linux-x64
+
+      - name: Build NuGet package
         shell: pwsh
-        run: ./scripts/package.ps1 -Version '${{ steps.gitversion.outputs.semVer }}'
+        run: >-
+          ./scripts/Build-NuGetPackage.ps1
+          -Version '${{ needs.version.outputs.semver }}'
+          -NativeAssetsDirectory 'native-assets'
+
+      - name: Upload NuGet package
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-${{ needs.version.outputs.semver }}
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+
+  consume:
+    name: Test C# package (${{ matrix.rid }})
+    needs: [version, package]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET runtimes
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Download NuGet package
+        uses: actions/download-artifact@v8
+        with:
+          name: nuget-${{ needs.version.outputs.semver }}
+          path: artifacts
+
+      - name: Restore installed package tests
+        shell: pwsh
+        run: |
+          $packageSource = (Resolve-Path 'artifacts').Path
+          dotnet restore bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj `
+            --source $packageSource `
+            --source 'https://api.nuget.org/v3/index.json' `
+            -p:PackageVersionUnderTest='${{ needs.version.outputs.semver }}'
+          if ($LASTEXITCODE -ne 0) { throw 'Package test restore failed.' }
+
+      - name: Test installed package
+        shell: pwsh
+        run: >-
+          dotnet test bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj
+          --configuration Release
+          --no-restore
+          -p:PackageVersionUnderTest='${{ needs.version.outputs.semver }}'
+
+  native-archive:
+    name: Build native C archive
+    needs: [version, parser]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build native C archive
+        shell: pwsh
+        run: ./scripts/New-NativeArchive.ps1 -Version '${{ needs.version.outputs.semver }}'
+
+      - name: Upload native C archive
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-source-${{ needs.version.outputs.semver }}
+          path: artifacts/*.tar.gz
+          if-no-files-found: error
+
+  collect:
+    name: Collect validated packages
+    needs: [version, consume, native-archive]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download validated packages
+        uses: actions/download-artifact@v8
+        with:
+          pattern: '*-${{ needs.version.outputs.semver }}'
+          path: artifacts
+          merge-multiple: true
 
       - name: Upload package validation artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: packages-${{ steps.gitversion.outputs.semVer }}
+          name: packages-${{ needs.version.outputs.semver }}
           path: artifacts/*
           if-no-files-found: error
 
   gate:
     name: CI gate
     if: always()
-    needs: [parser, csharp, package]
+    needs: [version, parser, native, package, consume, native-archive, collect]
     runs-on: ubuntu-latest
 
     steps:
@@ -172,9 +240,13 @@ jobs:
         shell: pwsh
         run: |
           $results = @{
+            version = '${{ needs.version.result }}'
             parser = '${{ needs.parser.result }}'
-            csharp = '${{ needs.csharp.result }}'
+            native = '${{ needs.native.result }}'
             package = '${{ needs.package.result }}'
+            consume = '${{ needs.consume.result }}'
+            nativeArchive = '${{ needs.native-archive.result }}'
+            collect = '${{ needs.collect.result }}'
           }
           $failed = @($results.GetEnumerator() | Where-Object Value -ne 'success')
           if ($failed.Count -gt 0) {

@@ -22,12 +22,19 @@
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(PackageVersionUnderTest)' == ''">
     <ProjectReference Include="..\Expressif.Syntax\Expressif.Syntax.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(PackageVersionUnderTest)' != ''">
+    <PackageReference Include="Expressif.Syntax" Version="$(PackageVersionUnderTest)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="..\..\..\src\node-types.json" Link="node-types.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="CopyExpressifGrammar" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+  <Target Name="CopyExpressifGrammar" AfterTargets="Build" Condition="'$(TargetFramework)' != '' And '$(PackageVersionUnderTest)' == ''">
     <PropertyGroup>
       <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Windows'))">tree-sitter-expressif.dll</ExpressifGrammarLibrary>
       <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Linux'))">libtree-sitter-expressif.so</ExpressifGrammarLibrary>
