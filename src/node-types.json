@@ -74,6 +74,10 @@
         "named": true
       },
       {
+        "type": "null_literal",
+        "named": true
+      },
+      {
         "type": "numeric_literal",
         "named": true
       },
@@ -887,6 +891,10 @@
   },
   {
     "type": "named_record_field",
+    "named": true
+  },
+  {
+    "type": "null_literal",
     "named": true
   },
   {

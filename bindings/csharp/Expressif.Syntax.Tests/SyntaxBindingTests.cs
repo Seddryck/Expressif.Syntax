@@ -103,6 +103,32 @@ public class SyntaxBindingTests
         Assert.That(((BooleanLiteralSyntax)root.Value).Value, Is.EqualTo(expected));
     }
 
+    [Test]
+    public void NullLiteralExposesNullSemanticValueAndPreservesText()
+    {
+        var literal = (NullLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("#null")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Kind, Is.EqualTo(SyntaxKind.NullLiteral));
+            Assert.That(literal.Value, Is.Null);
+            Assert.That(literal.Text, Is.EqualTo("#null"));
+        });
+    }
+
+    [Test]
+    public void NullLiteralComposesAsAnArgumentAndCollectionValue()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("coalesce(#null)")).Pipeline.Single();
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{#null, #true}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(call.Arguments.Single().Value, Is.TypeOf<NullLiteralSyntax>());
+            Assert.That(array.Values[0], Is.TypeOf<NullLiteralSyntax>());
+        });
+    }
+
     [TestCase("true")]
     [TestCase("false")]
     public void BareBooleanWordsRemainFunctionCalls(string source)

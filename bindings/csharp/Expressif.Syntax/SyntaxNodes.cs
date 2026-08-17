@@ -12,6 +12,7 @@ public enum SyntaxKind
     NamedArgument,
     NumericLiteral,
     BooleanLiteral,
+    NullLiteral,
     QuotedLiteral,
     DateLiteral,
     DateTimeLiteral,
@@ -302,6 +303,14 @@ public sealed class BooleanLiteralSyntax : ValueSyntax
         : base(SyntaxKind.BooleanLiteral, span, text) => Value = text == "#true";
 
     public bool Value { get; }
+}
+
+public sealed class NullLiteralSyntax : ValueSyntax
+{
+    internal NullLiteralSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.NullLiteral, span, text) { }
+
+    public object? Value => null;
 }
 
 public enum QuotingStyle { DoubleQuote, Backtick }

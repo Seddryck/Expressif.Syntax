@@ -12,6 +12,23 @@ Empty array
       (array_literal))))
 
 ==================
+Null literal in collections
+==================
+
+{#null, T(#null, #true)}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (null_literal)
+        (tuple_literal
+          (null_literal)
+          (boolean_literal))))))
+
+==================
 Array values and whitespace
 ==================
 

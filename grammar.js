@@ -174,6 +174,7 @@ export default grammar({
       $.record_access,
       $.numeric_literal,
       $.boolean_literal,
+      $.null_literal,
       $.quoted_literal,
       $.temporal_literal,
       $.array_literal,
@@ -294,6 +295,8 @@ export default grammar({
     positional_record_field: (_) => /\.(?:0|[1-9][0-9]*)/,
 
     boolean_literal: (_) => choice("#true", "#false"),
+
+    null_literal: (_) => "#null",
 
     quoted_literal: ($) => choice(
       $.double_quoted_literal,

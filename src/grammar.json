@@ -685,6 +685,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "null_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "quoted_literal"
         },
         {
@@ -1231,6 +1235,10 @@
           "value": "#false"
         }
       ]
+    },
+    "null_literal": {
+      "type": "STRING",
+      "value": "#null"
     },
     "quoted_literal": {
       "type": "CHOICE",
