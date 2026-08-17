@@ -216,10 +216,16 @@ public abstract class SequenceLiteralSyntax : ValueSyntax
     public IReadOnlyList<ValueSyntax> Values { get; }
 }
 
-public sealed class ArrayLiteralSyntax : SequenceLiteralSyntax
+public sealed class ArrayLiteralSyntax : ValueSyntax
 {
-    internal ArrayLiteralSyntax(SourceSpan span, string text, IEnumerable<ValueSyntax> values)
-        : base(SyntaxKind.ArrayLiteral, span, text, values) { }
+    internal ArrayLiteralSyntax(SourceSpan span, string text, IEnumerable<ExpressionSyntax> values)
+        : this(span, text, values.ToArray()) { }
+
+    private ArrayLiteralSyntax(SourceSpan span, string text, ExpressionSyntax[] values)
+        : base(SyntaxKind.ArrayLiteral, span, text, values)
+        => Values = Array.AsReadOnly(values);
+
+    public IReadOnlyList<ExpressionSyntax> Values { get; }
 }
 
 public sealed class TupleLiteralSyntax : SequenceLiteralSyntax

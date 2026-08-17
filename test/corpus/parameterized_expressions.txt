@@ -171,7 +171,7 @@ foo({1,2,3}, {name := "Alice"}, {@foo | lower})
                   name: (function_name))))))))))
 
 ==================
-Top-level braces do not form a parameterized expression
+Top-level braces form an array with an input expression
 ==================
 
 {@foo | lower}
@@ -182,14 +182,13 @@ Top-level braces do not form a parameterized expression
   (root_expression
     (closed_expression
       (array_literal
-        (variable)
-        (MISSING "}"))
-      (function_call
-        (function_name))))
-  (ERROR))
+        (closed_expression
+          (variable)
+          (function_call
+            (function_name)))))))
 
 ==================
-Nested braces recover as a positional parameterized expression, not an array element
+Nested braces form an array argument containing an input expression
 ==================
 
 foo({{@foo | lower}})
@@ -203,14 +202,12 @@ foo({{@foo | lower}})
         (function_name)
         (argument_list
           (positional_argument
-            (parameterized_expression
+            (array_literal
               (array_literal
-                (variable)
-                (MISSING "}"))
-              (open_expression
-                (function_call
-                  (function_name))))))
-        (ERROR)))))
+                (closed_expression
+                  (variable)
+                  (function_call
+                    (function_name)))))))))))
 
 ==================
 Missing source recovery snapshot rejects the parameterized expression

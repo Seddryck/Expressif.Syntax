@@ -54,6 +54,27 @@ Array values and whitespace
           field: (original_record_field_selector (positional_record_field)))))))
 
 ==================
+Input expressions as array elements
+==================
+
+{ @foo | text-to-func("bar") }
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (closed_expression
+          (variable)
+          (function_call
+            name: (function_name)
+            (argument_list
+              (positional_argument
+                (double_quoted_literal
+                  (double_quoted_content))))))))))
+
+==================
 Nested and single-element arrays
 ==================
 

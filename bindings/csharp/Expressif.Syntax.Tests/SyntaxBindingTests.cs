@@ -270,6 +270,25 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void ArrayAcceptsInputExpressionsAsElements()
+    {
+        const string source = "{ @foo | text-to-func(\"bar\") }";
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var element = (ClosedExpressionSyntax)array.Values.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(array.Text, Is.EqualTo(source));
+            Assert.That(array.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(array.Children, Is.EqualTo(array.Values));
+            Assert.That(element.Text, Is.EqualTo("@foo | text-to-func(\"bar\")"));
+            Assert.That(element.Value, Is.TypeOf<VariableSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("@foo"));
+            Assert.That(element.Pipeline.Single(), Is.TypeOf<FunctionCallSyntax>());
+        });
+    }
+
+    [Test]
     public void TupleProjectionCompositionCanBeAFunctionArgument()
     {
         const string source = "adjacent($1 | subtract($0) | multiply($1))";
