@@ -409,15 +409,8 @@
                 "content": {
                   "type": "ALIAS",
                   "content": {
-                    "type": "TOKEN",
-                    "content": {
-                      "type": "PREC",
-                      "value": 1,
-                      "content": {
-                        "type": "STRING",
-                        "value": "record"
-                      }
-                    }
+                    "type": "STRING",
+                    "value": "record"
                   },
                   "named": true,
                   "value": "function_name"

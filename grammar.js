@@ -115,7 +115,7 @@ export default grammar({
 
     function_call: ($) => choice(
       prec(1, seq(
-        field("name", alias(token(prec(1, "record")), $.function_name)),
+        field("name", alias("record", $.function_name)),
         "(",
         optional(choice(
           $.argument_list,

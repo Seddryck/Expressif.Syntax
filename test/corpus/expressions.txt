@@ -44,6 +44,22 @@ foo-BAr-foo
         name: (function_name)))))
 
 ==================
+Function names can start with record
+==================
+
+recording() | record-value()
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))
+      (function_call
+        name: (function_name)))))
+
+==================
 Function call with positional arguments
 ==================
 
