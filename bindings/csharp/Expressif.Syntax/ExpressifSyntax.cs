@@ -151,29 +151,47 @@ public static class ExpressifSyntax
             "from_end" => TupleProjectionDirection.FromEnd,
             _ => throw Unknown(direction),
         };
-        return new(Span(node), node.Text, parsedDirection,
-            int.Parse(index.Text, System.Globalization.CultureInfo.InvariantCulture));
+        return new(
+            Span(node),
+            node.Text,
+            parsedDirection,
+            BindSemanticValue(index, () => int.Parse(index.Text, System.Globalization.CultureInfo.InvariantCulture)));
     }
 
-    private static ValueSyntax BindValue(TsNode node) => node.Type switch
+    private static ValueSyntax BindValue(TsNode node) => BindSemanticValue(node, () => node.Type switch
+        {
+            "variable" => new VariableSyntax(Span(node), node.Text),
+            "incoming_value" => new IncomingValueSyntax(Span(node), node.Text),
+            "record_access" => BindRecordAccess(node),
+            "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
+            "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
+            "double_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.DoubleQuote),
+            "backtick_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.Backtick),
+            "date_literal" => new DateLiteralSyntax(Span(node), node.Text),
+            "date_time_literal" => new DateTimeLiteralSyntax(Span(node), node.Text),
+            "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
+            "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
+            "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
+            "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
+            "interval_literal" => BindInterval(node),
+            "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
+            _ => throw Unknown(node),
+        });
+
+    private static T BindSemanticValue<T>(TsNode node, Func<T> bind)
     {
-        "variable" => new VariableSyntax(Span(node), node.Text),
-        "incoming_value" => new IncomingValueSyntax(Span(node), node.Text),
-        "record_access" => BindRecordAccess(node),
-        "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
-        "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
-        "double_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.DoubleQuote),
-        "backtick_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.Backtick),
-        "date_literal" => new DateLiteralSyntax(Span(node), node.Text),
-        "date_time_literal" => new DateTimeLiteralSyntax(Span(node), node.Text),
-        "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
-        "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
-        "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
-        "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
-        "interval_literal" => BindInterval(node),
-        "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
-        _ => throw Unknown(node),
-    };
+        try
+        {
+            return bind();
+        }
+        catch (Exception exception) when (exception is FormatException or OverflowException)
+        {
+            throw new ExpressifSyntaxException(
+                "The source contains a value that cannot be represented.",
+                [new SyntaxError(node.Type, Span(node), node.Text, false)],
+                exception);
+        }
+    }
 
     private static IntervalLiteralSyntax BindInterval(TsNode node)
     {
@@ -233,7 +251,9 @@ public static class ExpressifSyntax
             {
                 "named_record_field" => new RecordFieldSelector(field.Text.TrimStart('.'), null),
                 "positional_record_field" => new RecordFieldSelector(null,
-                    int.Parse(field.Text.AsSpan(field.Text[0] == '.' ? 1 : 0), System.Globalization.CultureInfo.InvariantCulture)),
+                    BindSemanticValue(field, () => int.Parse(
+                        field.Text.AsSpan(field.Text[0] == '.' ? 1 : 0),
+                        System.Globalization.CultureInfo.InvariantCulture))),
                 _ => throw Unknown(field),
             });
         return new(Span(node), node.Text, node.NamedChildren.Any(child => child.Type == "original_input"), fields);
@@ -286,7 +306,12 @@ public sealed record SyntaxError(string NodeType, SourceSpan Span, string Text, 
 
 public sealed class ExpressifSyntaxException : Exception
 {
-    internal ExpressifSyntaxException(string message, IReadOnlyList<SyntaxError> errors) : base(message) => Errors = errors;
+    internal ExpressifSyntaxException(
+        string message,
+        IReadOnlyList<SyntaxError> errors,
+        Exception? innerException = null)
+        : base(message, innerException) => Errors = errors;
+
     public IReadOnlyList<SyntaxError> Errors { get; }
 }
 

@@ -129,6 +129,11 @@ public class SyntaxBindingTests
         });
     }
 
+    [TestCase("79228162514264337593543950336")]
+    [TestCase("-79228162514264337593543950336")]
+    public void NumericLiteralsOutsideDecimalRangeExposeSyntaxErrors(string source)
+        => AssertSemanticValueError(source, "numeric_literal", source);
+
     [TestCase("#\"2025-12-17\"")]
     public void DateLiteralsExposeTypedValue(string source)
     {
@@ -161,6 +166,34 @@ public class SyntaxBindingTests
         {
             Assert.That(literal.Text, Is.EqualTo(source));
             Assert.That(literal.Value, Is.EqualTo(new TimeOnly(4, 0, 0)));
+        });
+    }
+
+    [TestCase("#\"2025-02-29\"", "date_literal")]
+    [TestCase("#\"2025-13-17\"", "date_literal")]
+    [TestCase("#\"2025-12-17T25:30:00\"", "date_time_literal")]
+    [TestCase("#\"24:00:00\"", "time_literal")]
+    public void InvalidTemporalValuesExposeSyntaxErrors(string source, string nodeType)
+        => AssertSemanticValueError(source, nodeType, source);
+
+    [Test]
+    public void TupleProjectionIndexesOutsideIntegerRangeExposeSyntaxErrors()
+        => AssertSemanticValueError("$2147483648", "tuple_index", "2147483648");
+
+    [Test]
+    public void PositionalRecordSelectorsOutsideIntegerRangeExposeSyntaxErrors()
+        => AssertSemanticValueError("^.2147483648", "positional_record_field", "2147483648");
+
+    private static void AssertSemanticValueError(string source, string nodeType, string errorText)
+    {
+        var exception = Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
+        Assert.Multiple(() =>
+        {
+            Assert.That(exception!.InnerException, Is.TypeOf<OverflowException>().Or.TypeOf<FormatException>());
+            Assert.That(exception.Errors, Has.Count.EqualTo(1));
+            Assert.That(exception.Errors[0].NodeType, Is.EqualTo(nodeType));
+            Assert.That(exception.Errors[0].Text, Is.EqualTo(errorText));
+            Assert.That(exception.Errors[0].IsMissing, Is.False);
         });
     }
 
