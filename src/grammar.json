@@ -191,6 +191,14 @@
           "name": "function_call"
         },
         {
+          "type": "PREC",
+          "value": 1,
+          "content": {
+            "type": "SYMBOL",
+            "name": "record_access"
+          }
+        },
+        {
           "type": "SYMBOL",
           "name": "tuple_projection"
         },
