@@ -21,6 +21,8 @@ export default grammar({
 
   conflicts: ($) => [
     [$.record_spread, $.incoming_value],
+    [$.expression, $._pipeline_expression],
+    [$.root_expression, $._parenthesized_pipeline_expression],
   ],
 
   rules: {
@@ -181,13 +183,13 @@ export default grammar({
       repeat(seq("|", $._pipeline_expression)),
     ),
 
-    parameterized_expression: ($) => seq(
+    parameterized_expression: ($) => prec.dynamic(3, seq(
       "{",
       field("source", choice($.value, $.tuple_projection)),
       "|",
       field("expression", $.open_expression),
       "}",
-    ),
+    )),
 
     value: ($) => choice(
       $.incoming_value,
@@ -230,11 +232,33 @@ export default grammar({
 
     interval_shorthand: (_) => choice("(0+)", "(+)", "(0-)", "(-)"),
 
-    array_literal: ($) => seq(
-      "{",
-      optional(seq($.value, repeat(seq(",", $.value)))),
-      "}",
+    array_literal: ($) => prec.dynamic(1, choice(
+      seq("{", "}"),
+      prec(1, seq(
+        "{",
+        alias($._array_closed_expression, $.closed_expression),
+        repeat(seq(",", $._array_element)),
+        "}",
+      )),
+      seq(
+        "{",
+        $.value,
+        repeat(seq(",", $._array_element)),
+        "}",
+      ),
+    )),
+
+    _array_element: ($) => choice(
+      alias($._array_closed_expression, $.closed_expression),
+      $.value,
     ),
+
+    _array_closed_expression: ($) => prec.right(2, seq(
+      $.value,
+      "|",
+      $._pipeline_expression,
+      repeat(seq("|", $._pipeline_expression)),
+    )),
 
     tuple_literal: ($) => seq(
       "T",
@@ -248,7 +272,7 @@ export default grammar({
 
     record_literal: ($) => choice(
       seq("{", ":", "}"),
-      prec.dynamic(1, seq(
+      prec.dynamic(2, seq(
         "{",
         $._record_entry,
         repeat(seq(",", $._record_entry)),

@@ -135,6 +135,10 @@
       "required": false,
       "types": [
         {
+          "type": "closed_expression",
+          "named": true
+        },
+        {
           "type": "value",
           "named": true
         }
