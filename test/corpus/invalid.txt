@@ -159,10 +159,10 @@ foo(, 5)
             (numeric_literal)))))))
 
 ==================
-Trailing argument separator
+Missing argument between separators
 ==================
 
-foo(5,)
+foo(5,,6)
 
 ---
 
@@ -173,8 +173,10 @@ foo(5,)
         (function_name)
         (argument_list
           (positional_argument
-            (numeric_literal)))
-        (ERROR)))))
+            (numeric_literal))
+          (ERROR)
+          (positional_argument
+            (numeric_literal)))))))
 
 ==================
 Malformed date literal

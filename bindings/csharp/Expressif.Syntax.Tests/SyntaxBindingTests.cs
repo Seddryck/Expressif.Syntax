@@ -639,12 +639,13 @@ public class SyntaxBindingTests
         Assert.That(shorthand.Expression.Pipeline.Single(), Is.TypeOf<ParenthesizedExpressionSyntax>());
     }
 
-    [TestCase("record(name := \"Alice\",")]
-    [TestCase("record(name := \"Alice\", age := 30,")]
-    public void RecordFunctionAcceptsATrailingComma(string prefix)
+    [TestCase("foo(5,)", "foo(5)")]
+    [TestCase("record(name := \"Alice\",)", "record(name := \"Alice\")")]
+    [TestCase("record(name := \"Alice\", age := 30,)", "record(name := \"Alice\", age := 30)")]
+    public void FunctionCallsAcceptATrailingComma(string source, string equivalentSource)
     {
-        var withComma = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(prefix + ")")).Pipeline.Single();
-        var withoutComma = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(prefix[..^1] + ")")).Pipeline.Single();
+        var withComma = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+        var withoutComma = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(equivalentSource)).Pipeline.Single();
 
         Assert.Multiple(() =>
         {
@@ -806,6 +807,8 @@ public class SyntaxBindingTests
     [TestCase("foo({| lower})", false)]
     [TestCase("append(.firstName |)", false)]
     [TestCase("foo(name :=)", false)]
+    [TestCase("foo(, 5)", false)]
+    [TestCase("foo(5,,6)", false)]
     [TestCase("....", false)]
     [TestCase("{ ..., }", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
