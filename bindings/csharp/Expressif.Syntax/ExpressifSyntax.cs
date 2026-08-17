@@ -104,10 +104,29 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, BindExpression(source), BindOpen(expression));
     }
 
+    private static ParenthesizedExpressionSyntax BindParenthesizedExpression(TsNode node)
+    {
+        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindRootExpression(expression));
+    }
+
     private static MapShorthandSyntax BindMapShorthand(TsNode node)
     {
         var expression = node.GetChildForField("expression") ?? throw Unknown(node);
         return new(Span(node), node.Text, BindOpen(expression));
+    }
+
+    private static RootExpressionSyntax BindRootExpression(TsNode node)
+    {
+        if (node.Type == "root_expression")
+            node = SingleNamedChild(node, "root_expression");
+
+        return node.Type switch
+        {
+            "open_expression" => BindOpen(node),
+            "closed_expression" => BindClosed(node),
+            _ => throw Unknown(node),
+        };
     }
 
     private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
@@ -117,6 +136,7 @@ public static class ExpressifSyntax
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
         "parameterized_expression" => BindParameterizedExpression(node),
+        "parenthesized_expression" => BindParenthesizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),
         _ => BindValue(node),
     };
