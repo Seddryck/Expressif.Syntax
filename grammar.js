@@ -113,20 +113,16 @@ export default grammar({
       ),
     ),
 
-    function_call: ($) => choice(
-      prec(1, seq(
-        field("name", alias("record", $.function_name)),
+    function_call: ($) => seq(
+      field("name", $.function_name),
+      optional(seq(
         "(",
         optional(choice(
           $.argument_list,
-          alias($._record_argument_list, $.argument_list),
+          alias($._trailing_argument_list, $.argument_list),
         )),
         ")",
       )),
-      seq(
-        field("name", $.function_name),
-        optional(seq("(", optional($.argument_list), ")")),
-      ),
     ),
 
     function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
@@ -136,7 +132,7 @@ export default grammar({
       repeat(seq(",", choice($.positional_argument, $.named_argument))),
     )),
 
-    _record_argument_list: ($) => prec.right(seq(
+    _trailing_argument_list: ($) => prec.right(seq(
       choice($.positional_argument, $.named_argument),
       repeat(seq(",", choice($.positional_argument, $.named_argument))),
       ",",
