@@ -19,17 +19,41 @@
           Pack="true"
           PackagePath="runtimes/win-x64/native/"
           Visible="false" />
+    <None Include="$(NativeAssetsDirectory)/win-arm64/tree-sitter-expressif.dll"
+          Pack="true"
+          PackagePath="runtimes/win-arm64/native/"
+          Visible="false" />
     <None Include="$(NativeAssetsDirectory)/linux-x64/libtree-sitter-expressif.so"
           Pack="true"
           PackagePath="runtimes/linux-x64/native/"
+          Visible="false" />
+    <None Include="$(NativeAssetsDirectory)/linux-arm64/libtree-sitter-expressif.so"
+          Pack="true"
+          PackagePath="runtimes/linux-arm64/native/"
+          Visible="false" />
+    <None Include="$(NativeAssetsDirectory)/osx-x64/libtree-sitter-expressif.dylib"
+          Pack="true"
+          PackagePath="runtimes/osx-x64/native/"
+          Visible="false" />
+    <None Include="$(NativeAssetsDirectory)/osx-arm64/libtree-sitter-expressif.dylib"
+          Pack="true"
+          PackagePath="runtimes/osx-arm64/native/"
           Visible="false" />
   </ItemGroup>
 
   <Target Name="ValidateNativePackageAssets" BeforeTargets="Pack" Condition="'$(NativeAssetsDirectory)' != ''">
     <Error Condition="!Exists('$(NativeAssetsDirectory)/win-x64/tree-sitter-expressif.dll')"
            Text="The Windows native grammar library was not found in '$(NativeAssetsDirectory)/win-x64'." />
+    <Error Condition="!Exists('$(NativeAssetsDirectory)/win-arm64/tree-sitter-expressif.dll')"
+           Text="The Windows ARM64 native grammar library was not found in '$(NativeAssetsDirectory)/win-arm64'." />
     <Error Condition="!Exists('$(NativeAssetsDirectory)/linux-x64/libtree-sitter-expressif.so')"
            Text="The Linux native grammar library was not found in '$(NativeAssetsDirectory)/linux-x64'." />
+    <Error Condition="!Exists('$(NativeAssetsDirectory)/linux-arm64/libtree-sitter-expressif.so')"
+           Text="The Linux ARM64 native grammar library was not found in '$(NativeAssetsDirectory)/linux-arm64'." />
+    <Error Condition="!Exists('$(NativeAssetsDirectory)/osx-x64/libtree-sitter-expressif.dylib')"
+           Text="The macOS x64 native grammar library was not found in '$(NativeAssetsDirectory)/osx-x64'." />
+    <Error Condition="!Exists('$(NativeAssetsDirectory)/osx-arm64/libtree-sitter-expressif.dylib')"
+           Text="The macOS ARM64 native grammar library was not found in '$(NativeAssetsDirectory)/osx-arm64'." />
   </Target>
 
   <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Condition="'$(NativeAssetsDirectory)' == ''" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">

@@ -124,20 +124,15 @@ For the C# implementation:
 
 Therefore the OS/architecture matrix exists because of the **C parser**, not because of the C# code.
 
-If today the pipeline only produces:
+The pipeline therefore produces and validates:
 
 ```text
 win-x64
-linux-x64
-```
-
-then the natural extension is:
-
-```text
 win-arm64
+linux-x64
 linux-arm64
 osx-x64
 osx-arm64
 ```
 
-giving complete x64/ARM64 coverage across Windows, Linux, and macOS.
+This gives complete x64/ARM64 coverage across Windows, Linux, and macOS.
