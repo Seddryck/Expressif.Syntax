@@ -72,6 +72,7 @@ export default grammar({
 
     _pipeline_expression: ($) => choice(
       $.function_call,
+      prec(1, $.record_access),
       $.tuple_projection,
       alias($._parenthesized_pipeline_expression, $.parenthesized_expression),
     ),

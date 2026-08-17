@@ -81,6 +81,27 @@ Variable pipeline
         name: (function_name)))))
 
 ==================
+Record field shorthand pipeline
+==================
+
+.address | .city | .name
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_access
+        field: (record_field_selector
+          (named_record_field)))
+      (record_access
+        field: (record_field_selector
+          (named_record_field)))
+      (record_access
+        field: (record_field_selector
+          (named_record_field))))))
+
+==================
 Original input named field pipeline
 ==================
 

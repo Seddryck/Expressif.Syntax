@@ -614,6 +614,19 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void RecordFieldShorthandCanContinueAPipeline()
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(".address | .city | .name");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(((RecordAccessSyntax)root.Value).Fields.Single().Name, Is.EqualTo("address"));
+            Assert.That(root.Pipeline.Cast<RecordAccessSyntax>()
+                .Select(access => access.Fields.Single().Name), Is.EqualTo(new[] { "city", "name" }));
+        });
+    }
+
+    [Test]
     public void LeadingMapShorthandPreservesOuterPipelineBoundary()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("|> add(1) | sum");
