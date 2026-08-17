@@ -965,6 +965,26 @@
         {
           "type": "STRING",
           "value": "(-)"
+        },
+        {
+          "type": "STRING",
+          "value": "(positive)"
+        },
+        {
+          "type": "STRING",
+          "value": "(negative)"
+        },
+        {
+          "type": "STRING",
+          "value": "(absolutely-positive)"
+        },
+        {
+          "type": "STRING",
+          "value": "(absolutely-negative)"
+        },
+        {
+          "type": "PATTERN",
+          "value": "\\((?:>=|<=|>|<)-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?\\)"
         }
       ]
     },

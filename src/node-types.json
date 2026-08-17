@@ -810,6 +810,22 @@
     "named": false
   },
   {
+    "type": "(absolutely-negative)",
+    "named": false
+  },
+  {
+    "type": "(absolutely-positive)",
+    "named": false
+  },
+  {
+    "type": "(negative)",
+    "named": false
+  },
+  {
+    "type": "(positive)",
+    "named": false
+  },
+  {
     "type": ")",
     "named": false
   },

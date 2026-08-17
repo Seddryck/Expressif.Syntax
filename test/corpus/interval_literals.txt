@@ -106,6 +106,35 @@ Sign-oriented interval shorthands
           (interval_shorthand))))))
 
 ==================
+Comparison and word interval shorthands
+==================
+
+{I(>40), I(<40), I(>=40), I(<=40), I(positive), I(negative), I(absolutely-positive), I(absolutely-negative)}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))
+        (interval_literal
+          (interval_shorthand))))))
+
+==================
 Canonical temporal interval bounds
 ==================
 

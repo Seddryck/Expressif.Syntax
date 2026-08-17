@@ -230,7 +230,12 @@ export default grammar({
 
     infinite_bound: (_) => choice("+INF", "-INF"),
 
-    interval_shorthand: (_) => choice("(0+)", "(+)", "(0-)", "(-)"),
+    interval_shorthand: (_) => choice(
+      "(0+)", "(+)", "(0-)", "(-)",
+      "(positive)", "(negative)",
+      "(absolutely-positive)", "(absolutely-negative)",
+      /\((?:>=|<=|>|<)-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?\)/,
+    ),
 
     array_literal: ($) => prec.dynamic(1, choice(
       seq("{", "}"),

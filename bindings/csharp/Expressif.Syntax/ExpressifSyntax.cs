@@ -215,6 +215,11 @@ public static class ExpressifSyntax
                 "(-)" => new(Span(node), node.Text,
                     new(IntervalBoundKind.NegativeInfinity, null),
                     new(IntervalBoundKind.Finite, new NumericLiteralSyntax(new SourceSpan(node.StartIndex + 2, 0), "0")), true, false),
+                "(positive)" => BindZeroInterval(node, true, true),
+                "(negative)" => BindZeroInterval(node, false, true),
+                "(absolutely-positive)" => BindZeroInterval(node, true, false),
+                "(absolutely-negative)" => BindZeroInterval(node, false, false),
+                _ when shorthand.Text[1] is '>' or '<' => BindComparisonInterval(node, shorthand.Text),
                 _ => throw Unknown(shorthand),
             };
         }
@@ -226,6 +231,31 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, BindIntervalBound(lower), BindIntervalBound(upper),
             lowerDelimiter.Text == "[",
             upperDelimiter.Text == "]");
+    }
+
+    private static IntervalLiteralSyntax BindZeroInterval(TsNode node, bool positive, bool inclusive)
+    {
+        var zero = new NumericLiteralSyntax(new SourceSpan(node.StartIndex + 2, 0), "0");
+        return positive
+            ? new(Span(node), node.Text,
+                new(IntervalBoundKind.Finite, zero), new(IntervalBoundKind.PositiveInfinity, null), inclusive, true)
+            : new(Span(node), node.Text,
+                new(IntervalBoundKind.NegativeInfinity, null), new(IntervalBoundKind.Finite, zero), true, inclusive);
+    }
+
+    private static IntervalLiteralSyntax BindComparisonInterval(TsNode node, string shorthand)
+    {
+        var operatorLength = shorthand[2] == '=' ? 2 : 1;
+        var valueOffset = 1 + operatorLength;
+        var valueText = shorthand[valueOffset..^1];
+        var valueStart = node.Text.IndexOf(valueText, StringComparison.Ordinal);
+        var value = new NumericLiteralSyntax(new SourceSpan(node.StartIndex + valueStart, valueText.Length), valueText);
+        var inclusive = operatorLength == 2;
+        return shorthand[1] == '>'
+            ? new(Span(node), node.Text,
+                new(IntervalBoundKind.Finite, value), new(IntervalBoundKind.PositiveInfinity, null), inclusive, true)
+            : new(Span(node), node.Text,
+                new(IntervalBoundKind.NegativeInfinity, null), new(IntervalBoundKind.Finite, value), true, inclusive);
     }
 
     private static IntervalBound BindIntervalBound(TsNode node)
