@@ -7,7 +7,7 @@ public static class ExpressifSyntax
 {
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
-        "array_literal", "boolean_literal", "incoming_value", "numeric_literal",
+        "array_literal", "boolean_literal", "incoming_value", "null_literal", "numeric_literal",
         "interval_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
@@ -165,6 +165,7 @@ public static class ExpressifSyntax
             "record_access" => BindRecordAccess(node),
             "numeric_literal" => new NumericLiteralSyntax(Span(node), node.Text),
             "boolean_literal" => new BooleanLiteralSyntax(Span(node), node.Text),
+            "null_literal" => new NullLiteralSyntax(Span(node), node.Text),
             "double_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.DoubleQuote),
             "backtick_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.Backtick),
             "date_literal" => new DateLiteralSyntax(Span(node), node.Text),

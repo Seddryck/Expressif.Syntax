@@ -164,6 +164,24 @@ Boolean literals
             (boolean_literal)))))))
 
 ==================
+Null literal and function argument
+==================
+
+#null | coalesce(#null)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (null_literal)
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (null_literal)))))))
+
+==================
 Bare boolean words are function calls
 ==================
 
