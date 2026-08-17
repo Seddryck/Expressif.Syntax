@@ -835,6 +835,43 @@ public class SyntaxBindingTests
         });
     }
 
+    [TestCase("I(>40)", IntervalBoundKind.Finite, IntervalBoundKind.PositiveInfinity, false, true, "40")]
+    [TestCase("I(<40)", IntervalBoundKind.NegativeInfinity, IntervalBoundKind.Finite, true, false, "40")]
+    [TestCase("I(>=40)", IntervalBoundKind.Finite, IntervalBoundKind.PositiveInfinity, true, true, "40")]
+    [TestCase("I(<=40)", IntervalBoundKind.NegativeInfinity, IntervalBoundKind.Finite, true, true, "40")]
+    [TestCase("I(positive)", IntervalBoundKind.Finite, IntervalBoundKind.PositiveInfinity, true, true, "0")]
+    [TestCase("I(negative)", IntervalBoundKind.NegativeInfinity, IntervalBoundKind.Finite, true, true, "0")]
+    [TestCase("I(absolutely-positive)", IntervalBoundKind.Finite, IntervalBoundKind.PositiveInfinity, false, true, "0")]
+    [TestCase("I(absolutely-negative)", IntervalBoundKind.NegativeInfinity, IntervalBoundKind.Finite, true, false, "0")]
+    public void ComparisonAndWordIntervalShorthandsMapToFirstClassSemantics(
+        string source,
+        IntervalBoundKind lowerKind,
+        IntervalBoundKind upperKind,
+        bool lowerInclusive,
+        bool upperInclusive,
+        string finiteText)
+    {
+        var interval = (IntervalLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var finite = interval.LowerBound.Value ?? interval.UpperBound.Value;
+        var authoredValueStart = source.IndexOf(finiteText, StringComparison.Ordinal);
+        var expectedSpan = authoredValueStart >= 0
+            ? new SourceSpan(authoredValueStart, finiteText.Length)
+            : new SourceSpan(2, 0);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(interval.Text, Is.EqualTo(source));
+            Assert.That(interval.LowerBound.Kind, Is.EqualTo(lowerKind));
+            Assert.That(interval.UpperBound.Kind, Is.EqualTo(upperKind));
+            Assert.That(interval.IsLowerInclusive, Is.EqualTo(lowerInclusive));
+            Assert.That(interval.IsUpperInclusive, Is.EqualTo(upperInclusive));
+            Assert.That(finite, Is.TypeOf<NumericLiteralSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo(finiteText));
+            Assert.That(finite!.Span, Is.EqualTo(expectedSpan));
+            Assert.That(interval.Children, Is.EqualTo(new[] { finite }));
+        });
+    }
+
     [Test]
     public void BareDateLookingIntervalBoundsAreRejected()
         => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("I[2022-12-10, 2022-12-31]"));
