@@ -69,15 +69,23 @@ public class SyntaxBindingTests
         });
     }
 
-    [TestCase("0")]
-    [TestCase("42")]
-    [TestCase("-5")]
-    [TestCase("3.14")]
-    [TestCase("-3.14")]
-    public void NumericLiteralsPreserveLexicalText(string source)
+    [TestCase("0", "0")]
+    [TestCase("-0", "0")]
+    [TestCase("42", "42")]
+    [TestCase("-5", "-5")]
+    [TestCase("3.14", "3.14")]
+    [TestCase("-3.14", "-3.14")]
+    [TestCase("1.0", "1")]
+    [TestCase("1.500", "1.5")]
+    public void NumericLiteralsExposeNormalizedValue(string source, string expected)
     {
         var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
-        Assert.That(root.Value, Is.TypeOf<NumericLiteralSyntax>().With.Property(nameof(SyntaxNode.Text)).EqualTo(source));
+        var literal = (NumericLiteralSyntax)root.Value;
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Text, Is.EqualTo(source));
+            Assert.That(literal.Value, Is.EqualTo(expected));
+        });
     }
 
     [TestCase("#true", true)]
@@ -96,12 +104,13 @@ public class SyntaxBindingTests
         Assert.That(((FunctionCallSyntax)root.Pipeline.Single()).Name, Is.EqualTo(source));
     }
 
-    [TestCase("\"foo\"", QuotingStyle.DoubleQuote)]
-    [TestCase("\"\"", QuotingStyle.DoubleQuote)]
-    [TestCase("\"Alice said \\\"hello\\\".\"", QuotingStyle.DoubleQuote)]
-    [TestCase("`foo`", QuotingStyle.Backtick)]
-    [TestCase("` foo bar `", QuotingStyle.Backtick)]
-    public void QuotedLiteralsPreserveStyleAndEscapedSource(string source, QuotingStyle style)
+    [TestCase("\"foo\"", QuotingStyle.DoubleQuote, "foo")]
+    [TestCase("\"\"", QuotingStyle.DoubleQuote, "")]
+    [TestCase("\"Alice said \\\"hello\\\".\"", QuotingStyle.DoubleQuote, "Alice said \"hello\".")]
+    [TestCase("\"C:\\\\Temp\"", QuotingStyle.DoubleQuote, "C:\\Temp")]
+    [TestCase("`foo`", QuotingStyle.Backtick, "foo")]
+    [TestCase("` foo bar `", QuotingStyle.Backtick, " foo bar ")]
+    public void QuotedLiteralsExposeDecodedValue(string source, QuotingStyle style, string expected)
     {
         var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
         var literal = (QuotedLiteralSyntax)root.Value;
@@ -109,6 +118,42 @@ public class SyntaxBindingTests
         {
             Assert.That(literal.Text, Is.EqualTo(source));
             Assert.That(literal.QuotingStyle, Is.EqualTo(style));
+            Assert.That(literal.Value, Is.EqualTo(expected));
+        });
+    }
+
+    [TestCase("#\"2025-12-17\"")]
+    public void DateLiteralsExposeTypedValue(string source)
+    {
+        var literal = (DateLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Text, Is.EqualTo(source));
+            Assert.That(literal.Value, Is.EqualTo(new DateOnly(2025, 12, 17)));
+        });
+    }
+
+    [TestCase("#\"2025-12-17T14:30:00\"")]
+    [TestCase("#\"2025-12-17 14:30:00\"")]
+    public void DateTimeLiteralsExposeTypedValue(string source)
+    {
+        var literal = (DateTimeLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Text, Is.EqualTo(source));
+            Assert.That(literal.Value, Is.EqualTo(new DateTime(2025, 12, 17, 14, 30, 0)));
+            Assert.That(literal.Value.Kind, Is.EqualTo(DateTimeKind.Unspecified));
+        });
+    }
+
+    [TestCase("#\"04:00:00\"")]
+    public void TimeLiteralsExposeTypedValue(string source)
+    {
+        var literal = (TimeLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Text, Is.EqualTo(source));
+            Assert.That(literal.Value, Is.EqualTo(new TimeOnly(4, 0, 0)));
         });
     }
 

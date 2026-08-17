@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace Expressif.Syntax;
 
@@ -285,7 +286,23 @@ public sealed class TupleProjectionSyntax : ExpressionSyntax
 
 public sealed class NumericLiteralSyntax : ValueSyntax
 {
-    internal NumericLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.NumericLiteral, span, text) { }
+    internal NumericLiteralSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.NumericLiteral, span, text) => Value = Normalize(text);
+
+    public string Value { get; }
+
+    private static string Normalize(string text)
+    {
+        var isNegative = text[0] == '-';
+        var digits = isNegative ? text[1..] : text;
+        var decimalPoint = digits.IndexOf('.');
+        if (decimalPoint >= 0)
+        {
+            digits = digits.TrimEnd('0').TrimEnd('.');
+        }
+
+        return isNegative && digits != "0" ? $"-{digits}" : digits;
+    }
 }
 
 public sealed class BooleanLiteralSyntax : ValueSyntax
@@ -301,9 +318,17 @@ public enum QuotingStyle { DoubleQuote, Backtick }
 public sealed class QuotedLiteralSyntax : ValueSyntax
 {
     internal QuotedLiteralSyntax(SourceSpan span, string text, QuotingStyle quotingStyle)
-        : base(SyntaxKind.QuotedLiteral, span, text) => QuotingStyle = quotingStyle;
+        : base(SyntaxKind.QuotedLiteral, span, text)
+    {
+        QuotingStyle = quotingStyle;
+        var content = text[1..^1];
+        Value = quotingStyle is QuotingStyle.DoubleQuote
+            ? content.Replace("\\\"", "\"").Replace("\\\\", "\\")
+            : content;
+    }
 
     public QuotingStyle QuotingStyle { get; }
+    public string Value { get; }
 }
 
 public abstract class TemporalLiteralSyntax : ValueSyntax
@@ -313,17 +338,30 @@ public abstract class TemporalLiteralSyntax : ValueSyntax
 
 public sealed class DateLiteralSyntax : TemporalLiteralSyntax
 {
-    internal DateLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.DateLiteral, span, text) { }
+    internal DateLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.DateLiteral, span, text)
+        => Value = DateOnly.ParseExact(text[2..^1], "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    public DateOnly Value { get; }
 }
 
 public sealed class DateTimeLiteralSyntax : TemporalLiteralSyntax
 {
-    internal DateTimeLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.DateTimeLiteral, span, text) { }
+    internal DateTimeLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.DateTimeLiteral, span, text)
+        => Value = DateTime.ParseExact(
+            text[2..^1],
+            ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss"],
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None);
+
+    public DateTime Value { get; }
 }
 
 public sealed class TimeLiteralSyntax : TemporalLiteralSyntax
 {
-    internal TimeLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.TimeLiteral, span, text) { }
+    internal TimeLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.TimeLiteral, span, text)
+        => Value = TimeOnly.ParseExact(text[2..^1], "HH:mm:ss", CultureInfo.InvariantCulture);
+
+    public TimeOnly Value { get; }
 }
 
 public enum IntervalBoundKind { Finite, NegativeInfinity, PositiveInfinity }
