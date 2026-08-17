@@ -639,6 +639,22 @@ public class SyntaxBindingTests
         Assert.That(shorthand.Expression.Pipeline.Single(), Is.TypeOf<ParenthesizedExpressionSyntax>());
     }
 
+    [TestCase("record(name := \"Alice\",")]
+    [TestCase("record(name := \"Alice\", age := 30,")]
+    public void RecordFunctionAcceptsATrailingComma(string prefix)
+    {
+        var withComma = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(prefix + ")")).Pipeline.Single();
+        var withoutComma = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(prefix[..^1] + ")")).Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(withComma.Arguments.Select(argument => argument.Kind),
+                Is.EqualTo(withoutComma.Arguments.Select(argument => argument.Kind)));
+            Assert.That(withComma.Arguments.OfType<NamedArgumentSyntax>().Select(argument => argument.Name),
+                Is.EqualTo(withoutComma.Arguments.OfType<NamedArgumentSyntax>().Select(argument => argument.Name)));
+        });
+    }
+
     [Test]
     public void RecordFieldShorthandCanContinueAPipeline()
     {

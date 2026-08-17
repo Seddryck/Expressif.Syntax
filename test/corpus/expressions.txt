@@ -83,6 +83,28 @@ record(customer-name := .name)
                 (named_record_field)))))))))
 
 ==================
+Record function accepts trailing commas
+==================
+
+record(name := "Alice", age := 30,)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (named_argument
+            name: (argument_name)
+            value: (double_quoted_literal
+              (double_quoted_content)))
+          (named_argument
+            name: (argument_name)
+            value: (numeric_literal)))))))
+
+==================
 Function call with mixed arguments
 ==================
 
