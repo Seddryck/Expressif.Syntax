@@ -166,8 +166,7 @@ jobs:
         run: |
           $packageSource = (Resolve-Path 'artifacts').Path
           dotnet restore bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj `
-            --source $packageSource `
-            --source 'https://api.nuget.org/v3/index.json' `
+            -p:RestoreAdditionalProjectSources=$packageSource `
             -p:PackageVersionUnderTest='${{ needs.validate.outputs.version }}'
           if ($LASTEXITCODE -ne 0) { throw 'Package test restore failed.' }
 
