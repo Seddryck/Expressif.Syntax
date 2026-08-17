@@ -1,5 +1,6 @@
 namespace Expressif.Syntax.Tests;
 
+using System.Globalization;
 using System.Text.Json;
 
 public class SyntaxBindingTests
@@ -75,16 +76,18 @@ public class SyntaxBindingTests
     [TestCase("-5", "-5")]
     [TestCase("3.14", "3.14")]
     [TestCase("-3.14", "-3.14")]
-    [TestCase("1.0", "1")]
-    [TestCase("1.500", "1.5")]
-    public void NumericLiteralsExposeNormalizedValue(string source, string expected)
+    [TestCase("1.0", "1.0")]
+    [TestCase("1.500", "1.500")]
+    [TestCase("0.00100", "0.00100")]
+    [TestCase("79228162514264337593543950335", "79228162514264337593543950335")]
+    public void NumericLiteralsExposeDecimalValue(string source, string expected)
     {
         var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
         var literal = (NumericLiteralSyntax)root.Value;
         Assert.Multiple(() =>
         {
             Assert.That(literal.Text, Is.EqualTo(source));
-            Assert.That(literal.Value, Is.EqualTo(expected));
+            Assert.That(literal.Value, Is.EqualTo(decimal.Parse(expected, CultureInfo.InvariantCulture)));
         });
     }
 

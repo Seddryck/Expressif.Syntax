@@ -287,22 +287,13 @@ public sealed class TupleProjectionSyntax : ExpressionSyntax
 public sealed class NumericLiteralSyntax : ValueSyntax
 {
     internal NumericLiteralSyntax(SourceSpan span, string text)
-        : base(SyntaxKind.NumericLiteral, span, text) => Value = Normalize(text);
+        : base(SyntaxKind.NumericLiteral, span, text)
+        => Value = decimal.Parse(
+            text,
+            NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
+            CultureInfo.InvariantCulture);
 
-    public string Value { get; }
-
-    private static string Normalize(string text)
-    {
-        var isNegative = text[0] == '-';
-        var digits = isNegative ? text[1..] : text;
-        var decimalPoint = digits.IndexOf('.');
-        if (decimalPoint >= 0)
-        {
-            digits = digits.TrimEnd('0').TrimEnd('.');
-        }
-
-        return isNegative && digits != "0" ? $"-{digits}" : digits;
-    }
+    public decimal Value { get; }
 }
 
 public sealed class BooleanLiteralSyntax : ValueSyntax
