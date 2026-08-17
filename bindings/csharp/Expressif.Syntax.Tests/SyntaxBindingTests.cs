@@ -1,6 +1,5 @@
 namespace Expressif.Syntax.Tests;
 
-using System.Globalization;
 using System.Text.Json;
 
 public class SyntaxBindingTests
@@ -70,24 +69,29 @@ public class SyntaxBindingTests
         });
     }
 
-    [TestCase("0", "0")]
-    [TestCase("-0", "0")]
-    [TestCase("42", "42")]
-    [TestCase("-5", "-5")]
-    [TestCase("3.14", "3.14")]
-    [TestCase("-3.14", "-3.14")]
-    [TestCase("1.0", "1.0")]
-    [TestCase("1.500", "1.500")]
-    [TestCase("0.00100", "0.00100")]
-    [TestCase("79228162514264337593543950335", "79228162514264337593543950335")]
-    public void NumericLiteralsExposeDecimalValue(string source, string expected)
+    private static IEnumerable<TestCaseData> NumericLiteralCases()
+    {
+        yield return new TestCaseData("0", 0m);
+        yield return new TestCaseData("-0", 0m);
+        yield return new TestCaseData("42", 42m);
+        yield return new TestCaseData("-5", -5m);
+        yield return new TestCaseData("3.14", 3.14m);
+        yield return new TestCaseData("-3.14", -3.14m);
+        yield return new TestCaseData("1.0", 1.0m);
+        yield return new TestCaseData("1.500", 1.500m);
+        yield return new TestCaseData("0.00100", 0.00100m);
+        yield return new TestCaseData("79228162514264337593543950335", decimal.MaxValue);
+    }
+
+    [TestCaseSource(nameof(NumericLiteralCases))]
+    public void NumericLiteralsExposeDecimalValue(string source, decimal expected)
     {
         var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
         var literal = (NumericLiteralSyntax)root.Value;
         Assert.Multiple(() =>
         {
             Assert.That(literal.Text, Is.EqualTo(source));
-            Assert.That(literal.Value, Is.EqualTo(decimal.Parse(expected, CultureInfo.InvariantCulture)));
+            Assert.That(literal.Value, Is.EqualTo(expected));
         });
     }
 
