@@ -54,7 +54,7 @@ jobs:
           retention-days: 7
 
   validate:
-    name: Validate release candidate
+    name: Build release packages
     if: github.ref == 'refs/heads/main'
     needs: native
     runs-on: ubuntu-latest
@@ -91,33 +91,10 @@ jobs:
         with:
           useConfigFile: true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
-
-      - name: Install packaging dependencies
-        run: |
-          npm ci
-          python -m pip install build pytest
-
-      - name: Test parser and bindings
-        run: |
-          npm test
-          python -m pip install '.[core]'
-          python -m pytest bindings/python/tests
-          dotnet test Expressif.Syntax.sln --configuration Release
 
       - name: Download Windows native grammar library
         uses: actions/download-artifact@v8
@@ -131,13 +108,16 @@ jobs:
           name: native-linux-x64
           path: native-assets/linux-x64
 
-      - name: Build all release packages
+      - name: Build NuGet package
         shell: pwsh
         run: >-
-          ./scripts/package.ps1
+          ./scripts/Build-NuGetPackage.ps1
           -Version '${{ steps.gitversion.outputs.semVer }}'
           -NativeAssetsDirectory 'native-assets'
-          -RequirePublishablePythonVersion
+
+      - name: Build native C archive
+        shell: pwsh
+        run: ./scripts/New-NativeArchive.ps1 -Version '${{ steps.gitversion.outputs.semVer }}'
 
       - name: Upload validated release packages
         uses: actions/upload-artifact@v7
@@ -147,10 +127,62 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  consume:
+    name: Test release package (${{ matrix.rid }})
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          ref: ${{ needs.validate.outputs.sha }}
+
+      - name: Set up .NET runtimes
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Download release package
+        uses: actions/download-artifact@v8
+        with:
+          name: release-packages-${{ needs.validate.outputs.version }}
+          path: artifacts
+
+      - name: Restore installed package tests
+        shell: pwsh
+        run: |
+          $packageSource = (Resolve-Path 'artifacts').Path
+          dotnet restore bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj `
+            --source $packageSource `
+            --source 'https://api.nuget.org/v3/index.json' `
+            -p:PackageVersionUnderTest='${{ needs.validate.outputs.version }}'
+          if ($LASTEXITCODE -ne 0) { throw 'Package test restore failed.' }
+
+      - name: Test installed package
+        shell: pwsh
+        run: >-
+          dotnet test bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj
+          --configuration Release
+          --no-restore
+          -p:PackageVersionUnderTest='${{ needs.validate.outputs.version }}'
+
   publish:
     name: Publish patch-zero release
     if: needs.validate.outputs.patch == '0'
-    needs: validate
+    needs: [validate, consume]
     runs-on: ubuntu-latest
     permissions:
       contents: write
