@@ -102,6 +102,40 @@ foo($0, $^0)
               index: (tuple_index))))))))
 
 ==================
+Tuple projection compositions as function arguments
+==================
+
+adjacent($1 | subtract($0) | multiply($1))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (tuple_projection
+                direction: (from_start)
+                index: (tuple_index))
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (tuple_projection
+                      direction: (from_start)
+                      index: (tuple_index)))))
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (tuple_projection
+                      direction: (from_start)
+                      index: (tuple_index))))))))))))
+
+==================
 Tuple projection is distinct from field access
 ==================
 

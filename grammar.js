@@ -157,9 +157,17 @@ export default grammar({
 
     // Parentheses delimit the nested expression, so a function call or
     // function pipeline can be passed directly as a higher-order argument.
-    _nested_open_expression: ($) => seq(
-      $.function_call,
-      repeat(seq("|", $._pipeline_expression)),
+    _nested_open_expression: ($) => choice(
+      seq(
+        $.function_call,
+        repeat(seq("|", $._pipeline_expression)),
+      ),
+      seq(
+        $.tuple_projection,
+        "|",
+        $._pipeline_expression,
+        repeat(seq("|", $._pipeline_expression)),
+      ),
     ),
 
     // A positional argument is already delimited by its function call's
