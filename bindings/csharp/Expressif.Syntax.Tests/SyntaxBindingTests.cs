@@ -669,6 +669,20 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void RecordFieldShorthandAcceptsUnderscores()
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(".first_name._display_name");
+        var access = (RecordAccessSyntax)root.Value;
+
+        Assert.That(access.Fields.Select(field => field.Name),
+            Is.EqualTo(new[] { "first_name", "_display_name" }));
+    }
+
+    [Test]
+    public void RecordFieldShorthandRejectsOperators()
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(".+"));
+
+    [Test]
     public void LeadingMapShorthandPreservesOuterPipelineBoundary()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("|> add(1) | sum");

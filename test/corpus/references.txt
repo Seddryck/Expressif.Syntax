@@ -66,6 +66,27 @@ example(.name, .birth-date, .0, .10)
                 (positional_record_field)))))))))
 
 ==================
+Field shorthand names support underscores
+==================
+
+.first_name._display_name | ^._original_name
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_access
+        field: (record_field_selector
+          (named_record_field))
+        field: (immediate_record_field_selector
+          (named_record_field)))
+      (record_access
+        root: (original_input)
+        field: (original_record_field_selector
+          (named_record_field))))))
+
+==================
 Variable pipeline
 ==================
 
