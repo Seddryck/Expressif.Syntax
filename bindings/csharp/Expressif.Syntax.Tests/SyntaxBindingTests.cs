@@ -270,6 +270,25 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void TupleProjectionCompositionCanBeAFunctionArgument()
+    {
+        const string source = "adjacent($1 | subtract($0) | multiply($1))";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var composition = (OpenExpressionSyntax)call.Arguments.Single().Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(composition.Text, Is.EqualTo("$1 | subtract($0) | multiply($1)"));
+            Assert.That(composition.Source, Is.TypeOf<TupleProjectionSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("$1"));
+            Assert.That(composition.Pipeline, Has.Count.EqualTo(2));
+            Assert.That(composition.Children, Has.Count.EqualTo(3));
+            Assert.That(composition.Span, Is.EqualTo(new SourceSpan(9, 32)));
+        });
+    }
+
+    [Test]
     public void TupleProjectionCanFollowAFunctionCallInAnOpenPipeline()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("lower | $0");
