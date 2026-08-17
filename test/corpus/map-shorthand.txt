@@ -34,7 +34,7 @@ Mapped function with arguments
                 (numeric_literal)))))))))
 
 ==================
-Mapped multi-step open expression
+Leading map shorthand preserves the outer pipeline boundary
 ==================
 
 |> lower | trim
@@ -47,9 +47,9 @@ Mapped multi-step open expression
       (map_shorthand
         expression: (open_expression
           (function_call
-            name: (function_name))
-          (function_call
-            name: (function_name)))))))
+            name: (function_name))))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Map shorthand after a closed-expression source

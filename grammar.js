@@ -46,7 +46,7 @@ export default grammar({
 
     map_shorthand: ($) => seq(
       "|>",
-      field("expression", $.open_expression),
+      field("expression", alias($.expression, $.open_expression)),
     ),
 
     // In a closed-expression pipeline, the next ordinary `|` belongs to the

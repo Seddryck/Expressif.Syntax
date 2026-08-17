@@ -98,8 +98,13 @@
           "type": "FIELD",
           "name": "expression",
           "content": {
-            "type": "SYMBOL",
-            "name": "open_expression"
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "expression"
+            },
+            "named": true,
+            "value": "open_expression"
           }
         }
       ]

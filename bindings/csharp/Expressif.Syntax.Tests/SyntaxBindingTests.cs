@@ -614,6 +614,21 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void LeadingMapShorthandPreservesOuterPipelineBoundary()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("|> add(1) | sum");
+        var shorthand = (MapShorthandSyntax)root.Pipeline[0];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(shorthand.Expression.Pipeline.Cast<FunctionCallSyntax>().Select(call => call.Name),
+                Is.EqualTo(new[] { "add" }));
+            Assert.That(root.Pipeline[1],
+                Is.TypeOf<FunctionCallSyntax>().With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("sum"));
+        });
+    }
+
+    [Test]
     public void ParenthesizedMapShorthandCannotFollowAnOrdinaryPipe()
         => Assert.That(
             () => ExpressifSyntax.Parse("absolute | (|> absolute)"),
