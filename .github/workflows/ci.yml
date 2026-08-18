@@ -19,6 +19,7 @@ jobs:
     name: Calculate package version
     runs-on: ubuntu-latest
     outputs:
+      patch: ${{ steps.gitversion.outputs.patch }}
       semver: ${{ steps.gitversion.outputs.semVer }}
 
     steps:
@@ -297,3 +298,83 @@ jobs:
             exit 1
           }
           Write-Output 'All required CI validations succeeded.'
+
+  publish:
+    name: Publish patch-zero release
+    if: github.ref == 'refs/heads/main' && needs.version.outputs.patch == '0'
+    needs: [version, gate]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Check out publication guard
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      # Every registry or release publication step must remain below this guard.
+      - name: Enforce main-only publication
+        shell: pwsh
+        run: ./scripts/Assert-MainPublication.ps1
+
+      - name: Download validated release packages
+        uses: actions/download-artifact@v8
+        with:
+          name: packages-${{ needs.version.outputs.semver }}
+          path: artifacts
+
+      - name: Create tagged GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.sha }}
+          VERSION: ${{ needs.version.outputs.semver }}
+        shell: pwsh
+        run: |
+          $tag = "v$env:VERSION"
+          $existingTag = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$tag" `
+            --jq '.object.sha' 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if ($existingTag -ne $env:RELEASE_SHA) {
+              throw "Tag '$tag' already points to '$existingTag', not '$env:RELEASE_SHA'."
+            }
+            gh release view $tag | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+              throw "Tag '$tag' exists for this commit but its GitHub release is missing."
+            }
+            Write-Output "Release '$tag' already exists for this commit; leaving its artifacts unchanged."
+            exit 0
+          }
+
+          gh release create $tag artifacts/* `
+            --target $env:RELEASE_SHA `
+            --title $tag `
+            --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw "GitHub release '$tag' creation failed." }
+
+      - name: Log in to NuGet with trusted publishing
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+        with:
+          user: Seddryck
+
+      - name: Publish NuGet package
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
+            throw 'NuGet trusted publishing did not provide a temporary API key.'
+          }
+          $packages = @(Get-ChildItem -LiteralPath artifacts -Filter *.nupkg)
+          if ($packages.Count -ne 1) {
+            throw "Expected exactly one NuGet package, found $($packages.Count)."
+          }
+          dotnet nuget push $packages[0].FullName `
+            --api-key $env:NUGET_API_KEY `
+            --source https://api.nuget.org/v3/index.json `
+            --skip-duplicate
+          if ($LASTEXITCODE -ne 0) { throw 'NuGet publication failed.' }
