@@ -107,9 +107,9 @@ jobs:
           path: native-assets/${{ matrix.rid }}/${{ matrix.library }}
           if-no-files-found: error
 
-  package:
-    name: Build C# package
-    needs: [version, native]
+  managed:
+    name: Build .NET managed bindings
+    needs: version
     runs-on: ubuntu-latest
 
     steps:
@@ -122,6 +122,54 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
+
+      - name: Restore managed bindings
+        shell: pwsh
+        run: >-
+          dotnet restore bindings/csharp/Expressif.Syntax/Expressif.Syntax.csproj
+          -p:Version='${{ needs.version.outputs.semver }}'
+          -p:PackageVersion='${{ needs.version.outputs.semver }}'
+
+      - name: Build managed bindings
+        shell: pwsh
+        run: >-
+          dotnet build bindings/csharp/Expressif.Syntax/Expressif.Syntax.csproj
+          --configuration Release
+          --no-restore
+          -p:Version='${{ needs.version.outputs.semver }}'
+          -p:PackageVersion='${{ needs.version.outputs.semver }}'
+          -p:BuildNativeGrammar=false
+
+      - name: Upload managed bindings
+        uses: actions/upload-artifact@v7
+        with:
+          name: managed-${{ needs.version.outputs.semver }}
+          path: |
+            bindings/csharp/Expressif.Syntax/bin/Release
+            bindings/csharp/Expressif.Syntax/obj
+          if-no-files-found: error
+
+  package:
+    name: Pack NuGet package
+    needs: [version, native, managed]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Download managed bindings
+        uses: actions/download-artifact@v8
+        with:
+          name: managed-${{ needs.version.outputs.semver }}
+          path: bindings/csharp/Expressif.Syntax
 
       - name: Download Windows native grammar library
         uses: actions/download-artifact@v8
@@ -159,10 +207,10 @@ jobs:
           name: native-osx-arm64
           path: native-assets/osx-arm64
 
-      - name: Build NuGet package
+      - name: Pack NuGet package
         shell: pwsh
         run: >-
-          ./scripts/Build-NuGetPackage.ps1
+          ./scripts/Pack-NuGetPackage.ps1
           -Version '${{ needs.version.outputs.semver }}'
           -NativeAssetsDirectory 'native-assets'
 
@@ -276,7 +324,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [version, parser, native, package, consume, native-archive, collect]
+    needs: [version, parser, native, managed, package, consume, native-archive, collect]
     runs-on: ubuntu-latest
 
     steps:
@@ -287,6 +335,7 @@ jobs:
             version = '${{ needs.version.result }}'
             parser = '${{ needs.parser.result }}'
             native = '${{ needs.native.result }}'
+            managed = '${{ needs.managed.result }}'
             package = '${{ needs.package.result }}'
             consume = '${{ needs.consume.result }}'
             nativeArchive = '${{ needs.native-archive.result }}'

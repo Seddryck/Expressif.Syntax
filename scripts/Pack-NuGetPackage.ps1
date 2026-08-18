@@ -24,16 +24,12 @@ $properties = @(
     "/p:NativeAssetsDirectory=$nativeAssetsPath"
 )
 
-dotnet restore $projectPath @properties
-if ($LASTEXITCODE -ne 0) { throw 'NuGet restore failed.' }
-
-dotnet build $projectPath --configuration Release --no-restore @properties
-if ($LASTEXITCODE -ne 0) { throw 'Managed assembly build failed.' }
-
 dotnet pack $projectPath `
     --configuration Release `
     --output $outputPath `
     --no-build `
     --no-restore `
+    --disable-build-servers `
+    -m:1 `
     @properties
 if ($LASTEXITCODE -ne 0) { throw 'NuGet packaging failed.' }

@@ -6,6 +6,7 @@
     <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('Linux'))">libtree-sitter-expressif.so</ExpressifGrammarLibrary>
     <ExpressifGrammarLibrary Condition="$([MSBuild]::IsOSPlatform('OSX'))">libtree-sitter-expressif.dylib</ExpressifGrammarLibrary>
     <TreeSitterCli>tree-sitter</TreeSitterCli>
+    <BuildNativeGrammar Condition="'$(BuildNativeGrammar)' == ''">true</BuildNativeGrammar>
     <TreeSitterCli Condition="$([MSBuild]::IsOSPlatform('Windows')) And Exists('$(MSBuildThisFileDirectory)..\..\..\node_modules\.bin\tree-sitter.cmd')">$(MSBuildThisFileDirectory)..\..\..\node_modules\.bin\tree-sitter.cmd</TreeSitterCli>
     <TreeSitterCli Condition="!$([MSBuild]::IsOSPlatform('Windows')) And Exists('$(MSBuildThisFileDirectory)../../../node_modules/.bin/tree-sitter')">$(MSBuildThisFileDirectory)../../../node_modules/.bin/tree-sitter</TreeSitterCli>
   </PropertyGroup>
@@ -56,7 +57,7 @@
            Text="The macOS ARM64 native grammar library was not found in '$(NativeAssetsDirectory)/osx-arm64'." />
   </Target>
 
-  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Condition="'$(NativeAssetsDirectory)' == ''" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
+  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Condition="'$(NativeAssetsDirectory)' == '' And '$(BuildNativeGrammar)' == 'true'" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
     <Exec WorkingDirectory="$(MSBuildThisFileDirectory)..\..\.." Command="&quot;$(TreeSitterCli)&quot; build -o &quot;$(TargetDir)$(ExpressifGrammarLibrary)&quot; ." />
   </Target>
 </Project>
