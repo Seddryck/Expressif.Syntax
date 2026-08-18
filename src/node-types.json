@@ -267,10 +267,6 @@
       "required": true,
       "types": [
         {
-          "type": "binary_expression",
-          "named": true
-        },
-        {
           "type": "function_call",
           "named": true
         },
@@ -284,10 +280,6 @@
         },
         {
           "type": "tuple_projection",
-          "named": true
-        },
-        {
-          "type": "unary_expression",
           "named": true
         },
         {
