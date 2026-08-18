@@ -167,19 +167,184 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "function_call"
+          "name": "binary_expression"
         },
         {
           "type": "SYMBOL",
-          "name": "map_shorthand"
+          "name": "unary_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "function_call"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "map_shorthand"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "tuple_projection"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "parenthesized_expression"
+            }
+          ]
+        }
+      ]
+    },
+    "binary_expression": {
+      "type": "PREC_LEFT",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "left",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "binary_expression"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_shorthand_operand"
+                }
+              ]
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "operator",
+            "content": {
+              "type": "SYMBOL",
+              "name": "binary_operator"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "right",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_shorthand_operand"
+            }
+          }
+        ]
+      }
+    },
+    "binary_operator": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "|AND"
+        },
+        {
+          "type": "STRING",
+          "value": "|OR"
+        },
+        {
+          "type": "STRING",
+          "value": "|XOR"
+        }
+      ]
+    },
+    "unary_expression": {
+      "type": "PREC_RIGHT",
+      "value": 2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "operator",
+            "content": {
+              "type": "SYMBOL",
+              "name": "unary_operator"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "operand",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "unary_expression"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "function_call"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "map_shorthand"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "tuple_projection"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "parenthesized_expression"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "value"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "unary_operator": {
+      "type": "STRING",
+      "value": "!"
+    },
+    "_shorthand_operand": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "unary_expression"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "function_call"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "map_shorthand"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "tuple_projection"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "parenthesized_expression"
+            }
+          ]
         },
         {
           "type": "SYMBOL",
-          "name": "tuple_projection"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "parenthesized_expression"
+          "name": "value"
         }
       ]
     },
@@ -189,6 +354,14 @@
         {
           "type": "SYMBOL",
           "name": "function_call"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unary_expression"
         },
         {
           "type": "PREC",
@@ -593,6 +766,14 @@
     "_argument_value": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "SYMBOL",
+          "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unary_expression"
+        },
         {
           "type": "ALIAS",
           "content": {
@@ -1609,6 +1790,10 @@
     [
       "expression",
       "_pipeline_expression"
+    ],
+    [
+      "expression",
+      "_shorthand_operand"
     ],
     [
       "root_expression",

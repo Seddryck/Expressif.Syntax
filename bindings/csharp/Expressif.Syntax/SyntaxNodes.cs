@@ -30,6 +30,10 @@ public enum SyntaxKind
     ParenthesizedExpression,
     IntervalLiteral,
     MapShorthand,
+    UnaryExpression,
+    UnaryOperator,
+    BinaryExpression,
+    BinaryOperator,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -138,6 +142,55 @@ public sealed class MapShorthandSyntax : ExpressionSyntax
         => Expression = expression;
 
     public OpenExpressionSyntax Expression { get; }
+}
+
+public sealed class UnaryOperatorSyntax : SyntaxNode
+{
+    internal UnaryOperatorSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.UnaryOperator, span, text) { }
+}
+
+public sealed class UnaryExpressionSyntax : ExpressionSyntax
+{
+    internal UnaryExpressionSyntax(
+        SourceSpan span,
+        string text,
+        UnaryOperatorSyntax @operator,
+        ExpressionSyntax operand)
+        : base(SyntaxKind.UnaryExpression, span, text, [@operator, operand])
+    {
+        Operator = @operator;
+        Operand = operand;
+    }
+
+    public UnaryOperatorSyntax Operator { get; }
+    public ExpressionSyntax Operand { get; }
+}
+
+public sealed class BinaryOperatorSyntax : SyntaxNode
+{
+    internal BinaryOperatorSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.BinaryOperator, span, text) { }
+}
+
+public sealed class BinaryExpressionSyntax : ExpressionSyntax
+{
+    internal BinaryExpressionSyntax(
+        SourceSpan span,
+        string text,
+        ExpressionSyntax left,
+        BinaryOperatorSyntax @operator,
+        ExpressionSyntax right)
+        : base(SyntaxKind.BinaryExpression, span, text, [left, @operator, right])
+    {
+        Left = left;
+        Operator = @operator;
+        Right = right;
+    }
+
+    public ExpressionSyntax Left { get; }
+    public BinaryOperatorSyntax Operator { get; }
+    public ExpressionSyntax Right { get; }
 }
 
 public abstract class ArgumentSyntax : SyntaxNode

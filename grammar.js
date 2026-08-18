@@ -7,6 +7,13 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
+const ordinaryExpression = ($) => choice(
+  $.function_call,
+  $.map_shorthand,
+  $.tuple_projection,
+  $.parenthesized_expression,
+);
+
 export default grammar({
   name: "expressif",
 
@@ -22,6 +29,7 @@ export default grammar({
   conflicts: ($) => [
     [$.record_spread, $.incoming_value],
     [$.expression, $._pipeline_expression],
+    [$.expression, $._shorthand_operand],
     [$.root_expression, $._parenthesized_pipeline_expression],
   ],
 
@@ -66,14 +74,36 @@ export default grammar({
     ),
 
     expression: ($) => choice(
-      $.function_call,
-      $.map_shorthand,
-      $.tuple_projection,
-      $.parenthesized_expression,
+      $.binary_expression,
+      $.unary_expression,
+      ordinaryExpression($),
+    ),
+
+    binary_expression: ($) => prec.left(1, seq(
+      field("left", choice($.binary_expression, $._shorthand_operand)),
+      field("operator", $.binary_operator),
+      field("right", $._shorthand_operand),
+    )),
+
+    binary_operator: (_) => choice("|AND", "|OR", "|XOR"),
+
+    unary_expression: ($) => prec.right(2, seq(
+      field("operator", $.unary_operator),
+      field("operand", choice($.unary_expression, ordinaryExpression($), $.value)),
+    )),
+
+    unary_operator: (_) => "!",
+
+    _shorthand_operand: ($) => choice(
+      $.unary_expression,
+      ordinaryExpression($),
+      $.value,
     ),
 
     _pipeline_expression: ($) => choice(
       $.function_call,
+      $.binary_expression,
+      $.unary_expression,
       prec(1, $.record_access),
       $.tuple_projection,
       alias($._parenthesized_pipeline_expression, $.parenthesized_expression),
@@ -149,6 +179,8 @@ export default grammar({
     ),
 
     _argument_value: ($) => choice(
+      $.binary_expression,
+      $.unary_expression,
       alias($._nested_closed_expression, $.closed_expression),
       $.value,
       $.tuple_projection,

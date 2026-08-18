@@ -116,6 +116,30 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, BindOpen(expression));
     }
 
+    private static UnaryExpressionSyntax BindUnaryExpression(TsNode node)
+    {
+        var @operator = node.GetChildForField("operator") ?? throw Unknown(node);
+        var operand = node.GetChildForField("operand") ?? throw Unknown(node);
+        return new(
+            Span(node),
+            node.Text,
+            new UnaryOperatorSyntax(Span(@operator), @operator.Text),
+            BindExpression(operand));
+    }
+
+    private static BinaryExpressionSyntax BindBinaryExpression(TsNode node)
+    {
+        var left = node.GetChildForField("left") ?? throw Unknown(node);
+        var @operator = node.GetChildForField("operator") ?? throw Unknown(node);
+        var right = node.GetChildForField("right") ?? throw Unknown(node);
+        return new(
+            Span(node),
+            node.Text,
+            BindExpression(left),
+            new BinaryOperatorSyntax(Span(@operator), @operator.Text),
+            BindExpression(right));
+    }
+
     private static RootExpressionSyntax BindRootExpression(TsNode node)
     {
         if (node.Type == "root_expression")
@@ -132,12 +156,14 @@ public static class ExpressifSyntax
     private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
     {
         "closed_expression" => BindClosed(node),
+        "binary_expression" => BindBinaryExpression(node),
         "function_call" => BindFunctionCall(node),
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
         "parameterized_expression" => BindParameterizedExpression(node),
         "parenthesized_expression" => BindParenthesizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),
+        "unary_expression" => BindUnaryExpression(node),
         _ => BindValue(node),
     };
 
