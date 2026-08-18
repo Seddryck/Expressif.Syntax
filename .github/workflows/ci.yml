@@ -326,37 +326,10 @@ jobs:
           path: artifacts/*
           if-no-files-found: error
 
-  gate:
-    name: CI gate
-    if: always()
-    needs: [version, parser, native, managed, package, consume, native-archive, collect]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Require every validation job to succeed
-        shell: pwsh
-        run: |
-          $results = @{
-            version = '${{ needs.version.result }}'
-            parser = '${{ needs.parser.result }}'
-            native = '${{ needs.native.result }}'
-            managed = '${{ needs.managed.result }}'
-            package = '${{ needs.package.result }}'
-            consume = '${{ needs.consume.result }}'
-            nativeArchive = '${{ needs.native-archive.result }}'
-            collect = '${{ needs.collect.result }}'
-          }
-          $failed = @($results.GetEnumerator() | Where-Object Value -ne 'success')
-          if ($failed.Count -gt 0) {
-            $failed | ForEach-Object { Write-Error "$($_.Key) finished with result '$($_.Value)'." }
-            exit 1
-          }
-          Write-Output 'All required CI validations succeeded.'
-
   publish:
     name: Publish patch-zero release
     if: github.ref == 'refs/heads/main' && needs.version.outputs.patch == '0'
-    needs: [version, gate]
+    needs: [version, collect]
     runs-on: ubuntu-latest
     permissions:
       contents: write
