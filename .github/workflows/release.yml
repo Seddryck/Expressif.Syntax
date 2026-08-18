@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -14,63 +15,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  native:
-    name: Build native library (${{ matrix.rid }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            rid: win-x64
-            library: tree-sitter-expressif.dll
-          - os: windows-11-arm
-            rid: win-arm64
-            library: tree-sitter-expressif.dll
-          - os: ubuntu-latest
-            rid: linux-x64
-            library: libtree-sitter-expressif.so
-          - os: ubuntu-24.04-arm
-            rid: linux-arm64
-            library: libtree-sitter-expressif.so
-          - os: macos-15-intel
-            rid: osx-x64
-            library: libtree-sitter-expressif.dylib
-          - os: macos-15
-            rid: osx-arm64
-            library: libtree-sitter-expressif.dylib
-
-    steps:
-      - name: Check out release commit
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Set up Tree-sitter
-        uses: tree-sitter/setup-action/cli@v2
-
-      - name: Build native grammar library
-        shell: pwsh
-        run: |
-          $outputDirectory = Join-Path 'native-assets' '${{ matrix.rid }}'
-          New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-          tree-sitter build -o (Join-Path $outputDirectory '${{ matrix.library }}') .
-          if ($LASTEXITCODE -ne 0) { throw 'Native grammar build failed.' }
-
-      - name: Upload native grammar library
-        uses: actions/upload-artifact@v7
-        with:
-          name: native-${{ matrix.rid }}
-          path: native-assets/${{ matrix.rid }}/${{ matrix.library }}
-          if-no-files-found: error
-          retention-days: 7
-
   validate:
-    name: Build release packages
+    name: Resolve validated CI packages
     if: github.ref == 'refs/heads/main'
-    needs: native
     runs-on: ubuntu-latest
     outputs:
+      ci-run-id: ${{ steps.ci-run.outputs.run-id }}
       patch: ${{ steps.gitversion.outputs.patch }}
       sha: ${{ steps.release-context.outputs.sha }}
       version: ${{ steps.gitversion.outputs.semVer }}
@@ -103,131 +53,54 @@ jobs:
         with:
           useConfigFile: true
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Download Windows native grammar library
-        uses: actions/download-artifact@v8
-        with:
-          name: native-win-x64
-          path: native-assets/win-x64
-
-      - name: Download Linux native grammar library
-        uses: actions/download-artifact@v8
-        with:
-          name: native-linux-x64
-          path: native-assets/linux-x64
-
-      - name: Download Windows ARM64 native grammar library
-        uses: actions/download-artifact@v8
-        with:
-          name: native-win-arm64
-          path: native-assets/win-arm64
-
-      - name: Download Linux ARM64 native grammar library
-        uses: actions/download-artifact@v8
-        with:
-          name: native-linux-arm64
-          path: native-assets/linux-arm64
-
-      - name: Download macOS x64 native grammar library
-        uses: actions/download-artifact@v8
-        with:
-          name: native-osx-x64
-          path: native-assets/osx-x64
-
-      - name: Download macOS ARM64 native grammar library
-        uses: actions/download-artifact@v8
-        with:
-          name: native-osx-arm64
-          path: native-assets/osx-arm64
-
-      - name: Build NuGet package
-        shell: pwsh
-        run: >-
-          ./scripts/Build-NuGetPackage.ps1
-          -Version '${{ steps.gitversion.outputs.semVer }}'
-          -NativeAssetsDirectory 'native-assets'
-
-      - name: Build native C archive
-        shell: pwsh
-        run: ./scripts/New-NativeArchive.ps1 -Version '${{ steps.gitversion.outputs.semVer }}'
-
-      - name: Upload validated release packages
-        uses: actions/upload-artifact@v7
-        with:
-          name: release-packages-${{ steps.gitversion.outputs.semVer }}
-          path: artifacts/*
-          if-no-files-found: error
-          retention-days: 7
-
-  consume:
-    name: Test release package (${{ matrix.rid }})
-    needs: validate
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            rid: win-x64
-          - os: windows-11-arm
-            rid: win-arm64
-          - os: ubuntu-latest
-            rid: linux-x64
-          - os: ubuntu-24.04-arm
-            rid: linux-arm64
-          - os: macos-15-intel
-            rid: osx-x64
-          - os: macos-15
-            rid: osx-arm64
-
-    steps:
-      - name: Check out release commit
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-          ref: ${{ needs.validate.outputs.sha }}
-
-      - name: Set up .NET runtimes
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
-            10.0.x
-
-      - name: Download release package
-        uses: actions/download-artifact@v8
-        with:
-          name: release-packages-${{ needs.validate.outputs.version }}
-          path: artifacts
-
-      - name: Restore installed package tests
+      - name: Locate successful CI run for release commit
+        id: ci-run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ steps.release-context.outputs.sha }}
         shell: pwsh
         run: |
-          $packageSource = (Resolve-Path 'artifacts').Path
-          dotnet restore bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj `
-            -p:RestoreAdditionalProjectSources=$packageSource `
-            -p:PackageVersionUnderTest='${{ needs.validate.outputs.version }}'
-          if ($LASTEXITCODE -ne 0) { throw 'Package test restore failed.' }
+          $run = $null
+          for ($attempt = 1; $attempt -le 60; $attempt++) {
+            $response = gh api `
+              "repos/$env:GITHUB_REPOSITORY/actions/workflows/ci.yml/runs" `
+              --method GET `
+              -f head_sha="$env:RELEASE_SHA" `
+              -f per_page=100 | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0) { throw 'Could not query CI workflow runs.' }
 
-      - name: Test installed package
-        shell: pwsh
-        run: >-
-          dotnet test bindings/csharp/Expressif.Syntax.Tests/Expressif.Syntax.Tests.csproj
-          --configuration Release
-          --no-restore
-          -p:PackageVersionUnderTest='${{ needs.validate.outputs.version }}'
+            $runs = @($response.workflow_runs | Where-Object {
+              $_.head_sha -eq $env:RELEASE_SHA
+            } | Sort-Object run_attempt, id -Descending)
+            $run = $runs | Where-Object conclusion -eq 'success' | Select-Object -First 1
+            if ($null -ne $run) { break }
+
+            $activeRun = $runs | Where-Object status -ne 'completed' | Select-Object -First 1
+            $completedRun = $runs | Where-Object status -eq 'completed' | Select-Object -First 1
+            if ($null -eq $activeRun -and $null -ne $completedRun) {
+              throw "CI run '$($completedRun.id)' for '$env:RELEASE_SHA' concluded '$($completedRun.conclusion)'."
+            }
+
+            if ($attempt -lt 60) {
+              Write-Output "Waiting for CI to validate '$env:RELEASE_SHA' (attempt $attempt of 60)."
+              Start-Sleep -Seconds 30
+            }
+          }
+
+          if ($null -eq $run) {
+            throw "No successful CI run exists for release commit '$env:RELEASE_SHA'."
+          }
+
+          "run-id=$($run.id)" >> $env:GITHUB_OUTPUT
+          Write-Output "Using successful CI run '$($run.id)' for '$env:RELEASE_SHA'."
 
   publish:
     name: Publish patch-zero release
     if: needs.validate.outputs.patch == '0'
-    needs: [validate, consume]
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: write
       id-token: write
 
@@ -247,8 +120,10 @@ jobs:
       - name: Download validated release packages
         uses: actions/download-artifact@v8
         with:
-          name: release-packages-${{ needs.validate.outputs.version }}
+          name: packages-${{ needs.validate.outputs.version }}
           path: artifacts
+          github-token: ${{ github.token }}
+          run-id: ${{ needs.validate.outputs.ci-run-id }}
 
       - name: Create tagged GitHub release
         env:
