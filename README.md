@@ -136,7 +136,7 @@ The grammar should remain independent from the Expressif function catalogue. Par
 
 ## Releases
 
-For every push to `main`, the release workflow calculates the repository version with GitVersion and locates the successful CI run for that exact commit. When the calculated semantic version has a patch component of `0`, it promotes the package artifacts already built and validated by that CI run to the corresponding `vX.Y.0` GitHub release and NuGet.org. Other versions complete release eligibility evaluation without publishing artifacts.
+For every push to `main`, CI builds, tests, and collects the distributable artifacts. After every validation job succeeds, a patch-zero version is published from those same collected artifacts to the corresponding `vX.Y.0` GitHub release and NuGet.org. Other versions complete validation without publishing artifacts.
 
 Each GitHub release contains the distributable artifacts collected by CI after package validation:
 
@@ -147,7 +147,7 @@ Only the C# package is currently published to an external registry. NuGet public
 
 * Repository Owner: `Seddryck`
 * Repository: `Expressif.Syntax`
-* Workflow File: `release.yml`
+* Workflow File: `ci.yml`
 * Environment: leave blank
 
 The policy's NuGet user must be `Seddryck`, matching the `NuGet/login` step in the workflow.
