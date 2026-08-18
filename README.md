@@ -13,7 +13,7 @@ The parser defines the concrete syntax of Expressif independently from its runti
 **Project:** [![Expressif](https://img.shields.io/badge/Expressif-language-fe762d.svg)](https://github.com/Seddryck/Expressif)
 [![Tree-sitter](https://img.shields.io/badge/parser-Tree--sitter-6a9f58.svg)](https://tree-sitter.github.io/tree-sitter/)
 
-**Releases:** [![GitHub Release](https://img.shields.io/github/v/release/Seddryck/Expressif.Syntax)](https://github.com/Seddryck/Expressif.Syntax/releases/latest)
+**Releases:** [![nuget](https://img.shields.io/nuget/v/Expressif.Syntax.svg)](https://www.nuget.org/packages/Expressif.Syntax/) [![GitHub Release](https://img.shields.io/github/v/release/Seddryck/Expressif.Syntax)](https://github.com/Seddryck/Expressif.Syntax/releases/latest)
 [![GitHub Release Date](https://img.shields.io/github/release-date/Seddryck/Expressif.Syntax.svg)](https://github.com/Seddryck/Expressif.Syntax/releases/latest)
 [![licence badge](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](https://github.com/Seddryck/Expressif.Syntax/blob/main/LICENSE)
 
