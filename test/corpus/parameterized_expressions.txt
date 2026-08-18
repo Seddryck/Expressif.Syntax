@@ -249,7 +249,7 @@ foo({@foo lower})
             (array_literal
               (variable)
               (ERROR
-                (function_name)))))))))
+                (unquoted_record_field_name)))))))))
 
 ==================
 Missing right-hand expression recovery snapshot rejects an array literal

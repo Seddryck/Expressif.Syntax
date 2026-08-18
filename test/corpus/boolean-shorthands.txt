@@ -342,7 +342,7 @@ foo |BAD bar
       (function_call
         (function_name))))
   (ERROR
-    (function_name)))
+    (unquoted_record_field_name)))
 
 ==================
 Parenthesized shorthand requires a closing parenthesis

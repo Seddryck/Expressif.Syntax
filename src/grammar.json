@@ -356,14 +356,6 @@
           "name": "function_call"
         },
         {
-          "type": "SYMBOL",
-          "name": "binary_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "unary_expression"
-        },
-        {
           "type": "PREC",
           "value": 1,
           "content": {
