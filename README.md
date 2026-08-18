@@ -136,12 +136,10 @@ The grammar should remain independent from the Expressif function catalogue. Par
 
 ## Releases
 
-For every push to `main`, the release workflow independently validates the parser and all bindings, builds the release packages, and calculates the repository version with GitVersion. When validation succeeds and the calculated semantic version has a patch component of `0`, it creates the corresponding `vX.Y.0` tag and GitHub release. Other versions complete package validation without creating a tag or release.
+For every push to `main`, the release workflow calculates the repository version with GitVersion and locates the successful CI run for that exact commit. When the calculated semantic version has a patch component of `0`, it promotes the package artifacts already built and validated by that CI run to the corresponding `vX.Y.0` GitHub release and NuGet.org. Other versions complete release eligibility evaluation without publishing artifacts.
 
-Each GitHub release contains every validated package produced by `scripts/package.ps1`:
+Each GitHub release contains the distributable artifacts collected by CI after package validation:
 
-* the TypeScript/Node package
-* the Python wheel and source distribution
 * the C# NuGet package
 * the native parser source archive
 
@@ -152,7 +150,7 @@ Only the C# package is currently published to an external registry. NuGet public
 * Workflow File: `release.yml`
 * Environment: leave blank
 
-The policy's NuGet user must be `Seddryck`, matching the `NuGet/login` step in the workflow. Python and TypeScript/Node packages remain available as GitHub release artifacts until PyPI and npm publishing are implemented.
+The policy's NuGet user must be `Seddryck`, matching the `NuGet/login` step in the workflow.
 
 ## Related projects
 
