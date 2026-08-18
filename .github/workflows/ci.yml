@@ -111,6 +111,8 @@ jobs:
     name: Build .NET managed bindings
     needs: version
     runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/nuget-packages
 
     steps:
       - name: Check out repository
@@ -147,12 +149,15 @@ jobs:
           path: |
             bindings/csharp/Expressif.Syntax/bin/Release
             bindings/csharp/Expressif.Syntax/obj
+            nuget-packages
           if-no-files-found: error
 
   package:
     name: Pack NuGet package
     needs: [version, native, managed]
     runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/nuget-packages
 
     steps:
       - name: Check out repository
@@ -169,7 +174,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: managed-${{ needs.version.outputs.semver }}
-          path: bindings/csharp/Expressif.Syntax
+          path: .
 
       - name: Download Windows native grammar library
         uses: actions/download-artifact@v8
