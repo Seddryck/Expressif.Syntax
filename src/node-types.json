@@ -4,6 +4,10 @@
     "named": true,
     "subtypes": [
       {
+        "type": "binary_expression",
+        "named": true
+      },
+      {
         "type": "function_call",
         "named": true
       },
@@ -17,6 +21,10 @@
       },
       {
         "type": "tuple_projection",
+        "named": true
+      },
+      {
+        "type": "unary_expression",
         "named": true
       }
     ]
@@ -161,6 +169,91 @@
     }
   },
   {
+    "type": "binary_expression",
+    "named": true,
+    "fields": {
+      "left": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "binary_operator",
+            "named": true
+          }
+        ]
+      },
+      "right": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "binary_operator",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "boolean_literal",
     "named": true,
     "fields": {}
@@ -173,6 +266,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "binary_expression",
+          "named": true
+        },
         {
           "type": "function_call",
           "named": true
@@ -187,6 +284,10 @@
         },
         {
           "type": "tuple_projection",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
           "named": true
         },
         {
@@ -413,6 +514,10 @@
         "required": true,
         "types": [
           {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
             "type": "closed_expression",
             "named": true
           },
@@ -430,6 +535,10 @@
           },
           {
             "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
             "named": true
           },
           {
@@ -541,6 +650,10 @@
       "required": true,
       "types": [
         {
+          "type": "binary_expression",
+          "named": true
+        },
+        {
           "type": "closed_expression",
           "named": true
         },
@@ -558,6 +671,10 @@
         },
         {
           "type": "tuple_projection",
+          "named": true
+        },
+        {
+          "type": "unary_expression",
           "named": true
         },
         {
@@ -774,6 +891,52 @@
     }
   },
   {
+    "type": "unary_expression",
+    "named": true,
+    "fields": {
+      "operand": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "unary_operator",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "\"",
     "named": false
   },
@@ -938,6 +1101,10 @@
     "named": true
   },
   {
+    "type": "unary_operator",
+    "named": true
+  },
+  {
     "type": "unquoted_record_field_name",
     "named": true
   },
@@ -955,6 +1122,18 @@
   },
   {
     "type": "|>",
+    "named": false
+  },
+  {
+    "type": "|AND",
+    "named": false
+  },
+  {
+    "type": "|OR",
+    "named": false
+  },
+  {
+    "type": "|XOR",
     "named": false
   },
   {

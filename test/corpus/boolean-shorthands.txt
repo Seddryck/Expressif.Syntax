@@ -1,0 +1,367 @@
+==================
+Unary shorthand
+==================
+
+!is-null
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Unary shorthand with arguments
+==================
+
+!less-than(5)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (function_call
+          (function_name)
+          (argument_list
+            (positional_argument
+              (numeric_literal))))))))
+
+==================
+Unary shorthand with generic operands
+==================
+
+!$0
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (tuple_projection
+          (from_start)
+          (tuple_index))))))
+
+==================
+Nested unary shorthand
+==================
+
+!!is-null
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (unary_expression
+          (unary_operator)
+          (function_call
+            (function_name)))))))
+
+==================
+Unary shorthand as an argument
+==================
+
+foo(!less-than(5))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (unary_expression
+              (unary_operator)
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (numeric_literal)))))))))))
+
+==================
+Unary shorthand whitespace
+==================
+
+ ! less-than(5)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (function_call
+          (function_name)
+          (argument_list
+            (positional_argument
+              (numeric_literal))))))))
+
+==================
+Each binary shorthand
+==================
+
+a |AND b |OR c |XOR d
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (binary_expression
+          (binary_expression
+            (function_call
+              (function_name))
+            (binary_operator)
+            (function_call
+              (function_name)))
+          (binary_operator)
+          (function_call
+            (function_name)))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Unary shorthand binds inside binary shorthand
+==================
+
+!foo |AND bar
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (unary_expression
+          (unary_operator)
+          (function_call
+            (function_name)))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Binary shorthand followed by an ordinary pipeline
+==================
+
+foo |AND bar | some-function
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (function_call
+          (function_name))
+        (binary_operator)
+        (function_call
+          (function_name)))
+      (function_call
+        (function_name)))))
+
+==================
+Parenthesized binary shorthand controls grouping
+==================
+
+(a |OR b) |AND c
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (parenthesized_expression
+          (root_expression
+            (open_expression
+              (binary_expression
+                (function_call
+                  (function_name))
+                (binary_operator)
+                (function_call
+                  (function_name))))))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Parenthesized binary shorthand as right operand
+==================
+
+a |OR (b |AND c)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (function_call
+          (function_name))
+        (binary_operator)
+        (parenthesized_expression
+          (root_expression
+            (open_expression
+              (binary_expression
+                (function_call
+                  (function_name))
+                (binary_operator)
+                (function_call
+                  (function_name))))))))))
+
+==================
+Parenthesized shorthand under unary shorthand
+==================
+
+!(a |OR b)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (parenthesized_expression
+          (root_expression
+            (open_expression
+              (binary_expression
+                (function_call
+                  (function_name))
+                (binary_operator)
+                (function_call
+                  (function_name))))))))))
+
+==================
+Nested parenthesized shorthand
+==================
+
+((a |OR b) |AND c)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (parenthesized_expression
+        (root_expression
+          (open_expression
+            (binary_expression
+              (parenthesized_expression
+                (root_expression
+                  (open_expression
+                    (binary_expression
+                      (function_call
+                        (function_name))
+                      (binary_operator)
+                      (function_call
+                        (function_name))))))
+              (binary_operator)
+              (function_call
+                    (function_name)))))))))
+
+==================
+Unary shorthand requires an operand
+==================
+
+!
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (unary_expression
+        (unary_operator)
+        (function_call
+          (MISSING function_name))))))
+
+==================
+Binary shorthand requires a right operand
+==================
+
+foo |AND
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (function_call
+          (function_name))
+        (binary_operator)
+        (function_call
+          (MISSING function_name))))))
+
+==================
+Binary shorthand requires a left operand
+==================
+
+|AND foo
+
+---
+
+(source_file
+  (ERROR)
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)))))
+
+==================
+Malformed binary shorthand operator
+==================
+
+foo |BAD bar
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (function_call
+        (function_name))))
+  (ERROR
+    (function_name)))
+
+==================
+Parenthesized shorthand requires a closing parenthesis
+==================
+
+(foo |AND bar
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (parenthesized_expression
+        (root_expression
+          (open_expression
+            (binary_expression
+              (function_call
+                (function_name))
+              (binary_operator)
+              (function_call
+                (function_name)))))
+        (MISSING ")")))))

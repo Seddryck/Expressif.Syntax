@@ -611,6 +611,132 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void UnaryShorthandPreservesOperatorOperandAndAuthoredSource()
+    {
+        const string source = " ! less-than(5) ";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var unary = (UnaryExpressionSyntax)root.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(unary.Kind, Is.EqualTo(SyntaxKind.UnaryExpression));
+            Assert.That(unary.Operator.Kind, Is.EqualTo(SyntaxKind.UnaryOperator));
+            Assert.That(unary.Operator.Text, Is.EqualTo("!"));
+            Assert.That(unary.Operator.Span, Is.EqualTo(new SourceSpan(1, 1)));
+            Assert.That(unary.Operand, Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("less-than"));
+            Assert.That(unary.Children, Is.EqualTo(new SyntaxNode[] { unary.Operator, unary.Operand }));
+            Assert.That(unary.Text, Is.EqualTo("! less-than(5)"));
+            Assert.That(unary.Span, Is.EqualTo(new SourceSpan(1, 14)));
+        });
+    }
+
+    [Test]
+    public void RepeatedUnaryShorthandRemainsNestedSyntax()
+    {
+        var outer = (UnaryExpressionSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("!!is-null")).Pipeline.Single();
+        var inner = (UnaryExpressionSyntax)outer.Operand;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(inner.Operand, Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("is-null"));
+            Assert.That(outer.Text, Is.EqualTo("!!is-null"));
+            Assert.That(inner.Text, Is.EqualTo("!is-null"));
+        });
+    }
+
+    [TestCase("|AND")]
+    [TestCase("|OR")]
+    [TestCase("|XOR")]
+    public void BinaryShorthandPreservesOperatorAndOperands(string operatorText)
+    {
+        var source = $"foo {operatorText} bar";
+        var binary = (BinaryExpressionSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(binary.Kind, Is.EqualTo(SyntaxKind.BinaryExpression));
+            Assert.That(binary.Left, Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("foo"));
+            Assert.That(binary.Operator.Kind, Is.EqualTo(SyntaxKind.BinaryOperator));
+            Assert.That(binary.Operator.Text, Is.EqualTo(operatorText));
+            Assert.That(binary.Right, Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("bar"));
+            Assert.That(binary.Children, Is.EqualTo(new SyntaxNode[] { binary.Left, binary.Operator, binary.Right }));
+            Assert.That(binary.Text, Is.EqualTo(source));
+            Assert.That(binary.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+        });
+    }
+
+    [Test]
+    public void BinaryShorthandChainsLeftAssociatively()
+    {
+        var outer = (BinaryExpressionSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("a |AND b |OR c")).Pipeline.Single();
+        var left = (BinaryExpressionSyntax)outer.Left;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(left.Operator.Text, Is.EqualTo("|AND"));
+            Assert.That(outer.Operator.Text, Is.EqualTo("|OR"));
+            Assert.That(((FunctionCallSyntax)outer.Right).Name, Is.EqualTo("c"));
+        });
+    }
+
+    [Test]
+    public void BinaryShorthandAcceptsGenericExpressionOperands()
+    {
+        var binary = (BinaryExpressionSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("$0 |AND .active")).Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(binary.Left, Is.TypeOf<TupleProjectionSyntax>());
+            Assert.That(binary.Right, Is.TypeOf<RecordAccessSyntax>());
+        });
+    }
+
+    [Test]
+    public void UnaryShorthandBindsMoreTightlyThanBinaryShorthand()
+    {
+        var binary = (BinaryExpressionSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("!foo |AND bar")).Pipeline.Single();
+
+        Assert.That(binary.Left, Is.TypeOf<UnaryExpressionSyntax>());
+    }
+
+    [Test]
+    public void ParenthesesGroupShorthandWithoutLoweringItToFunctions()
+    {
+        var outer = (BinaryExpressionSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("(a |OR b) |AND c")).Pipeline.Single();
+        var parenthesized = (ParenthesizedExpressionSyntax)outer.Left;
+        var innerRoot = (OpenExpressionSyntax)parenthesized.Expression;
+        var inner = (BinaryExpressionSyntax)innerRoot.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(parenthesized.Text, Is.EqualTo("(a |OR b)"));
+            Assert.That(inner.Operator.Text, Is.EqualTo("|OR"));
+            Assert.That(outer.Operator.Text, Is.EqualTo("|AND"));
+            Assert.That(innerRoot.Pipeline, Has.Count.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public void ShorthandComposesAsAnArgumentAndWithAnOrdinaryPipeline()
+    {
+        var argumentRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("foo(!less-than(5))");
+        var pipelineRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("foo |AND bar | some-function");
+
+        Assert.Multiple(() =>
+        {
+            var foo = (FunctionCallSyntax)argumentRoot.Pipeline.Single();
+            Assert.That(foo.Arguments.Single().Value, Is.TypeOf<UnaryExpressionSyntax>());
+            Assert.That(pipelineRoot.Pipeline[0], Is.TypeOf<BinaryExpressionSyntax>());
+            Assert.That(pipelineRoot.Pipeline[1], Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("some-function"));
+        });
+    }
+
+    [Test]
     public void ParenthesizedPipelineComposesAsAnArgumentAndPipelineOperation()
     {
         var argumentRoot = (OpenExpressionSyntax)ExpressifSyntax.Parse("map((absolute | add(5)))");
@@ -884,6 +1010,11 @@ public class SyntaxBindingTests
     [TestCase("foo(name :=)", false)]
     [TestCase("foo(, 5)", false)]
     [TestCase("foo(5,,6)", false)]
+    [TestCase("!", false)]
+    [TestCase("foo |AND", true)]
+    [TestCase("|AND foo", false)]
+    [TestCase("foo |BAD bar", false)]
+    [TestCase("(foo |AND bar", false)]
     [TestCase("....", false)]
     [TestCase("{ ..., }", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
