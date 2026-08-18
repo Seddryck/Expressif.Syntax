@@ -137,6 +137,127 @@ a |AND b |OR c |XOR d
           (function_name))))))
 
 ==================
+Each complementary binary shorthand
+==================
+
+a |NAND b |NOR c |NXOR d
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (binary_expression
+          (binary_expression
+            (function_call
+              (function_name))
+            (binary_operator)
+            (function_call
+              (function_name)))
+          (binary_operator)
+          (function_call
+            (function_name)))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Complementary shorthand chains with existing shorthand
+==================
+
+a |NAND b |AND c |NOR d |OR e |NXOR f |XOR g
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (binary_expression
+          (binary_expression
+            (binary_expression
+              (binary_expression
+                (binary_expression
+                  (function_call
+                    (function_name))
+                  (binary_operator)
+                  (function_call
+                    (function_name)))
+                (binary_operator)
+                (function_call
+                  (function_name)))
+              (binary_operator)
+              (function_call
+                (function_name)))
+            (binary_operator)
+            (function_call
+              (function_name)))
+          (binary_operator)
+          (function_call
+            (function_name)))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Complementary shorthand whitespace variants
+==================
+
+a|NAND b |NORc  |NXOR  d
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (binary_expression
+          (binary_expression
+            (function_call
+              (function_name))
+            (binary_operator)
+            (function_call
+              (function_name)))
+          (binary_operator)
+          (function_call
+            (function_name)))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Complementary shorthand composes with unary grouping and pipeline
+==================
+
+!a |NAND (b |NOR !c) | some-function
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (unary_expression
+          (unary_operator)
+          (function_call
+            (function_name)))
+        (binary_operator)
+        (parenthesized_expression
+          (root_expression
+            (open_expression
+              (binary_expression
+                (function_call
+                  (function_name))
+                (binary_operator)
+                (unary_expression
+                  (unary_operator)
+                  (function_call
+                    (function_name))))))))
+      (function_call
+        (function_name)))))
+
+==================
 Unary shorthand binds inside binary shorthand
 ==================
 
@@ -365,3 +486,54 @@ Parenthesized shorthand requires a closing parenthesis
               (function_call
                 (function_name)))))
         (MISSING ")")))))
+
+==================
+Complementary binary shorthand requires a right operand
+==================
+
+foo |NAND
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        (function_call
+          (function_name))
+        (binary_operator)
+        (function_call
+          (MISSING function_name))))))
+
+==================
+Complementary binary shorthand requires a left operand
+==================
+
+|NOR foo
+
+---
+
+(source_file
+  (ERROR)
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)))))
+
+==================
+Malformed complementary binary shorthand operator
+==================
+
+foo |XNOR bar
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (function_call
+        (function_name))))
+  (ERROR
+    (unquoted_record_field_name)))

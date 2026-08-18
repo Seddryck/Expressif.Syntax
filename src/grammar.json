@@ -252,6 +252,18 @@
         {
           "type": "STRING",
           "value": "|XOR"
+        },
+        {
+          "type": "STRING",
+          "value": "|NAND"
+        },
+        {
+          "type": "STRING",
+          "value": "|NOR"
+        },
+        {
+          "type": "STRING",
+          "value": "|NXOR"
         }
       ]
     },
