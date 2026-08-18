@@ -85,7 +85,10 @@ export default grammar({
       field("right", $._shorthand_operand),
     )),
 
-    binary_operator: (_) => choice("|AND", "|OR", "|XOR"),
+    binary_operator: (_) => choice(
+      "|AND", "|OR", "|XOR",
+      "|NAND", "|NOR", "|NXOR",
+    ),
 
     unary_expression: ($) => prec.right(2, seq(
       field("operator", $.unary_operator),
