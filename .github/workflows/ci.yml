@@ -312,12 +312,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download validated packages
+      - name: Download validated NuGet package
         uses: actions/download-artifact@v8
         with:
-          pattern: '*-${{ needs.version.outputs.semver }}'
+          name: nuget-${{ needs.version.outputs.semver }}
           path: artifacts
-          merge-multiple: true
+
+      - name: Download validated native source archive
+        uses: actions/download-artifact@v8
+        with:
+          name: native-source-${{ needs.version.outputs.semver }}
+          path: artifacts
 
       - name: Upload package validation artifacts
         uses: actions/upload-artifact@v7
@@ -362,6 +367,12 @@ jobs:
         shell: pwsh
         run: |
           $tag = "v$env:VERSION"
+          $assets = @(Get-ChildItem -LiteralPath artifacts -File)
+          if ($assets.Count -ne 2) {
+            throw "Expected exactly two release assets, found $($assets.Count)."
+          }
+          $assetPaths = @($assets.FullName)
+
           $existingTag = gh api "repos/$env:GITHUB_REPOSITORY/git/ref/tags/$tag" `
             --jq '.object.sha' 2>$null
           if ($LASTEXITCODE -eq 0) {
@@ -369,14 +380,15 @@ jobs:
               throw "Tag '$tag' already points to '$existingTag', not '$env:RELEASE_SHA'."
             }
             gh release view $tag | Out-Null
-            if ($LASTEXITCODE -ne 0) {
-              throw "Tag '$tag' exists for this commit but its GitHub release is missing."
+            if ($LASTEXITCODE -eq 0) {
+              gh release upload $tag @assetPaths --clobber
+              if ($LASTEXITCODE -ne 0) { throw "GitHub release '$tag' asset upload failed." }
+              Write-Output "Release '$tag' already exists for this commit; refreshed its assets."
+              exit 0
             }
-            Write-Output "Release '$tag' already exists for this commit; leaving its artifacts unchanged."
-            exit 0
           }
 
-          gh release create $tag artifacts/* `
+          gh release create $tag @assetPaths `
             --target $env:RELEASE_SHA `
             --title $tag `
             --generate-notes
