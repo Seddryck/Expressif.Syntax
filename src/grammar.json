@@ -1488,6 +1488,23 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "private_record_field_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "public_record_field_name"
+        }
+      ]
+    },
+    "private_record_field_name": {
+      "type": "PATTERN",
+      "value": "_[A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
+    },
+    "public_record_field_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
           "name": "unquoted_record_field_name"
         },
         {
@@ -1502,7 +1519,7 @@
     },
     "unquoted_record_field_name": {
       "type": "PATTERN",
-      "value": "[A-Za-z_][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
+      "value": "[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
     },
     "numeric_literal": {
       "type": "PATTERN",

@@ -365,8 +365,8 @@ public class SyntaxBindingTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(record.Fields.Select(field => field.Name), Is.EqualTo(new[] { "name", "scores" }));
-            Assert.That(record.Fields[1].QuotingStyle, Is.EqualTo(QuotingStyle.Backtick));
+            Assert.That(record.Fields.Select(field => field.Name.Value), Is.EqualTo(new[] { "name", "scores" }));
+            Assert.That(record.Fields[1].Name.QuotingStyle, Is.EqualTo(QuotingStyle.Backtick));
             Assert.That(record.Fields[0].Value, Is.TypeOf<VariableSyntax>());
             Assert.That(((ArrayLiteralSyntax)record.Fields[1].Value).Values[1], Is.TypeOf<RecordAccessSyntax>());
             Assert.That(record.Children, Is.EqualTo(record.Fields));
@@ -399,7 +399,7 @@ public class SyntaxBindingTests
             Assert.That(field.Value.Kind, Is.EqualTo(SyntaxKind.IncomingValue));
             Assert.That(field.Value.Text, Is.EqualTo("..."));
             Assert.That(field.Value.Span, Is.EqualTo(new SourceSpan(14, 3)));
-            Assert.That(field.Children, Is.EqualTo(new SyntaxNode[] { field.Value }));
+            Assert.That(field.Children, Is.EqualTo(new SyntaxNode[] { field.Name, field.Value }));
         });
     }
 
@@ -434,7 +434,7 @@ public class SyntaxBindingTests
                 SyntaxKind.RecordSpread,
                 SyntaxKind.RecordField,
             }));
-            Assert.That(record.Fields.Select(field => field.Name), Is.EqualTo(new[] { "before", "after" }));
+            Assert.That(record.Fields.Select(field => field.Name.Value), Is.EqualTo(new[] { "before", "after" }));
             Assert.That(record.Children, Is.EqualTo(record.Entries));
             Assert.That(spread.Text, Is.EqualTo("..."));
             Assert.That(spread.Span, Is.EqualTo(new SourceSpan(19, 3)));
@@ -449,7 +449,8 @@ public class SyntaxBindingTests
         static IEnumerable<RecordEntrySyntax> CreateEntries()
         {
             yield return new RecordFieldSyntax(
-                new SourceSpan(2, 10), "value := 1", "value", null,
+                new SourceSpan(2, 10), "value := 1",
+                new RecordFieldNameSyntax(new SourceSpan(2, 5), "value", "value", false, null),
                 new NumericLiteralSyntax(new SourceSpan(11, 1), "1"));
             yield return new RecordSpreadSyntax(new SourceSpan(14, 3), "...");
         }
@@ -643,6 +644,38 @@ public class SyntaxBindingTests
                 .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("is-null"));
             Assert.That(outer.Text, Is.EqualTo("!!is-null"));
             Assert.That(inner.Text, Is.EqualTo("!is-null"));
+        });
+    }
+
+    [TestCase("{foo := 10, bar := 20}")]
+    [TestCase("{_tmp := 20, _x1 := 30}")]
+    [TestCase("{foo := 10, _internalValue := 20, bar := 30}")]
+    public void PublicPrivateAndMixedRecordFieldsParse(string source)
+        => Assert.That(ExpressifSyntax.Parse(source), Is.TypeOf<ClosedExpressionSyntax>());
+
+    [Test]
+    public void RecordFieldNamesExposeVisibilityAndPreserveSource()
+    {
+        const string source = "{foo := 10, _tmp := 20, `display name` := 30}";
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var names = record.Fields.Select(field => field.Name).ToArray();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(names.Select(name => name.Kind), Is.All.EqualTo(SyntaxKind.RecordFieldName));
+            Assert.That(names.Select(name => name.Value), Is.EqualTo(new[] { "foo", "_tmp", "display name" }));
+            Assert.That(names.Select(name => name.IsPrivate), Is.EqualTo(new[] { false, true, false }));
+            Assert.That(names.Select(name => name.Text), Is.EqualTo(new[] { "foo", "_tmp", "`display name`" }));
+            Assert.That(names.Select(name => name.Span), Is.EqualTo(new[]
+            {
+                new SourceSpan(1, 3),
+                new SourceSpan(12, 4),
+                new SourceSpan(24, 14),
+            }));
+            Assert.That(names[2].QuotingStyle, Is.EqualTo(QuotingStyle.Backtick));
+            Assert.That(names.SelectMany(name => name.Children), Is.Empty);
+            Assert.That(record.Fields[1].Children,
+                Is.EqualTo(new SyntaxNode[] { names[1], record.Fields[1].Value }));
         });
     }
 

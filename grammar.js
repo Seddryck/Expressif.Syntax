@@ -336,12 +336,19 @@ export default grammar({
     incoming_value: (_) => "...",
 
     record_field_name: ($) => choice(
+      $.private_record_field_name,
+      $.public_record_field_name,
+    ),
+
+    private_record_field_name: (_) => /_[A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/,
+
+    public_record_field_name: ($) => choice(
       $.unquoted_record_field_name,
       $.double_quoted_literal,
       $.backtick_quoted_literal,
     ),
 
-    unquoted_record_field_name: (_) => /[A-Za-z_][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/,
+    unquoted_record_field_name: (_) => /[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/,
 
     numeric_literal: (_) => /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/,
 

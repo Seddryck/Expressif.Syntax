@@ -463,7 +463,7 @@ foo |BAD bar
       (function_call
         (function_name))))
   (ERROR
-    (unquoted_record_field_name)))
+    (function_name)))
 
 ==================
 Parenthesized shorthand requires a closing parenthesis
@@ -536,7 +536,7 @@ foo |XNOR bar
       (function_call
         (function_name))))
   (ERROR
-    (unquoted_record_field_name)))
+    (function_name)))
 
 ==================
 Negated predicate in a closed pipeline
