@@ -10,6 +10,7 @@ public enum SyntaxKind
     FunctionCall,
     PositionalArgument,
     NamedArgument,
+    ArgumentName,
     NumericLiteral,
     BooleanLiteral,
     NullLiteral,
@@ -212,15 +213,35 @@ public sealed class PositionalArgumentSyntax : ArgumentSyntax
 
 public sealed class NamedArgumentSyntax : ArgumentSyntax
 {
-    internal NamedArgumentSyntax(SourceSpan span, string text, string name, ExpressionSyntax value)
-        : base(SyntaxKind.NamedArgument, span, text, [value])
+    internal NamedArgumentSyntax(SourceSpan span, string text, ArgumentNameSyntax name, ExpressionSyntax value)
+        : base(SyntaxKind.NamedArgument, span, text, [name, value])
     {
         Name = name;
         Value = value;
     }
 
-    public string Name { get; }
+    public ArgumentNameSyntax Name { get; }
     public override ExpressionSyntax Value { get; }
+}
+
+public sealed class ArgumentNameSyntax : SyntaxNode
+{
+    internal ArgumentNameSyntax(
+        SourceSpan span,
+        string text,
+        string value,
+        bool isPrivate,
+        QuotingStyle? quotingStyle)
+        : base(SyntaxKind.ArgumentName, span, text)
+    {
+        Value = value;
+        IsPrivate = isPrivate;
+        QuotingStyle = quotingStyle;
+    }
+
+    public string Value { get; }
+    public bool IsPrivate { get; }
+    public QuotingStyle? QuotingStyle { get; }
 }
 
 public abstract class ValueSyntax : ExpressionSyntax

@@ -93,10 +93,43 @@ record(customer-name := .name)
         name: (function_name)
         (argument_list
           (named_argument
-            name: (argument_name)
+            name: (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
             value: (record_access
               field: (record_field_selector
                 (named_record_field)))))))))
+
+==================
+Function call with private and quoted argument names
+==================
+
+example(__NONAME_0 := 1, "display name" := 2, `display name` := 3)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (named_argument
+            name: (argument_name
+              (private_argument_name))
+            value: (numeric_literal))
+          (named_argument
+            name: (argument_name
+              (public_argument_name
+                (double_quoted_literal
+                  (double_quoted_content))))
+            value: (numeric_literal))
+          (named_argument
+            name: (argument_name
+              (public_argument_name
+                (backtick_quoted_literal
+                  (backtick_quoted_content))))
+            value: (numeric_literal)))))))
 
 ==================
 Function calls accept trailing commas
@@ -118,11 +151,15 @@ foo(5,) | record(name := "Alice", age := 30,)
         name: (function_name)
         (argument_list
           (named_argument
-            name: (argument_name)
+            name: (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
             value: (double_quoted_literal
               (double_quoted_content)))
           (named_argument
-            name: (argument_name)
+            name: (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
             value: (numeric_literal)))))))
 
 ==================
@@ -142,7 +179,9 @@ example(10, rounding-mode := "up", 20)
           (positional_argument
             (numeric_literal))
           (named_argument
-            name: (argument_name)
+            name: (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
             value: (double_quoted_literal
               (double_quoted_content)))
           (positional_argument

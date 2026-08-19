@@ -551,12 +551,40 @@ public class SyntaxBindingTests
         Assert.Multiple(() =>
         {
             Assert.That(argument.Kind, Is.EqualTo(SyntaxKind.NamedArgument));
-            Assert.That(argument.Name, Is.EqualTo("customer-name"));
+            Assert.That(argument.Name.Kind, Is.EqualTo(SyntaxKind.ArgumentName));
+            Assert.That(argument.Name.Value, Is.EqualTo("customer-name"));
+            Assert.That(argument.Name.IsPrivate, Is.False);
+            Assert.That(argument.Name.QuotingStyle, Is.Null);
+            Assert.That(argument.Name.Text, Is.EqualTo("customer-name"));
+            Assert.That(argument.Name.Span, Is.EqualTo(new SourceSpan(7, 13)));
             Assert.That(argument.Value, Is.TypeOf<RecordAccessSyntax>());
-            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { argument.Value }));
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { argument.Name, argument.Value }));
             Assert.That(argument.Text, Is.EqualTo("customer-name := .name"));
             Assert.That(argument.Span, Is.EqualTo(new SourceSpan(7, 22)));
             Assert.That(call.Text, Is.EqualTo(source));
+        });
+    }
+
+    [TestCase("__NONAME_0", true, null)]
+    [TestCase("\"display name\"", false, QuotingStyle.DoubleQuote)]
+    [TestCase("`display name`", false, QuotingStyle.Backtick)]
+    public void ArgumentNamesPreserveVisibilityQuotingAndAuthoredSource(
+        string authoredName,
+        bool isPrivate,
+        QuotingStyle? quotingStyle)
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse($"example({authoredName} := 1)");
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var name = ((NamedArgumentSyntax)call.Arguments.Single()).Name;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(name.Value, Is.EqualTo(authoredName.Trim('"', '`')));
+            Assert.That(name.IsPrivate, Is.EqualTo(isPrivate));
+            Assert.That(name.QuotingStyle, Is.EqualTo(quotingStyle));
+            Assert.That(name.Text, Is.EqualTo(authoredName));
+            Assert.That(name.Span, Is.EqualTo(new SourceSpan(8, authoredName.Length)));
+            Assert.That(name.Children, Is.Empty);
         });
     }
 
@@ -860,8 +888,8 @@ public class SyntaxBindingTests
         {
             Assert.That(withComma.Arguments.Select(argument => argument.Kind),
                 Is.EqualTo(withoutComma.Arguments.Select(argument => argument.Kind)));
-            Assert.That(withComma.Arguments.OfType<NamedArgumentSyntax>().Select(argument => argument.Name),
-                Is.EqualTo(withoutComma.Arguments.OfType<NamedArgumentSyntax>().Select(argument => argument.Name)));
+            Assert.That(withComma.Arguments.OfType<NamedArgumentSyntax>().Select(argument => argument.Name.Value),
+                Is.EqualTo(withoutComma.Arguments.OfType<NamedArgumentSyntax>().Select(argument => argument.Name.Value)));
         });
     }
 
@@ -1052,7 +1080,7 @@ public class SyntaxBindingTests
     [TestCase("\"unterminated", false)]
     [TestCase("foo({| lower})", false)]
     [TestCase("append(.firstName |)", false)]
-    [TestCase("foo(name :=)", false)]
+    [TestCase("foo(name :=)", true)]
     [TestCase("foo(, 5)", false)]
     [TestCase("foo(5,,6)", false)]
     [TestCase("!", false)]

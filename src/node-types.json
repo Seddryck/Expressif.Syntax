@@ -135,6 +135,25 @@
     }
   },
   {
+    "type": "argument_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "private_argument_name",
+          "named": true
+        },
+        {
+          "type": "public_argument_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "array_literal",
     "named": true,
     "fields": {},
@@ -685,6 +704,39 @@
     }
   },
   {
+    "type": "private_argument_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "private_record_field_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "public_argument_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "backtick_quoted_literal",
+          "named": true
+        },
+        {
+          "type": "double_quoted_literal",
+          "named": true
+        },
+        {
+          "type": "unquoted_argument_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "public_record_field_name",
     "named": true,
     "fields": {},
@@ -956,6 +1008,16 @@
     }
   },
   {
+    "type": "unquoted_argument_name",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "unquoted_record_field_name",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "\"",
     "named": false
   },
@@ -1056,10 +1118,6 @@
     "named": false
   },
   {
-    "type": "argument_name",
-    "named": true
-  },
-  {
     "type": "backtick_quoted_content",
     "named": true
   },
@@ -1112,10 +1170,6 @@
     "named": true
   },
   {
-    "type": "private_record_field_name",
-    "named": true
-  },
-  {
     "type": "time_literal",
     "named": true
   },
@@ -1125,10 +1179,6 @@
   },
   {
     "type": "unary_operator",
-    "named": true
-  },
-  {
-    "type": "unquoted_record_field_name",
     "named": true
   },
   {

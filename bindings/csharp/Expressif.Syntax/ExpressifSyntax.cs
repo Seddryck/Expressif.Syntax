@@ -92,9 +92,24 @@ public static class ExpressifSyntax
 
     private static NamedArgumentSyntax BindNamedArgument(TsNode node)
     {
-        var name = node.GetChildForField("name") ?? throw Unknown(node);
+        var nameContainer = node.GetChildForField("name") ?? throw Unknown(node);
+        var visibility = SingleNamedChild(nameContainer, nameContainer.Type);
+        var name = visibility.Type == "public_argument_name"
+            ? SingleNamedChild(visibility, visibility.Type)
+            : visibility;
         var value = node.GetChildForField("value") ?? throw Unknown(node);
-        return new(Span(node), node.Text, name.Text, BindExpression(value));
+        QuotingStyle? quotingStyle = name.Type switch
+        {
+            "double_quoted_literal" => QuotingStyle.DoubleQuote,
+            "backtick_quoted_literal" => QuotingStyle.Backtick,
+            "unquoted_argument_name" or "private_argument_name" => null,
+            _ => throw Unknown(name),
+        };
+        var nameValue = quotingStyle is null ? name.Text : name.Text[1..^1];
+        var nameSyntax = new ArgumentNameSyntax(
+            Span(visibility), visibility.Text, nameValue,
+            visibility.Type == "private_argument_name", quotingStyle);
+        return new(Span(node), node.Text, nameSyntax, BindExpression(value));
     }
 
     private static ParameterizedExpressionSyntax BindParameterizedExpression(TsNode node)
