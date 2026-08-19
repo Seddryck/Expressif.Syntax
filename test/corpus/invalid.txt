@@ -22,13 +22,7 @@ foo1
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name))))
-  (ERROR
-    (numeric_literal)))
+(ERROR)
 
 ==================
 Function name cannot start with a hyphen

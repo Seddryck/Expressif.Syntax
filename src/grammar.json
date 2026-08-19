@@ -586,8 +586,13 @@
           "type": "FIELD",
           "name": "name",
           "content": {
-            "type": "SYMBOL",
-            "name": "function_name"
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_function_name"
+            },
+            "named": true,
+            "value": "function_name"
           }
         },
         {
@@ -639,7 +644,7 @@
         }
       ]
     },
-    "function_name": {
+    "_function_name": {
       "type": "PATTERN",
       "value": "[A-Za-z]+(?:-[A-Za-z]+)*"
     },
@@ -752,13 +757,8 @@
           "type": "FIELD",
           "name": "name",
           "content": {
-            "type": "ALIAS",
-            "content": {
-              "type": "SYMBOL",
-              "name": "function_name"
-            },
-            "named": true,
-            "value": "argument_name"
+            "type": "SYMBOL",
+            "name": "argument_name"
           }
         },
         {
@@ -774,6 +774,53 @@
           }
         }
       ]
+    },
+    "argument_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "public_argument_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "private_argument_name"
+        }
+      ]
+    },
+    "private_argument_name": {
+      "type": "PATTERN",
+      "value": "_[A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
+    },
+    "public_argument_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_function_name"
+          },
+          "named": true,
+          "value": "unquoted_argument_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "unquoted_argument_name"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "double_quoted_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "backtick_quoted_literal"
+        }
+      ]
+    },
+    "unquoted_argument_name": {
+      "type": "PATTERN",
+      "value": "[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
     },
     "_argument_value": {
       "type": "CHOICE",

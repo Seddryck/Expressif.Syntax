@@ -250,8 +250,7 @@ foo({@foo lower})
           (positional_argument
             (array_literal
               (variable)
-              (ERROR
-                (unquoted_record_field_name)))))))))
+              (ERROR))))))))
 
 ==================
 Missing right-hand expression recovery snapshot rejects an array literal

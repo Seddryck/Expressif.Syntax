@@ -14,6 +14,9 @@ const ordinaryExpression = ($) => choice(
   $.parenthesized_expression,
 );
 
+const privateName = /_[A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/;
+const unquotedPublicName = /[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/;
+
 export default grammar({
   name: "expressif",
 
@@ -149,7 +152,7 @@ export default grammar({
     ),
 
     function_call: ($) => seq(
-      field("name", $.function_name),
+      field("name", alias($._function_name, $.function_name)),
       optional(seq(
         "(",
         optional(choice(
@@ -160,7 +163,7 @@ export default grammar({
       )),
     ),
 
-    function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
+    _function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
 
     argument_list: ($) => prec.left(seq(
       choice($.positional_argument, $.named_argument),
@@ -176,10 +179,26 @@ export default grammar({
     positional_argument: ($) => $._argument_value,
 
     named_argument: ($) => seq(
-      field("name", alias($.function_name, $.argument_name)),
+      field("name", $.argument_name),
       ":=",
       field("value", $._argument_value),
     ),
+
+    argument_name: ($) => choice(
+      $.public_argument_name,
+      $.private_argument_name,
+    ),
+
+    private_argument_name: (_) => privateName,
+
+    public_argument_name: ($) => choice(
+      alias($._function_name, $.unquoted_argument_name),
+      $.unquoted_argument_name,
+      $.double_quoted_literal,
+      $.backtick_quoted_literal,
+    ),
+
+    unquoted_argument_name: (_) => unquotedPublicName,
 
     _argument_value: ($) => choice(
       $.binary_expression,
@@ -340,7 +359,7 @@ export default grammar({
       $.public_record_field_name,
     ),
 
-    private_record_field_name: (_) => /_[A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/,
+    private_record_field_name: (_) => privateName,
 
     public_record_field_name: ($) => choice(
       $.unquoted_record_field_name,
@@ -348,7 +367,7 @@ export default grammar({
       $.backtick_quoted_literal,
     ),
 
-    unquoted_record_field_name: (_) => /[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/,
+    unquoted_record_field_name: (_) => unquotedPublicName,
 
     numeric_literal: (_) => /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?/,
 
