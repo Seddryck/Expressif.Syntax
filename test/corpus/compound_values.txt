@@ -48,10 +48,12 @@ Array values and whitespace
         (variable)
         (record_access
           root: (original_input)
-          field: (original_record_field_selector (named_record_field)))
+          field: (original_record_field_selector
+            (named_record_field)))
         (record_access
           root: (original_input)
-          field: (original_record_field_selector (positional_record_field)))))))
+          field: (original_record_field_selector
+            (positional_record_field)))))))
 
 ==================
 Input expressions as array elements
@@ -126,7 +128,8 @@ T("foo", #true, T(#"2025-12-17", ^.0), @value)
           (date_literal)
           (record_access
             root: (original_input)
-            field: (original_record_field_selector (positional_record_field))))
+            field: (original_record_field_selector
+              (positional_record_field))))
         (variable)))))
 
 ==================
@@ -155,10 +158,14 @@ Unquoted record field names allow digits after the first letter
     (closed_expression
       (record_literal
         (record_field
-          name: (record_field_name (unquoted_record_field_name))
+          name: (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (numeric_literal))
         (record_field
-          name: (record_field_name (unquoted_record_field_name))
+          name: (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (numeric_literal))))))
 
 ==================
@@ -175,19 +182,22 @@ Record fields and quoted names
       (record_literal
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (double_quoted_literal
             (double_quoted_content)))
         (record_field
           name: (record_field_name
-            (double_quoted_literal
-              (double_quoted_content)))
+            (public_record_field_name
+              (double_quoted_literal
+                (double_quoted_content))))
           value: (double_quoted_literal
             (double_quoted_content)))
         (record_field
           name: (record_field_name
-            (backtick_quoted_literal
-              (backtick_quoted_content)))
+            (public_record_field_name
+              (backtick_quoted_literal
+                (backtick_quoted_content))))
           value: (numeric_literal))))))
 
 ==================
@@ -204,27 +214,32 @@ Nested compound values
       (record_literal
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (double_quoted_literal
             (double_quoted_content)))
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (array_literal
             (numeric_literal)
             (numeric_literal)
             (numeric_literal)))
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (record_literal
             (record_field
               name: (record_field_name
-                (unquoted_record_field_name))
+                (public_record_field_name
+                  (unquoted_record_field_name)))
               value: (boolean_literal))))
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (tuple_literal
             (numeric_literal)
             (numeric_literal)))))))
@@ -254,7 +269,8 @@ foo({1}, T(1,2), {name := "Alice"}) | consume
             (record_literal
               (record_field
                 name: (record_field_name
-                  (unquoted_record_field_name))
+                  (public_record_field_name
+                    (unquoted_record_field_name)))
                 value: (double_quoted_literal
                   (double_quoted_content)))))))
       (function_call
@@ -274,7 +290,8 @@ T(1,2) | consume
       (tuple_literal
         (numeric_literal)
         (numeric_literal))
-      (function_call name: (function_name)))))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Record as closed-expression source
@@ -289,9 +306,13 @@ Record as closed-expression source
     (closed_expression
       (record_literal
         (record_field
-          name: (record_field_name (unquoted_record_field_name))
-          value: (double_quoted_literal (double_quoted_content))))
-      (function_call name: (function_name)))))
+          name: (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          value: (double_quoted_literal
+            (double_quoted_content))))
+      (function_call
+        name: (function_name)))))
 
 ==================
 Compound values as closed-expression sources
@@ -329,7 +350,8 @@ T(1)
 
 ---
 
-(ERROR (numeric_literal))
+(ERROR
+  (numeric_literal))
 
 ==================
 Compound reports missing closing delimiter
@@ -359,7 +381,8 @@ Compound reports missing array comma
   (root_expression
     (closed_expression
       (array_literal
-        (ERROR (numeric_literal))
+        (ERROR
+          (numeric_literal))
         (numeric_literal)))))
 
 ==================
@@ -375,8 +398,11 @@ Compound reports malformed record field
     (closed_expression
       (array_literal
         (ERROR
-          (record_field_name (unquoted_record_field_name)))
-        (double_quoted_literal (double_quoted_content))))))
+          (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name))))
+        (double_quoted_literal
+          (double_quoted_content))))))
 
 ==================
 Compound rejects mixed array and record members
@@ -391,5 +417,77 @@ Compound rejects mixed array and record members
     (closed_expression
       (array_literal
         (numeric_literal)
-        (ERROR (function_name))
+        (ERROR
+          (function_name))
         (numeric_literal)))))
+
+==================
+Public record field names
+==================
+
+{foo := 10, bar := 20}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          (numeric_literal))
+        (record_field
+          (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          (numeric_literal))))))
+
+==================
+Private record field names
+==================
+
+{_tmp := 20, _x1 := 30}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          (record_field_name
+            (private_record_field_name))
+          (numeric_literal))
+        (record_field
+          (record_field_name
+            (private_record_field_name))
+          (numeric_literal))))))
+
+==================
+Mixed public and private record field names
+==================
+
+{foo := 10, _internalValue := 20, bar := 30}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_literal
+        (record_field
+          (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          (numeric_literal))
+        (record_field
+          (record_field_name
+            (private_record_field_name))
+          (numeric_literal))
+        (record_field
+          (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          (numeric_literal))))))

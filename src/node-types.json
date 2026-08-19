@@ -685,6 +685,29 @@
     }
   },
   {
+    "type": "public_record_field_name",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "backtick_quoted_literal",
+          "named": true
+        },
+        {
+          "type": "double_quoted_literal",
+          "named": true
+        },
+        {
+          "type": "unquoted_record_field_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "record_access",
     "named": true,
     "fields": {
@@ -753,15 +776,11 @@
       "required": true,
       "types": [
         {
-          "type": "backtick_quoted_literal",
+          "type": "private_record_field_name",
           "named": true
         },
         {
-          "type": "double_quoted_literal",
-          "named": true
-        },
-        {
-          "type": "unquoted_record_field_name",
+          "type": "public_record_field_name",
           "named": true
         }
       ]
@@ -1090,6 +1109,10 @@
   },
   {
     "type": "positional_record_field",
+    "named": true
+  },
+  {
+    "type": "private_record_field_name",
     "named": true
   },
   {

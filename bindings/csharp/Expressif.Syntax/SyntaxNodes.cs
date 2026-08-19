@@ -24,6 +24,7 @@ public enum SyntaxKind
     TupleLiteral,
     RecordLiteral,
     RecordField,
+    RecordFieldName,
     RecordSpread,
     IncomingValue,
     ParameterizedExpression,
@@ -311,17 +312,35 @@ public abstract class RecordEntrySyntax : SyntaxNode
 
 public sealed class RecordFieldSyntax : RecordEntrySyntax
 {
-    internal RecordFieldSyntax(SourceSpan span, string text, string name, QuotingStyle? quotingStyle, ValueSyntax value)
-        : base(SyntaxKind.RecordField, span, text, [value])
+    internal RecordFieldSyntax(SourceSpan span, string text, RecordFieldNameSyntax name, ValueSyntax value)
+        : base(SyntaxKind.RecordField, span, text, [name, value])
     {
         Name = name;
-        QuotingStyle = quotingStyle;
         Value = value;
     }
 
-    public string Name { get; }
-    public QuotingStyle? QuotingStyle { get; }
+    public RecordFieldNameSyntax Name { get; }
     public ValueSyntax Value { get; }
+}
+
+public sealed class RecordFieldNameSyntax : SyntaxNode
+{
+    internal RecordFieldNameSyntax(
+        SourceSpan span,
+        string text,
+        string value,
+        bool isPrivate,
+        QuotingStyle? quotingStyle)
+        : base(SyntaxKind.RecordFieldName, span, text)
+    {
+        Value = value;
+        IsPrivate = isPrivate;
+        QuotingStyle = quotingStyle;
+    }
+
+    public string Value { get; }
+    public bool IsPrivate { get; }
+    public QuotingStyle? QuotingStyle { get; }
 }
 
 public sealed class RecordSpreadSyntax : RecordEntrySyntax

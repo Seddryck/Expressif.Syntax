@@ -447,7 +447,8 @@ Incoming value in a record field
       (record_literal
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (incoming_value))))))
 
 ==================
@@ -464,14 +465,16 @@ Record spread between fields
       (record_literal
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (record_access
             field: (record_field_selector
               (named_record_field))))
         (record_spread)
         (record_field
           name: (record_field_name
-            (unquoted_record_field_name))
+            (public_record_field_name
+              (unquoted_record_field_name)))
           value: (boolean_literal))))))
 
 ==================

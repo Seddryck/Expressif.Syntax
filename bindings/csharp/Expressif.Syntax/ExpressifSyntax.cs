@@ -319,17 +319,23 @@ public static class ExpressifSyntax
     private static RecordFieldSyntax BindRecordField(TsNode node)
     {
         var nameContainer = node.GetChildForField("name") ?? throw Unknown(node);
-        var name = SingleNamedChild(nameContainer, nameContainer.Type);
+        var visibility = SingleNamedChild(nameContainer, nameContainer.Type);
+        var name = visibility.Type == "public_record_field_name"
+            ? SingleNamedChild(visibility, visibility.Type)
+            : visibility;
         var value = node.GetChildForField("value") ?? throw Unknown(node);
         QuotingStyle? quotingStyle = name.Type switch
         {
             "double_quoted_literal" => QuotingStyle.DoubleQuote,
             "backtick_quoted_literal" => QuotingStyle.Backtick,
-            "unquoted_record_field_name" => null,
+            "unquoted_record_field_name" or "private_record_field_name" => null,
             _ => throw Unknown(name),
         };
         var nameText = quotingStyle is null ? name.Text : name.Text[1..^1];
-        return new(Span(node), node.Text, nameText, quotingStyle, BindValue(value));
+        var nameSyntax = new RecordFieldNameSyntax(
+            Span(visibility), visibility.Text, nameText,
+            visibility.Type == "private_record_field_name", quotingStyle);
+        return new(Span(node), node.Text, nameSyntax, BindValue(value));
     }
 
     private static TsNode SingleNamedChild(TsNode node, string container)

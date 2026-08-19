@@ -107,7 +107,8 @@ foo({{1,2,3} | sum | add(1)}, {T(1,2) | some-function}, {{name := "Alice"} | som
               source: (record_literal
                 (record_field
                   name: (record_field_name
-                    (unquoted_record_field_name))
+                    (public_record_field_name
+                      (unquoted_record_field_name)))
                   value: (double_quoted_literal
                     (double_quoted_content))))
               expression: (open_expression
@@ -160,7 +161,8 @@ foo({1,2,3}, {name := "Alice"}, {@foo | lower})
             (record_literal
               (record_field
                 name: (record_field_name
-                  (unquoted_record_field_name))
+                  (public_record_field_name
+                    (unquoted_record_field_name)))
                 value: (double_quoted_literal
                   (double_quoted_content)))))
           (positional_argument
