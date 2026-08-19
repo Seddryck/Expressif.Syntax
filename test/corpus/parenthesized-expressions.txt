@@ -138,9 +138,12 @@ absolute | (|> absolute)
   (root_expression
     (open_expression
       (function_call
-        name: (function_name))
-      (parenthesized_expression
-        (ERROR)
-        expression: (open_expression
-          (function_call
-            name: (function_name)))))))
+        name: (function_name))))
+  (ERROR
+    (parenthesized_expression
+      expression: (root_expression
+        (open_expression
+          (map_shorthand
+            expression: (open_expression
+              (function_call
+                name: (function_name)))))))))

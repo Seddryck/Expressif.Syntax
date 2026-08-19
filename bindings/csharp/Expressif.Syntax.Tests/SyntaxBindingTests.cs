@@ -646,6 +646,18 @@ public class SyntaxBindingTests
         });
     }
 
+    [TestCase("123 | !equal-to(125)")]
+    [TestCase("123 | ! equal-to(125) ")]
+    [TestCase("123 | !equal-to(125) |OR even ")]
+    [TestCase("123 | ( ! equal-to(125) ) ")]
+    [TestCase("123 | ( ! equal-to(125) |OR even ) |AND !null ")]
+    public void NegatedPredicatesParseInPipelinesAndGroupedExpressions(string source)
+    {
+        var root = ExpressifSyntax.Parse(source);
+
+        Assert.That(root, Is.TypeOf<ClosedExpressionSyntax>());
+    }
+
     [TestCase("|AND")]
     [TestCase("|OR")]
     [TestCase("|XOR")]

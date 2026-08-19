@@ -537,3 +537,122 @@ foo |XNOR bar
         (function_name))))
   (ERROR
     (unquoted_record_field_name)))
+
+==================
+Negated predicate in a closed pipeline
+==================
+
+123 | !equal-to(125)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (unary_expression
+        (unary_operator)
+        (function_call
+          (function_name)
+          (argument_list
+            (positional_argument
+              (numeric_literal))))))))
+
+==================
+Negated predicate with whitespace in a closed pipeline
+==================
+
+123 | ! equal-to(125)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (unary_expression
+        (unary_operator)
+        (function_call
+          (function_name)
+          (argument_list
+            (positional_argument
+              (numeric_literal))))))))
+
+==================
+Negated predicate composed with a boolean shorthand
+==================
+
+123 | !equal-to(125) |OR even
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (binary_expression
+        (unary_expression
+          (unary_operator)
+          (function_call
+            (function_name)
+            (argument_list
+              (positional_argument
+                (numeric_literal)))))
+        (binary_operator)
+        (function_call
+          (function_name))))))
+
+==================
+Negated predicate in a grouped pipeline
+==================
+
+123 | ( ! equal-to(125) )
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (parenthesized_expression
+        (open_expression
+          (unary_expression
+            (unary_operator)
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal))))))))))
+
+==================
+Negated predicates around grouped boolean composition
+==================
+
+123 | ( ! equal-to(125) |OR even ) |AND !null
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (binary_expression
+        (parenthesized_expression
+          (root_expression
+            (open_expression
+              (binary_expression
+                (unary_expression
+                  (unary_operator)
+                  (function_call
+                    (function_name)
+                    (argument_list
+                      (positional_argument
+                        (numeric_literal)))))
+                (binary_operator)
+                (function_call
+                  (function_name))))))
+        (binary_operator)
+        (unary_expression
+          (unary_operator)
+          (function_call
+            (function_name)))))))
