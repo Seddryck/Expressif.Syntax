@@ -30,7 +30,7 @@ export default grammar({
   ],
 
   conflicts: ($) => [
-    [$.record_spread, $.incoming_value],
+    [$.value, $._non_incoming_value],
     [$.expression, $._pipeline_expression],
     [$.expression, $._shorthand_operand],
     [$.root_expression, $._parenthesized_pipeline_expression],
@@ -295,29 +295,53 @@ export default grammar({
       seq("{", "}"),
       prec(1, seq(
         "{",
-        alias($._array_closed_expression, $.closed_expression),
-        repeat(seq(",", $._array_element)),
+        $.array_element,
+        repeat(seq(",", $.array_element)),
         "}",
       )),
       seq(
         "{",
-        $.value,
-        repeat(seq(",", $._array_element)),
+        $.array_element,
+        repeat(seq(",", $.array_element)),
         "}",
       ),
     )),
 
-    _array_element: ($) => choice(
-      alias($._array_closed_expression, $.closed_expression),
-      $.value,
+    array_element: ($) => choice(
+      seq(
+        field("spread", "..."),
+        field("expression", choice(
+          alias($._array_closed_expression, $.closed_expression),
+          $._non_incoming_value,
+          $.expression,
+        )),
+      ),
+      field("expression", choice(
+        alias($._array_closed_expression, $.closed_expression),
+        $._non_incoming_value,
+      )),
     ),
 
     _array_closed_expression: ($) => prec.right(2, seq(
-      $.value,
+      $._non_incoming_value,
       "|",
       $._pipeline_expression,
       repeat(seq("|", $._pipeline_expression)),
     )),
+
+    _non_incoming_value: ($) => choice(
+      $.variable,
+      $.record_access,
+      $.numeric_literal,
+      $.boolean_literal,
+      $.null_literal,
+      $.quoted_literal,
+      $.temporal_literal,
+      $.array_literal,
+      $.tuple_literal,
+      $.record_literal,
+      $.interval_literal,
+    ),
 
     tuple_literal: ($) => seq(
       "T",
@@ -347,7 +371,13 @@ export default grammar({
     record_field: ($) => seq(
       field("name", $.record_field_name),
       ":=",
-      field("value", $.value),
+      choice(
+        seq(
+          field("spread", "..."),
+          field("value", choice($._non_incoming_value, $.expression)),
+        ),
+        field("value", $._non_incoming_value),
+      ),
     ),
 
     record_spread: (_) => "...",

@@ -83,9 +83,12 @@ foo({{1,2,3} | sum | add(1)}, {T(1,2) | some-function}, {{name := "Alice"} | som
           (positional_argument
             (parameterized_expression
               source: (array_literal
-                (numeric_literal)
-                (numeric_literal)
-                (numeric_literal))
+                (array_element
+                  expression: (numeric_literal))
+                (array_element
+                  expression: (numeric_literal))
+                (array_element
+                  expression: (numeric_literal)))
               expression: (open_expression
                 (function_call
                   name: (function_name))
@@ -154,9 +157,12 @@ foo({1,2,3}, {name := "Alice"}, {@foo | lower})
         (argument_list
           (positional_argument
             (array_literal
-              (numeric_literal)
-              (numeric_literal)
-              (numeric_literal)))
+              (array_element
+                expression: (numeric_literal))
+              (array_element
+                expression: (numeric_literal))
+              (array_element
+                expression: (numeric_literal))))
           (positional_argument
             (record_literal
               (record_field
@@ -184,10 +190,11 @@ Top-level braces form an array with an input expression
   (root_expression
     (closed_expression
       (array_literal
-        (closed_expression
-          (variable)
-          (function_call
-            (function_name)))))))
+        (array_element
+          (closed_expression
+            (variable)
+            (function_call
+              (function_name))))))))
 
 ==================
 Nested braces form an array argument containing an input expression
@@ -205,11 +212,13 @@ foo({{@foo | lower}})
         (argument_list
           (positional_argument
             (array_literal
-              (array_literal
-                (closed_expression
-                  (variable)
-                  (function_call
-                    (function_name)))))))))))
+              (array_element
+                (array_literal
+                  (array_element
+                    (closed_expression
+                      (variable)
+                      (function_call
+                        (function_name)))))))))))))
 
 ==================
 Missing source recovery snapshot rejects the parameterized expression
@@ -249,8 +258,10 @@ foo({@foo lower})
         (argument_list
           (positional_argument
             (array_literal
-              (variable)
-              (ERROR))))))))
+              (array_element
+                (variable))
+              (ERROR
+                (function_name)))))))))
 
 ==================
 Missing right-hand expression recovery snapshot rejects an array literal
@@ -268,7 +279,8 @@ foo({@foo | })
         (argument_list
           (positional_argument
             (array_literal
-              (variable)
+              (array_element
+                (variable))
               (ERROR))))))))
 
 ==================

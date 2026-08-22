@@ -212,13 +212,22 @@ public static class ExpressifSyntax
             "date_literal" => new DateLiteralSyntax(Span(node), node.Text),
             "date_time_literal" => new DateTimeLiteralSyntax(Span(node), node.Text),
             "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
-            "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindExpression).ToArray()),
+            "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindArrayElement).ToArray()),
             "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
             "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
             "interval_literal" => BindInterval(node),
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
             _ => throw Unknown(node),
         });
+
+    private static ArrayElementSyntax BindArrayElement(TsNode node)
+    {
+        if (node.Type != "array_element")
+            throw Unknown(node);
+
+        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindExpression(expression), node.GetChildForField("spread") is not null);
+    }
 
     private static T BindSemanticValue<T>(TsNode node, Func<T> bind)
     {
@@ -350,7 +359,7 @@ public static class ExpressifSyntax
         var nameSyntax = new RecordFieldNameSyntax(
             Span(visibility), visibility.Text, nameText,
             visibility.Type == "private_record_field_name", quotingStyle);
-        return new(Span(node), node.Text, nameSyntax, BindValue(value));
+        return new(Span(node), node.Text, nameSyntax, BindExpression(value), node.GetChildForField("spread") is not null);
     }
 
     private static TsNode SingleNamedChild(TsNode node, string container)

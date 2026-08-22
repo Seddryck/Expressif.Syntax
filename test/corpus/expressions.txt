@@ -473,10 +473,10 @@ Incoming value
       (incoming_value))))
 
 ==================
-Incoming value in a record field
+Spread values in record fields
 ==================
 
-{ original := ... }
+{foo := ...args, bar := ...qrz}
 
 ---
 
@@ -488,7 +488,14 @@ Incoming value in a record field
           name: (record_field_name
             (public_record_field_name
               (unquoted_record_field_name)))
-          value: (incoming_value))))))
+          value: (function_call
+            name: (function_name)))
+        (record_field
+          name: (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          value: (function_call
+            name: (function_name)))))))
 
 ==================
 Record spread between fields
@@ -531,7 +538,7 @@ Singleton record spread
         (record_spread)))))
 
 ==================
-Incoming value in an array
+Incoming value is rejected as a standalone array element
 ==================
 
 {..., #true}
@@ -542,8 +549,10 @@ Incoming value in an array
   (root_expression
     (closed_expression
       (array_literal
-        (incoming_value)
-        (boolean_literal)))))
+        (ERROR
+          (record_spread))
+        (array_element
+          (boolean_literal))))))
 
 ==================
 Broadcast accepts a function argument
@@ -682,11 +691,16 @@ Array pipeline filters with a function argument
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal)))
       (function_call
         (function_name)
         (argument_list
@@ -707,9 +721,12 @@ Array pipeline maps with a function-call argument
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal)))
       (function_call
         (function_name)
         (argument_list

@@ -280,13 +280,40 @@ public class SyntaxBindingTests
         {
             Assert.That(array.Text, Is.EqualTo(source));
             Assert.That(array.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
-            Assert.That(array.Children, Is.EqualTo(array.Values));
+            Assert.That(array.Children, Is.EqualTo(array.Elements));
+            Assert.That(array.Elements.Single().Expression, Is.SameAs(element));
+            Assert.That(array.Elements.Single().IsSpread, Is.False);
             Assert.That(element.Text, Is.EqualTo("@foo | text-to-func(\"bar\")"));
             Assert.That(element.Value, Is.TypeOf<VariableSyntax>()
                 .With.Property(nameof(SyntaxNode.Text)).EqualTo("@foo"));
             Assert.That(element.Pipeline.Single(), Is.TypeOf<FunctionCallSyntax>());
         });
     }
+
+    [Test]
+    public void ArraySpreadElementsPreserveTheirMarkerAndExpression()
+    {
+        const string source = "{1, ...{2,3}, 4}";
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var spread = array.Elements[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(array.Elements.Select(element => element.IsSpread),
+                Is.EqualTo(new[] { false, true, false }));
+            Assert.That(array.Values, Is.EqualTo(array.Elements.Select(element => element.Expression)));
+            Assert.That(array.Children, Is.EqualTo(array.Elements));
+            Assert.That(array.Elements.Select(element => element.Kind), Is.All.EqualTo(SyntaxKind.ArrayElement));
+            Assert.That(spread.Expression, Is.TypeOf<ArrayLiteralSyntax>());
+            Assert.That(spread.Text, Is.EqualTo("...{2,3}"));
+            Assert.That(spread.Span, Is.EqualTo(new SourceSpan(4, 8)));
+            Assert.That(spread.Children, Is.EqualTo(new SyntaxNode[] { spread.Expression }));
+        });
+    }
+
+    [Test]
+    public void ArraySpreadMarkerRequiresAnExpression()
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{1, ..., 3}"));
 
     [Test]
     public void TupleProjectionCompositionCanBeAFunctionArgument()
@@ -388,20 +415,26 @@ public class SyntaxBindingTests
     }
 
     [Test]
-    public void IncomingValueCanBeEmbeddedInARecordField()
+    public void RecordFieldsPreserveSpreadSemantics()
     {
-        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{ original := ... }")).Value;
-        var field = record.Fields.Single();
+        const string source = "{foo := ...args, bar := ...qrz, baz := @value}";
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var first = record.Fields[0];
 
         Assert.Multiple(() =>
         {
-            Assert.That(field.Value, Is.TypeOf<IncomingValueSyntax>());
-            Assert.That(field.Value.Kind, Is.EqualTo(SyntaxKind.IncomingValue));
-            Assert.That(field.Value.Text, Is.EqualTo("..."));
-            Assert.That(field.Value.Span, Is.EqualTo(new SourceSpan(14, 3)));
-            Assert.That(field.Children, Is.EqualTo(new SyntaxNode[] { field.Name, field.Value }));
+            Assert.That(record.Fields.Select(field => field.IsSpread), Is.EqualTo(new[] { true, true, false }));
+            Assert.That(record.Fields.Select(field => field.Value.Text), Is.EqualTo(new[] { "args", "qrz", "@value" }));
+            Assert.That(first.Value, Is.TypeOf<FunctionCallSyntax>());
+            Assert.That(first.Text, Is.EqualTo("foo := ...args"));
+            Assert.That(first.Span, Is.EqualTo(new SourceSpan(1, 14)));
+            Assert.That(first.Children, Is.EqualTo(new SyntaxNode[] { first.Name, first.Value }));
         });
     }
+
+    [Test]
+    public void RecordFieldSpreadMarkerRequiresAValue()
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{foo := ...}"));
 
     [Test]
     public void IncomingValueComposesAsAnArgumentAndPipelineSource()
@@ -474,12 +507,9 @@ public class SyntaxBindingTests
     }
 
     [Test]
-    public void IncomingValueCanAppearInAnArrayWhenAnotherValueDisambiguatesIt()
+    public void IncomingValueCannotBeAStandaloneArrayElement()
     {
-        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{..., #true}")).Value;
-
-        Assert.That(array.Values.Select(value => value.Kind),
-            Is.EqualTo(new[] { SyntaxKind.IncomingValue, SyntaxKind.BooleanLiteral }));
+        Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{..., #true}"));
     }
 
     [Test]

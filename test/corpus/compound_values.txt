@@ -23,10 +23,12 @@ Null literal in collections
   (root_expression
     (closed_expression
       (array_literal
-        (null_literal)
-        (tuple_literal
-          (null_literal)
-          (boolean_literal))))))
+        (array_element
+          (null_literal))
+        (array_element
+          (tuple_literal
+            (null_literal)
+            (boolean_literal)))))))
 
 ==================
 Array values and whitespace
@@ -40,20 +42,27 @@ Array values and whitespace
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (boolean_literal)
-        (double_quoted_literal
-          (double_quoted_content))
-        (date_literal)
-        (variable)
-        (record_access
-          root: (original_input)
-          field: (original_record_field_selector
-            (named_record_field)))
-        (record_access
-          root: (original_input)
-          field: (original_record_field_selector
-            (positional_record_field)))))))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (boolean_literal))
+        (array_element
+          expression: (double_quoted_literal
+            (double_quoted_content)))
+        (array_element
+          expression: (date_literal))
+        (array_element
+          expression: (variable))
+        (array_element
+          expression: (record_access
+            root: (original_input)
+            field: (original_record_field_selector
+              (named_record_field))))
+        (array_element
+          expression: (record_access
+            root: (original_input)
+            field: (original_record_field_selector
+              (positional_record_field))))))))
 
 ==================
 Input expressions as array elements
@@ -67,14 +76,15 @@ Input expressions as array elements
   (root_expression
     (closed_expression
       (array_literal
-        (closed_expression
-          (variable)
-          (function_call
-            name: (function_name)
-            (argument_list
-              (positional_argument
-                (double_quoted_literal
-                  (double_quoted_content))))))))))
+        (array_element
+          expression: (closed_expression
+            (variable)
+            (function_call
+              name: (function_name)
+              (argument_list
+                (positional_argument
+                  (double_quoted_literal
+                    (double_quoted_content)))))))))))
 
 ==================
 Nested and single-element arrays
@@ -88,11 +98,16 @@ Nested and single-element arrays
   (root_expression
     (closed_expression
       (array_literal
-        (array_literal
-          (numeric_literal))
-        (array_literal
-          (numeric_literal)
-          (numeric_literal))))))
+        (array_element
+          (array_literal
+            (array_element
+              (numeric_literal))))
+        (array_element
+          (array_literal
+            (array_element
+              (numeric_literal))
+            (array_element
+              (numeric_literal))))))))
 
 ==================
 Tuple with minimum arity
@@ -223,9 +238,12 @@ Nested compound values
             (public_record_field_name
               (unquoted_record_field_name)))
           value: (array_literal
-            (numeric_literal)
-            (numeric_literal)
-            (numeric_literal)))
+            (array_element
+              expression: (numeric_literal))
+            (array_element
+              expression: (numeric_literal))
+            (array_element
+              expression: (numeric_literal))))
         (record_field
           name: (record_field_name
             (public_record_field_name
@@ -260,7 +278,8 @@ foo({1}, T(1,2), {name := "Alice"}) | consume
         (argument_list
           (positional_argument
             (array_literal
-              (numeric_literal)))
+              (array_element
+                expression: (numeric_literal))))
           (positional_argument
             (tuple_literal
               (numeric_literal)
@@ -326,9 +345,12 @@ Compound values as closed-expression sources
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal)))
       (function_call
         name: (function_name)))))
 
@@ -365,8 +387,10 @@ Compound reports missing closing delimiter
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
         (MISSING "}")))))
 
 ==================
@@ -381,9 +405,10 @@ Compound reports missing array comma
   (root_expression
     (closed_expression
       (array_literal
-        (ERROR
+        (array_element
           (numeric_literal))
-        (numeric_literal)))))
+        (ERROR
+          (numeric_literal))))))
 
 ==================
 Compound reports malformed record field
@@ -401,8 +426,9 @@ Compound reports malformed record field
           (record_field_name
             (public_record_field_name
               (unquoted_record_field_name))))
-        (double_quoted_literal
-          (double_quoted_content))))))
+        (array_element
+          (double_quoted_literal
+            (double_quoted_content)))))))
 
 ==================
 Compound rejects mixed array and record members
@@ -416,10 +442,12 @@ Compound rejects mixed array and record members
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
+        (array_element
+          (numeric_literal))
         (ERROR
           (function_name))
-        (numeric_literal)))))
+        (array_element
+          (numeric_literal))))))
 
 ==================
 Public record field names
@@ -443,6 +471,29 @@ Public record field names
             (public_record_field_name
               (unquoted_record_field_name)))
           (numeric_literal))))))
+
+==================
+Array spread elements
+==================
+
+{1, ...{2, 3}, 4}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (array_literal
+            (array_element
+              expression: (numeric_literal))
+            (array_element
+              expression: (numeric_literal))))
+        (array_element
+          expression: (numeric_literal))))))
 
 ==================
 Private record field names

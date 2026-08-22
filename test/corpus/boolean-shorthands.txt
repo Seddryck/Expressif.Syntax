@@ -445,7 +445,8 @@ Binary shorthand requires a left operand
   (root_expression
     (open_expression
       (function_call
-        (function_name)))))
+        (function_name))))
+  (ERROR))
 
 ==================
 Malformed binary shorthand operator
@@ -462,8 +463,7 @@ foo |BAD bar
         (function_name))
       (function_call
         (function_name))))
-  (ERROR
-    (function_name)))
+  (ERROR))
 
 ==================
 Parenthesized shorthand requires a closing parenthesis
@@ -518,7 +518,8 @@ Complementary binary shorthand requires a left operand
   (root_expression
     (open_expression
       (function_call
-        (function_name)))))
+        (function_name))))
+  (ERROR))
 
 ==================
 Malformed complementary binary shorthand operator
@@ -535,8 +536,7 @@ foo |XNOR bar
         (function_name))
       (function_call
         (function_name))))
-  (ERROR
-    (function_name)))
+  (ERROR))
 
 ==================
 Negated predicate in a closed pipeline
