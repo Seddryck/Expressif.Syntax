@@ -359,7 +359,7 @@ public static class ExpressifSyntax
         var nameSyntax = new RecordFieldNameSyntax(
             Span(visibility), visibility.Text, nameText,
             visibility.Type == "private_record_field_name", quotingStyle);
-        return new(Span(node), node.Text, nameSyntax, BindValue(value));
+        return new(Span(node), node.Text, nameSyntax, BindExpression(value), node.GetChildForField("spread") is not null);
     }
 
     private static TsNode SingleNamedChild(TsNode node, string container)

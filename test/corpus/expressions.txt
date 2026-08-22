@@ -473,10 +473,10 @@ Incoming value
       (incoming_value))))
 
 ==================
-Incoming value in a record field
+Spread values in record fields
 ==================
 
-{ original := ... }
+{foo := ...args, bar := ...qrz}
 
 ---
 
@@ -488,7 +488,14 @@ Incoming value in a record field
           name: (record_field_name
             (public_record_field_name
               (unquoted_record_field_name)))
-          value: (incoming_value))))))
+          value: (function_call
+            name: (function_name)))
+        (record_field
+          name: (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          value: (function_call
+            name: (function_name)))))))
 
 ==================
 Record spread between fields

@@ -415,20 +415,26 @@ public class SyntaxBindingTests
     }
 
     [Test]
-    public void IncomingValueCanBeEmbeddedInARecordField()
+    public void RecordFieldsPreserveSpreadSemantics()
     {
-        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{ original := ... }")).Value;
-        var field = record.Fields.Single();
+        const string source = "{foo := ...args, bar := ...qrz, baz := @value}";
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var first = record.Fields[0];
 
         Assert.Multiple(() =>
         {
-            Assert.That(field.Value, Is.TypeOf<IncomingValueSyntax>());
-            Assert.That(field.Value.Kind, Is.EqualTo(SyntaxKind.IncomingValue));
-            Assert.That(field.Value.Text, Is.EqualTo("..."));
-            Assert.That(field.Value.Span, Is.EqualTo(new SourceSpan(14, 3)));
-            Assert.That(field.Children, Is.EqualTo(new SyntaxNode[] { field.Name, field.Value }));
+            Assert.That(record.Fields.Select(field => field.IsSpread), Is.EqualTo(new[] { true, true, false }));
+            Assert.That(record.Fields.Select(field => field.Value.Text), Is.EqualTo(new[] { "args", "qrz", "@value" }));
+            Assert.That(first.Value, Is.TypeOf<FunctionCallSyntax>());
+            Assert.That(first.Text, Is.EqualTo("foo := ...args"));
+            Assert.That(first.Span, Is.EqualTo(new SourceSpan(1, 14)));
+            Assert.That(first.Children, Is.EqualTo(new SyntaxNode[] { first.Name, first.Value }));
         });
     }
+
+    [Test]
+    public void RecordFieldSpreadMarkerRequiresAValue()
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{foo := ...}"));
 
     [Test]
     public void IncomingValueComposesAsAnArgumentAndPipelineSource()

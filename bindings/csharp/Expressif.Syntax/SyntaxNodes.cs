@@ -351,15 +351,17 @@ public abstract class RecordEntrySyntax : SyntaxNode
 
 public sealed class RecordFieldSyntax : RecordEntrySyntax
 {
-    internal RecordFieldSyntax(SourceSpan span, string text, RecordFieldNameSyntax name, ValueSyntax value)
+    internal RecordFieldSyntax(SourceSpan span, string text, RecordFieldNameSyntax name, ExpressionSyntax value, bool isSpread = false)
         : base(SyntaxKind.RecordField, span, text, [name, value])
     {
         Name = name;
         Value = value;
+        IsSpread = isSpread;
     }
 
     public RecordFieldNameSyntax Name { get; }
-    public ValueSyntax Value { get; }
+    public ExpressionSyntax Value { get; }
+    public bool IsSpread { get; }
 }
 
 public sealed class RecordFieldNameSyntax : SyntaxNode

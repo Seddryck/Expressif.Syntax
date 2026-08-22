@@ -30,8 +30,7 @@ export default grammar({
   ],
 
   conflicts: ($) => [
-    [$.record_spread, $.incoming_value],
-    [$.value, $._array_value],
+    [$.value, $._non_incoming_value],
     [$.expression, $._pipeline_expression],
     [$.expression, $._shorthand_operand],
     [$.root_expression, $._parenthesized_pipeline_expression],
@@ -308,22 +307,29 @@ export default grammar({
       ),
     )),
 
-    array_element: ($) => seq(
-      field("spread", optional("...")),
+    array_element: ($) => choice(
+      seq(
+        field("spread", "..."),
+        field("expression", choice(
+          alias($._array_closed_expression, $.closed_expression),
+          $._non_incoming_value,
+          $.expression,
+        )),
+      ),
       field("expression", choice(
         alias($._array_closed_expression, $.closed_expression),
-        $._array_value,
+        $._non_incoming_value,
       )),
     ),
 
     _array_closed_expression: ($) => prec.right(2, seq(
-      $._array_value,
+      $._non_incoming_value,
       "|",
       $._pipeline_expression,
       repeat(seq("|", $._pipeline_expression)),
     )),
 
-    _array_value: ($) => choice(
+    _non_incoming_value: ($) => choice(
       $.variable,
       $.record_access,
       $.numeric_literal,
@@ -365,7 +371,13 @@ export default grammar({
     record_field: ($) => seq(
       field("name", $.record_field_name),
       ":=",
-      field("value", $.value),
+      choice(
+        seq(
+          field("spread", "..."),
+          field("value", choice($._non_incoming_value, $.expression)),
+        ),
+        field("value", $._non_incoming_value),
+      ),
     ),
 
     record_spread: (_) => "...",
