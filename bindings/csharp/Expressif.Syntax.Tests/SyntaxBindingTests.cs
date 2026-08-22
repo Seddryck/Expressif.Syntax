@@ -280,13 +280,40 @@ public class SyntaxBindingTests
         {
             Assert.That(array.Text, Is.EqualTo(source));
             Assert.That(array.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
-            Assert.That(array.Children, Is.EqualTo(array.Values));
+            Assert.That(array.Children, Is.EqualTo(array.Elements));
+            Assert.That(array.Elements.Single().Expression, Is.SameAs(element));
+            Assert.That(array.Elements.Single().IsSpread, Is.False);
             Assert.That(element.Text, Is.EqualTo("@foo | text-to-func(\"bar\")"));
             Assert.That(element.Value, Is.TypeOf<VariableSyntax>()
                 .With.Property(nameof(SyntaxNode.Text)).EqualTo("@foo"));
             Assert.That(element.Pipeline.Single(), Is.TypeOf<FunctionCallSyntax>());
         });
     }
+
+    [Test]
+    public void ArraySpreadElementsPreserveTheirMarkerAndExpression()
+    {
+        const string source = "{1, ...{2,3}, 4}";
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var spread = array.Elements[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(array.Elements.Select(element => element.IsSpread),
+                Is.EqualTo(new[] { false, true, false }));
+            Assert.That(array.Values, Is.EqualTo(array.Elements.Select(element => element.Expression)));
+            Assert.That(array.Children, Is.EqualTo(array.Elements));
+            Assert.That(array.Elements.Select(element => element.Kind), Is.All.EqualTo(SyntaxKind.ArrayElement));
+            Assert.That(spread.Expression, Is.TypeOf<ArrayLiteralSyntax>());
+            Assert.That(spread.Text, Is.EqualTo("...{2,3}"));
+            Assert.That(spread.Span, Is.EqualTo(new SourceSpan(4, 8)));
+            Assert.That(spread.Children, Is.EqualTo(new SyntaxNode[] { spread.Expression }));
+        });
+    }
+
+    [Test]
+    public void ArraySpreadMarkerRequiresAnExpression()
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{1, ..., 3}"));
 
     [Test]
     public void TupleProjectionCompositionCanBeAFunctionArgument()
@@ -474,12 +501,9 @@ public class SyntaxBindingTests
     }
 
     [Test]
-    public void IncomingValueCanAppearInAnArrayWhenAnotherValueDisambiguatesIt()
+    public void IncomingValueCannotBeAStandaloneArrayElement()
     {
-        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{..., #true}")).Value;
-
-        Assert.That(array.Values.Select(value => value.Kind),
-            Is.EqualTo(new[] { SyntaxKind.IncomingValue, SyntaxKind.BooleanLiteral }));
+        Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{..., #true}"));
     }
 
     [Test]

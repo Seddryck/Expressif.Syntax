@@ -31,6 +31,7 @@ export default grammar({
 
   conflicts: ($) => [
     [$.record_spread, $.incoming_value],
+    [$.value, $._array_value],
     [$.expression, $._pipeline_expression],
     [$.expression, $._shorthand_operand],
     [$.root_expression, $._parenthesized_pipeline_expression],
@@ -295,29 +296,46 @@ export default grammar({
       seq("{", "}"),
       prec(1, seq(
         "{",
-        alias($._array_closed_expression, $.closed_expression),
-        repeat(seq(",", $._array_element)),
+        $.array_element,
+        repeat(seq(",", $.array_element)),
         "}",
       )),
       seq(
         "{",
-        $.value,
-        repeat(seq(",", $._array_element)),
+        $.array_element,
+        repeat(seq(",", $.array_element)),
         "}",
       ),
     )),
 
-    _array_element: ($) => choice(
-      alias($._array_closed_expression, $.closed_expression),
-      $.value,
+    array_element: ($) => seq(
+      field("spread", optional("...")),
+      field("expression", choice(
+        alias($._array_closed_expression, $.closed_expression),
+        $._array_value,
+      )),
     ),
 
     _array_closed_expression: ($) => prec.right(2, seq(
-      $.value,
+      $._array_value,
       "|",
       $._pipeline_expression,
       repeat(seq("|", $._pipeline_expression)),
     )),
+
+    _array_value: ($) => choice(
+      $.variable,
+      $.record_access,
+      $.numeric_literal,
+      $.boolean_literal,
+      $.null_literal,
+      $.quoted_literal,
+      $.temporal_literal,
+      $.array_literal,
+      $.tuple_literal,
+      $.record_literal,
+      $.interval_literal,
+    ),
 
     tuple_literal: ($) => seq(
       "T",

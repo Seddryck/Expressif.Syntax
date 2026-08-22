@@ -10,41 +10,48 @@ Bounded interval spellings
   (root_expression
     (closed_expression
       (array_literal
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (numeric_literal)))))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (numeric_literal))))))))
 
 ==================
 Infinite interval bounds
@@ -58,31 +65,36 @@ Infinite interval bounds
   (root_expression
     (closed_expression
       (array_literal
-        (interval_literal
-          (interval_bound
-            (infinite_bound))
-          (interval_bound
-            (infinite_bound)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (infinite_bound)))
-        (interval_literal
-          (interval_bound
-            (numeric_literal))
-          (interval_bound
-            (infinite_bound)))
-        (interval_literal
-          (interval_bound
-            (infinite_bound))
-          (interval_bound
-            (numeric_literal)))
-        (interval_literal
-          (interval_bound
-            (infinite_bound))
-          (interval_bound
-            (numeric_literal)))))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (infinite_bound))
+            (interval_bound
+              (infinite_bound))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (infinite_bound))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (numeric_literal))
+            (interval_bound
+              (infinite_bound))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (infinite_bound))
+            (interval_bound
+              (numeric_literal))))
+        (array_element
+          (interval_literal
+            (interval_bound
+              (infinite_bound))
+            (interval_bound
+              (numeric_literal))))))))
 
 ==================
 Sign-oriented interval shorthands
@@ -96,14 +108,18 @@ Sign-oriented interval shorthands
   (root_expression
     (closed_expression
       (array_literal
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))))))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))))))
 
 ==================
 Comparison and word interval shorthands
@@ -117,22 +133,30 @@ Comparison and word interval shorthands
   (root_expression
     (closed_expression
       (array_literal
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))
-        (interval_literal
-          (interval_shorthand))))))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))
+        (array_element
+          (interval_literal
+            (interval_shorthand)))))))
 
 ==================
 Canonical temporal interval bounds

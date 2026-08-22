@@ -63,9 +63,12 @@ Map shorthand after a closed-expression source
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal)))
       (map_shorthand
         expression: (open_expression
           (function_call
@@ -86,9 +89,12 @@ Map shorthand preserves the outer pipeline boundary
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal)))
       (map_shorthand
         expression: (open_expression
           (function_call

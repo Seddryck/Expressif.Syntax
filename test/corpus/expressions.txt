@@ -531,7 +531,7 @@ Singleton record spread
         (record_spread)))))
 
 ==================
-Incoming value in an array
+Incoming value is rejected as a standalone array element
 ==================
 
 {..., #true}
@@ -542,8 +542,10 @@ Incoming value in an array
   (root_expression
     (closed_expression
       (array_literal
-        (incoming_value)
-        (boolean_literal)))))
+        (ERROR
+          (record_spread))
+        (array_element
+          (boolean_literal))))))
 
 ==================
 Broadcast accepts a function argument
@@ -682,11 +684,16 @@ Array pipeline filters with a function argument
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal)))
       (function_call
         (function_name)
         (argument_list
@@ -707,9 +714,12 @@ Array pipeline maps with a function-call argument
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal))
+        (array_element
+          (numeric_literal)))
       (function_call
         (function_name)
         (argument_list

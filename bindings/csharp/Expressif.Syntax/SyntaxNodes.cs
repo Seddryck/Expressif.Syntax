@@ -22,6 +22,7 @@ public enum SyntaxKind
     Variable,
     RecordAccess,
     ArrayLiteral,
+    ArrayElement,
     TupleLiteral,
     RecordLiteral,
     RecordField,
@@ -293,14 +294,31 @@ public abstract class SequenceLiteralSyntax : ValueSyntax
 
 public sealed class ArrayLiteralSyntax : ValueSyntax
 {
-    internal ArrayLiteralSyntax(SourceSpan span, string text, IEnumerable<ExpressionSyntax> values)
-        : this(span, text, values.ToArray()) { }
+    internal ArrayLiteralSyntax(SourceSpan span, string text, IEnumerable<ArrayElementSyntax> elements)
+        : this(span, text, elements.ToArray()) { }
 
-    private ArrayLiteralSyntax(SourceSpan span, string text, ExpressionSyntax[] values)
-        : base(SyntaxKind.ArrayLiteral, span, text, values)
-        => Values = Array.AsReadOnly(values);
+    private ArrayLiteralSyntax(SourceSpan span, string text, ArrayElementSyntax[] elements)
+        : base(SyntaxKind.ArrayLiteral, span, text, elements)
+    {
+        Elements = Array.AsReadOnly(elements);
+        Values = Array.AsReadOnly(elements.Select(element => element.Expression).ToArray());
+    }
 
+    public IReadOnlyList<ArrayElementSyntax> Elements { get; }
     public IReadOnlyList<ExpressionSyntax> Values { get; }
+}
+
+public sealed class ArrayElementSyntax : SyntaxNode
+{
+    internal ArrayElementSyntax(SourceSpan span, string text, ExpressionSyntax expression, bool isSpread)
+        : base(SyntaxKind.ArrayElement, span, text, [expression])
+    {
+        Expression = expression;
+        IsSpread = isSpread;
+    }
+
+    public ExpressionSyntax Expression { get; }
+    public bool IsSpread { get; }
 }
 
 public sealed class TupleLiteralSyntax : SequenceLiteralSyntax

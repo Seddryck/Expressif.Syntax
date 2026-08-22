@@ -1258,13 +1258,8 @@
                   "value": "{"
                 },
                 {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_array_closed_expression"
-                  },
-                  "named": true,
-                  "value": "closed_expression"
+                  "type": "SYMBOL",
+                  "name": "array_element"
                 },
                 {
                   "type": "REPEAT",
@@ -1277,7 +1272,7 @@
                       },
                       {
                         "type": "SYMBOL",
-                        "name": "_array_element"
+                        "name": "array_element"
                       }
                     ]
                   }
@@ -1298,7 +1293,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "value"
+                "name": "array_element"
               },
               {
                 "type": "REPEAT",
@@ -1311,7 +1306,7 @@
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "_array_element"
+                      "name": "array_element"
                     }
                   ]
                 }
@@ -1325,21 +1320,46 @@
         ]
       }
     },
-    "_array_element": {
-      "type": "CHOICE",
+    "array_element": {
+      "type": "SEQ",
       "members": [
         {
-          "type": "ALIAS",
+          "type": "FIELD",
+          "name": "spread",
           "content": {
-            "type": "SYMBOL",
-            "name": "_array_closed_expression"
-          },
-          "named": true,
-          "value": "closed_expression"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "..."
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          }
         },
         {
-          "type": "SYMBOL",
-          "name": "value"
+          "type": "FIELD",
+          "name": "expression",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_array_closed_expression"
+                },
+                "named": true,
+                "value": "closed_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_array_value"
+              }
+            ]
+          }
         }
       ]
     },
@@ -1351,7 +1371,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "value"
+            "name": "_array_value"
           },
           {
             "type": "STRING",
@@ -1379,6 +1399,55 @@
           }
         ]
       }
+    },
+    "_array_value": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "variable"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "record_access"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "numeric_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "boolean_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "null_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "quoted_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "temporal_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "array_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tuple_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "record_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "interval_literal"
+        }
+      ]
     },
     "tuple_literal": {
       "type": "SEQ",
@@ -1862,6 +1931,10 @@
     [
       "record_spread",
       "incoming_value"
+    ],
+    [
+      "value",
+      "_array_value"
     ],
     [
       "expression",

@@ -32,9 +32,12 @@ Parenthesized map pipeline preserves outer pipeline
   (root_expression
     (closed_expression
       (array_literal
-        (numeric_literal)
-        (numeric_literal)
-        (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal))
+        (array_element
+          expression: (numeric_literal)))
       (map_shorthand
         expression: (open_expression
           (parenthesized_expression
