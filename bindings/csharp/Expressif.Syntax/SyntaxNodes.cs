@@ -20,6 +20,7 @@ public enum SyntaxKind
     DateTimeLiteral,
     TimeLiteral,
     TupleProjection,
+    ConstantReference,
     Variable,
     RecordAccess,
     ArrayLiteral,
@@ -258,6 +259,14 @@ public abstract class ValueSyntax : ExpressionSyntax
 {
     protected ValueSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
         : base(kind, span, text, children) { }
+}
+
+public sealed class ConstantReferenceSyntax : ValueSyntax
+{
+    internal ConstantReferenceSyntax(SourceSpan span, string text) : base(SyntaxKind.ConstantReference, span, text)
+        => Name = text[2..];
+
+    public string Name { get; }
 }
 
 public sealed class VariableSyntax : ValueSyntax

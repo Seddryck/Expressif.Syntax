@@ -7,7 +7,7 @@ public static class ExpressifSyntax
 {
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
-        "array_literal", "boolean_literal", "incoming_value", "null_literal", "numeric_literal",
+        "array_literal", "boolean_literal", "constant_reference", "incoming_value", "null_literal", "numeric_literal",
         "interval_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
@@ -208,6 +208,7 @@ public static class ExpressifSyntax
 
     private static ValueSyntax BindValue(TsNode node) => BindSemanticValue(node, () => node.Type switch
         {
+            "constant_reference" => new ConstantReferenceSyntax(Span(node), node.Text),
             "variable" => new VariableSyntax(Span(node), node.Text),
             "incoming_value" => new IncomingValueSyntax(Span(node), node.Text),
             "record_access" => BindRecordAccess(node),

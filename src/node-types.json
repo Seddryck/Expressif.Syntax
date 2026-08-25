@@ -74,6 +74,10 @@
         "named": true
       },
       {
+        "type": "constant_reference",
+        "named": true
+      },
+      {
         "type": "incoming_value",
         "named": true
       },
@@ -175,6 +179,10 @@
           },
           {
             "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "constant_reference",
             "named": true
           },
           {
@@ -903,6 +911,10 @@
             "named": true
           },
           {
+            "type": "constant_reference",
+            "named": true
+          },
+          {
             "type": "expression",
             "named": true
           },
@@ -1294,6 +1306,10 @@
   },
   {
     "type": "backtick_quoted_content",
+    "named": true
+  },
+  {
+    "type": "constant_reference",
     "named": true
   },
   {

@@ -1053,6 +1053,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "constant_reference"
+        },
+        {
+          "type": "SYMBOL",
           "name": "variable"
         },
         {
@@ -1473,6 +1477,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "constant_reference"
+        },
+        {
+          "type": "SYMBOL",
           "name": "variable"
         },
         {
@@ -1709,6 +1717,10 @@
     "incoming_value": {
       "type": "STRING",
       "value": "@_"
+    },
+    "constant_reference": {
+      "type": "PATTERN",
+      "value": "@![A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
     },
     "record_field_name": {
       "type": "CHOICE",

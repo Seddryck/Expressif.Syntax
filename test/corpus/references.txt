@@ -12,6 +12,44 @@ Single-letter variable
       (variable))))
 
 ==================
+Constant references preserve public names
+==================
+
+example(@!pi, @!today, @!max-retries, @!retry_count2)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (constant_reference))
+          (positional_argument
+            (constant_reference))
+          (positional_argument
+            (constant_reference))
+          (positional_argument
+            (constant_reference)))))))
+
+==================
+Constant reference pipeline
+==================
+
+@!pi | round
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (constant_reference)
+      (function_call
+        name: (function_name)))))
+
+==================
 Variable names support letters digits and mixed case
 ==================
 

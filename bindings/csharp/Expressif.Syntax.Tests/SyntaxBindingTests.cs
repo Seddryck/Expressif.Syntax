@@ -409,11 +409,46 @@ public class SyntaxBindingTests
     }
 
     [TestCase("@value", typeof(VariableSyntax))]
+    [TestCase("@!pi", typeof(ConstantReferenceSyntax))]
     [TestCase("{}", typeof(ArrayLiteralSyntax))]
     [TestCase("T(1, 2)", typeof(TupleLiteralSyntax))]
     [TestCase("{:}", typeof(RecordLiteralSyntax))]
     public void RemainingGrammarValuesHaveManagedSyntaxNodes(string source, Type expected)
         => Assert.That(((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value, Is.TypeOf(expected));
+
+    [Test]
+    public void ConstantReferenceIsALosslessValueNode()
+    {
+        const string source = "@!max-retries";
+        var constant = (ConstantReferenceSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(constant.Kind, Is.EqualTo(SyntaxKind.ConstantReference));
+            Assert.That(constant.Name, Is.EqualTo("max-retries"));
+            Assert.That(constant.Text, Is.EqualTo(source));
+            Assert.That(constant.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(constant.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void ConstantReferencesComposeAsArgumentsPipelinesAndCompoundValues()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("foo(@!today)")).Pipeline.Single();
+        var pipeline = (ClosedExpressionSyntax)ExpressifSyntax.Parse("@!pi | round");
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{limit := @!max-retries}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(call.Arguments.Single().Value, Is.TypeOf<ConstantReferenceSyntax>()
+                .With.Property(nameof(ConstantReferenceSyntax.Name)).EqualTo("today"));
+            Assert.That(pipeline.Value, Is.TypeOf<ConstantReferenceSyntax>()
+                .With.Property(nameof(ConstantReferenceSyntax.Name)).EqualTo("pi"));
+            Assert.That(record.Fields.Single().Value, Is.TypeOf<ConstantReferenceSyntax>()
+                .With.Property(nameof(ConstantReferenceSyntax.Name)).EqualTo("max-retries"));
+        });
+    }
 
     [Test]
     public void CompoundValuesBindNestedValuesAndRecordFields()
@@ -1201,6 +1236,12 @@ public class SyntaxBindingTests
     [TestCase("(foo |AND bar", false)]
     [TestCase("....", false)]
     [TestCase("{ ..., }", false)]
+    [TestCase("@!", false)]
+    [TestCase("@!1foo", false)]
+    [TestCase("@! foo", false)]
+    [TestCase("@!foo-", false)]
+    [TestCase("@_foo", false)]
+    [TestCase("@!_", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
     {
         var exception = Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
