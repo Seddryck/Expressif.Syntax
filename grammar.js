@@ -167,17 +167,22 @@ export default grammar({
     _function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
 
     argument_list: ($) => prec.left(seq(
-      choice($.positional_argument, $.named_argument),
-      repeat(seq(",", choice($.positional_argument, $.named_argument))),
+      choice($.positional_argument, $.named_argument, $.spread_argument),
+      repeat(seq(",", choice($.positional_argument, $.named_argument, $.spread_argument))),
     )),
 
     _trailing_argument_list: ($) => prec.right(seq(
-      choice($.positional_argument, $.named_argument),
-      repeat(seq(",", choice($.positional_argument, $.named_argument))),
+      choice($.positional_argument, $.named_argument, $.spread_argument),
+      repeat(seq(",", choice($.positional_argument, $.named_argument, $.spread_argument))),
       ",",
     )),
 
     positional_argument: ($) => $._argument_value,
+
+    spread_argument: ($) => seq(
+      "...",
+      field("value", $._argument_value),
+    ),
 
     named_argument: ($) => seq(
       field("name", $.argument_name),

@@ -130,6 +130,10 @@
         {
           "type": "positional_argument",
           "named": true
+        },
+        {
+          "type": "spread_argument",
+          "named": true
         }
       ]
     }
@@ -1041,6 +1045,50 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "spread_argument",
+    "named": true,
+    "fields": {
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "parameterized_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {

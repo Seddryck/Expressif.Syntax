@@ -79,6 +79,7 @@ public static class ExpressifSyntax
     private static ArgumentSyntax BindArgument(TsNode node) => node.Type switch
     {
         "positional_argument" => BindPositionalArgument(node),
+        "spread_argument" => BindSpreadArgument(node),
         "named_argument" => BindNamedArgument(node),
         _ => throw Unknown(node),
     };
@@ -88,6 +89,12 @@ public static class ExpressifSyntax
         var valueNode = SingleNamedChild(node, "positional_argument");
         var value = BindExpression(valueNode);
         return new(Span(node), node.Text, value);
+    }
+
+    private static SpreadArgumentSyntax BindSpreadArgument(TsNode node)
+    {
+        var valueNode = node.GetChildForField("value") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindExpression(valueNode));
     }
 
     private static NamedArgumentSyntax BindNamedArgument(TsNode node)
