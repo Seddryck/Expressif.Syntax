@@ -777,8 +777,16 @@
           "type": "FIELD",
           "name": "value",
           "content": {
-            "type": "SYMBOL",
-            "name": "_argument_value"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_argument_value"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
           }
         }
       ]

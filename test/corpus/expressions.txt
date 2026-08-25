@@ -205,6 +205,22 @@ array(...@values)
             value: (variable)))))))
 
 ==================
+Function call with implicit incoming-value spread argument
+==================
+
+array(...)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (spread_argument))))))
+
+==================
 Function call with mixed and trailing spread arguments
 ==================
 
