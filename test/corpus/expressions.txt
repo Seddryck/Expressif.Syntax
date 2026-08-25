@@ -188,6 +188,47 @@ example(10, rounding-mode := "up", 20)
             (numeric_literal)))))))
 
 ==================
+Function call with spread argument
+==================
+
+array(...@values)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (spread_argument
+            value: (variable)))))))
+
+==================
+Function call with mixed and trailing spread arguments
+==================
+
+array(1, name := 2, ...@values,)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))
+          (named_argument
+            name: (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
+            value: (numeric_literal))
+          (spread_argument
+            value: (variable)))))))
+
+==================
 Open expression pipeline
 ==================
 

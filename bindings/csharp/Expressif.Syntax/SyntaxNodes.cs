@@ -9,6 +9,7 @@ public enum SyntaxKind
     ClosedExpression,
     FunctionCall,
     PositionalArgument,
+    SpreadArgument,
     NamedArgument,
     ArgumentName,
     NumericLiteral,
@@ -208,6 +209,14 @@ public sealed class PositionalArgumentSyntax : ArgumentSyntax
 {
     internal PositionalArgumentSyntax(SourceSpan span, string text, ExpressionSyntax value)
         : base(SyntaxKind.PositionalArgument, span, text, [value]) => Value = value;
+
+    public override ExpressionSyntax Value { get; }
+}
+
+public sealed class SpreadArgumentSyntax : ArgumentSyntax
+{
+    internal SpreadArgumentSyntax(SourceSpan span, string text, ExpressionSyntax value)
+        : base(SyntaxKind.SpreadArgument, span, text, [value]) => Value = value;
 
     public override ExpressionSyntax Value { get; }
 }

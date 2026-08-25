@@ -100,9 +100,12 @@ spreads an explicit expression.
 ...args            spread the result of the zero-argument function args
 ```
 
-The distinction applies consistently to arrays and named record fields:
+The distinction applies consistently to function arguments, arrays, and named
+record fields:
 
 ```text
+array(@args)         variable as one positional argument
+array(...@args)      variable spread into the function argument list
 {1, @_, 3}         current object as one array element
 {1, ..., 3}        current object spread into an array
 {1, ...@args, 3}   variable @args spread into an array

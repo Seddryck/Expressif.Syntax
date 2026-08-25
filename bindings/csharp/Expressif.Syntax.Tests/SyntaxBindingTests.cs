@@ -680,6 +680,40 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void SpreadArgumentPreservesValueAndAuthoredSource()
+    {
+        const string source = "array(...@values)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = (SpreadArgumentSyntax)call.Arguments.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(argument.Kind, Is.EqualTo(SyntaxKind.SpreadArgument));
+            Assert.That(argument.Value, Is.TypeOf<VariableSyntax>());
+            Assert.That(((VariableSyntax)argument.Value).Name, Is.EqualTo("values"));
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { argument.Value }));
+            Assert.That(argument.Text, Is.EqualTo("...@values"));
+            Assert.That(argument.Span, Is.EqualTo(new SourceSpan(6, 10)));
+            Assert.That(call.Text, Is.EqualTo(source));
+        });
+    }
+
+    [Test]
+    public void FunctionCallPreservesSpreadArgumentOrderAndTrailingComma()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("array(1, name := 2, ...@values,)");
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+
+        Assert.That(call.Arguments.Select(argument => argument.Kind), Is.EqualTo(new[]
+        {
+            SyntaxKind.PositionalArgument,
+            SyntaxKind.NamedArgument,
+            SyntaxKind.SpreadArgument,
+        }));
+    }
+
+    [Test]
     public void OpenExpressionCanBeAPositionalArgument()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("broadcast(sum)");

@@ -290,10 +290,10 @@ foo(a: 1)
             (numeric_literal)))))))
 
 ==================
-Spread arguments are not implemented
+Spread argument requires a value
 ==================
 
-foo(...a)
+array(...)
 
 ---
 
@@ -302,12 +302,7 @@ foo(...a)
     (open_expression
       (function_call
         name: (function_name)
-        (ERROR)
-        (argument_list
-          (positional_argument
-            (open_expression
-              (function_call
-                name: (function_name)))))))))
+        (ERROR)))))
 
 ==================
 Operators are not implemented
