@@ -47,7 +47,10 @@ export default grammar({
 
     open_expression: ($) => prec.right(seq(
       $.expression,
-      repeat(seq("|", $._pipeline_expression)),
+      repeat(choice(
+        seq("|", $._pipeline_expression),
+        alias($._pipeline_map_shorthand, $.map_shorthand),
+      )),
     )),
 
     closed_expression: ($) => seq(

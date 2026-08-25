@@ -34,6 +34,60 @@ Mapped function with arguments
                 (numeric_literal)))))))))
 
 ==================
+Map shorthand after an open expression
+==================
+
+filter(even) |> add(1)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                name: (function_name))))))
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)
+            (argument_list
+              (positional_argument
+                (numeric_literal)))))))))
+
+==================
+Map shorthand in an open expression preserves the outer pipeline boundary
+==================
+
+filter(even) |> add(1) | sum
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                name: (function_name))))))
+      (map_shorthand
+        expression: (open_expression
+          (function_call
+            name: (function_name)
+            (argument_list
+              (positional_argument
+                (numeric_literal))))))
+      (function_call
+        name: (function_name)))))
+
+==================
 Leading map shorthand preserves the outer pipeline boundary
 ==================
 
