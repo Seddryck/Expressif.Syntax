@@ -203,7 +203,7 @@ public abstract class ArgumentSyntax : SyntaxNode
     protected ArgumentSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode> children)
         : base(kind, span, text, children) { }
 
-    public abstract ExpressionSyntax Value { get; }
+    public abstract ExpressionSyntax? Value { get; }
 }
 
 public sealed class PositionalArgumentSyntax : ArgumentSyntax
@@ -216,10 +216,11 @@ public sealed class PositionalArgumentSyntax : ArgumentSyntax
 
 public sealed class SpreadArgumentSyntax : ArgumentSyntax
 {
-    internal SpreadArgumentSyntax(SourceSpan span, string text, ExpressionSyntax value)
-        : base(SyntaxKind.SpreadArgument, span, text, [value]) => Value = value;
+    internal SpreadArgumentSyntax(SourceSpan span, string text, ExpressionSyntax? value)
+        : base(SyntaxKind.SpreadArgument, span, text, value is null ? [] : [value]) => Value = value;
 
-    public override ExpressionSyntax Value { get; }
+    public override ExpressionSyntax? Value { get; }
+    public bool IsImplicitSpread => Value is null;
 }
 
 public sealed class NamedArgumentSyntax : ArgumentSyntax

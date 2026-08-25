@@ -731,6 +731,53 @@ public class SyntaxBindingTests
             Assert.That(argument.Text, Is.EqualTo("...@values"));
             Assert.That(argument.Span, Is.EqualTo(new SourceSpan(6, 10)));
             Assert.That(call.Text, Is.EqualTo(source));
+            Assert.That(argument.IsImplicitSpread, Is.False);
+        });
+    }
+
+    [TestCase("array(...)")]
+    [TestCase("example(...)")]
+    [TestCase("array(0, ..., 4)")]
+    [TestCase("array(0, ...@_, 4)")]
+    [TestCase("@items | array(0, ..., 4)")]
+    [TestCase("{1, 2, 3} | array(0, ..., 4)")]
+    public void OperandlessSpreadArgumentsParseInEveryFunctionComposition(string source)
+    {
+        Assert.That(ExpressifSyntax.Parse(source), Is.Not.Null);
+    }
+
+    [Test]
+    public void OperandlessSpreadArgumentHasNoValueOrChildren()
+    {
+        const string source = "array(0, ..., 4)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = (SpreadArgumentSyntax)call.Arguments[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(argument.Kind, Is.EqualTo(SyntaxKind.SpreadArgument));
+            Assert.That(argument.Value, Is.Null);
+            Assert.That(argument.IsImplicitSpread, Is.True);
+            Assert.That(argument.Children, Is.Empty);
+            Assert.That(argument.Text, Is.EqualTo("..."));
+            Assert.That(argument.Span, Is.EqualTo(new SourceSpan(9, 3)));
+            Assert.That(call.Text, Is.EqualTo(source));
+        });
+    }
+
+    [Test]
+    public void IncomingValueSpreadArgumentRemainsExplicit()
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("array(0, ...@_, 4)");
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = (SpreadArgumentSyntax)call.Arguments[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(argument.Value, Is.TypeOf<IncomingValueSyntax>());
+            Assert.That(argument.IsImplicitSpread, Is.False);
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { argument.Value! }));
         });
     }
 

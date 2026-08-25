@@ -93,8 +93,8 @@ public static class ExpressifSyntax
 
     private static SpreadArgumentSyntax BindSpreadArgument(TsNode node)
     {
-        var valueNode = node.GetChildForField("value") ?? throw Unknown(node);
-        return new(Span(node), node.Text, BindExpression(valueNode));
+        var valueNode = node.GetChildForField("value");
+        return new(Span(node), node.Text, valueNode is null ? null : BindExpression(valueNode));
     }
 
     private static NamedArgumentSyntax BindNamedArgument(TsNode node)
