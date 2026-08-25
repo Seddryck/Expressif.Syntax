@@ -225,8 +225,8 @@ public static class ExpressifSyntax
         if (node.Type != "array_element")
             throw Unknown(node);
 
-        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
-        return new(Span(node), node.Text, BindExpression(expression), node.GetChildForField("spread") is not null);
+        var expression = node.GetChildForField("expression");
+        return new(Span(node), node.Text, expression is null ? null : BindExpression(expression), node.GetChildForField("spread") is not null);
     }
 
     private static T BindSemanticValue<T>(TsNode node, Func<T> bind)
@@ -347,7 +347,7 @@ public static class ExpressifSyntax
         var name = visibility.Type == "public_record_field_name"
             ? SingleNamedChild(visibility, visibility.Type)
             : visibility;
-        var value = node.GetChildForField("value") ?? throw Unknown(node);
+        var value = node.GetChildForField("value");
         QuotingStyle? quotingStyle = name.Type switch
         {
             "double_quoted_literal" => QuotingStyle.DoubleQuote,
@@ -359,7 +359,7 @@ public static class ExpressifSyntax
         var nameSyntax = new RecordFieldNameSyntax(
             Span(visibility), visibility.Text, nameText,
             visibility.Type == "private_record_field_name", quotingStyle);
-        return new(Span(node), node.Text, nameSyntax, BindExpression(value), node.GetChildForField("spread") is not null);
+        return new(Span(node), node.Text, nameSyntax, value is null ? null : BindExpression(value), node.GetChildForField("spread") is not null);
     }
 
     private static TsNode SingleNamedChild(TsNode node, string container)

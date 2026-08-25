@@ -463,7 +463,7 @@ foo(#"2025-12-17", #"2025-12-17T14:30:00", #"14:30:00", `bar`)
 Incoming value
 ==================
 
-...
+@_
 
 ---
 
@@ -473,10 +473,10 @@ Incoming value
       (incoming_value))))
 
 ==================
-Spread values in record fields
+Implicit and explicit spread values in record fields
 ==================
 
-{foo := ...args, bar := ...qrz}
+{foo := ..., bar := ...@_, qrz := ...@args, fn := ...args}
 
 ---
 
@@ -487,9 +487,17 @@ Spread values in record fields
         (record_field
           name: (record_field_name
             (public_record_field_name
+              (unquoted_record_field_name))))
+        (record_field
+          name: (record_field_name
+            (public_record_field_name
               (unquoted_record_field_name)))
-          value: (function_call
-            name: (function_name)))
+          value: (incoming_value))
+        (record_field
+          name: (record_field_name
+            (public_record_field_name
+              (unquoted_record_field_name)))
+          value: (variable))
         (record_field
           name: (record_field_name
             (public_record_field_name
@@ -538,7 +546,7 @@ Singleton record spread
         (record_spread)))))
 
 ==================
-Incoming value is rejected as a standalone array element
+Implicit spread followed by a normal array element
 ==================
 
 {..., #true}
@@ -549,8 +557,7 @@ Incoming value is rejected as a standalone array element
   (root_expression
     (closed_expression
       (array_literal
-        (ERROR
-          (record_spread))
+        (array_element)
         (array_element
           (boolean_literal))))))
 

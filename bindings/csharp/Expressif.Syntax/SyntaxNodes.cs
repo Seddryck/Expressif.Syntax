@@ -305,20 +305,21 @@ public sealed class ArrayLiteralSyntax : ValueSyntax
     }
 
     public IReadOnlyList<ArrayElementSyntax> Elements { get; }
-    public IReadOnlyList<ExpressionSyntax> Values { get; }
+    public IReadOnlyList<ExpressionSyntax?> Values { get; }
 }
 
 public sealed class ArrayElementSyntax : SyntaxNode
 {
-    internal ArrayElementSyntax(SourceSpan span, string text, ExpressionSyntax expression, bool isSpread)
-        : base(SyntaxKind.ArrayElement, span, text, [expression])
+    internal ArrayElementSyntax(SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
+        : base(SyntaxKind.ArrayElement, span, text, expression is null ? [] : [expression])
     {
         Expression = expression;
         IsSpread = isSpread;
     }
 
-    public ExpressionSyntax Expression { get; }
+    public ExpressionSyntax? Expression { get; }
     public bool IsSpread { get; }
+    public bool IsImplicitSpread => IsSpread && Expression is null;
 }
 
 public sealed class TupleLiteralSyntax : SequenceLiteralSyntax
@@ -351,8 +352,8 @@ public abstract class RecordEntrySyntax : SyntaxNode
 
 public sealed class RecordFieldSyntax : RecordEntrySyntax
 {
-    internal RecordFieldSyntax(SourceSpan span, string text, RecordFieldNameSyntax name, ExpressionSyntax value, bool isSpread = false)
-        : base(SyntaxKind.RecordField, span, text, [name, value])
+    internal RecordFieldSyntax(SourceSpan span, string text, RecordFieldNameSyntax name, ExpressionSyntax? value, bool isSpread = false)
+        : base(SyntaxKind.RecordField, span, text, value is null ? [name] : [name, value])
     {
         Name = name;
         Value = value;
@@ -360,8 +361,9 @@ public sealed class RecordFieldSyntax : RecordEntrySyntax
     }
 
     public RecordFieldNameSyntax Name { get; }
-    public ExpressionSyntax Value { get; }
+    public ExpressionSyntax? Value { get; }
     public bool IsSpread { get; }
+    public bool IsImplicitSpread => IsSpread && Value is null;
 }
 
 public sealed class RecordFieldNameSyntax : SyntaxNode
