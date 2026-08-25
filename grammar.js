@@ -253,6 +253,7 @@ export default grammar({
 
     value: ($) => choice(
       $.incoming_value,
+      $.constant_reference,
       $.variable,
       $.record_access,
       $.numeric_literal,
@@ -337,6 +338,7 @@ export default grammar({
 
     _compound_value: ($) => choice(
       $.incoming_value,
+      $.constant_reference,
       $.variable,
       $.record_access,
       $.numeric_literal,
@@ -390,6 +392,8 @@ export default grammar({
     record_spread: (_) => "...",
 
     incoming_value: (_) => "@_",
+
+    constant_reference: (_) => /@![A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/,
 
     record_field_name: ($) => choice(
       $.private_record_field_name,

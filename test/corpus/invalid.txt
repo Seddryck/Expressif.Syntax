@@ -85,6 +85,44 @@ Empty variable
   (UNEXPECTED '\n'))
 
 ==================
+Empty constant reference
+==================
+
+@!
+
+---
+
+(ERROR
+  (UNEXPECTED '\n'))
+
+==================
+Incoming value cannot have a suffix
+==================
+
+@_foo
+
+---
+
+(source_file
+  (ERROR
+    (incoming_value))
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)))))
+
+==================
+Constant reference cannot start with an underscore
+==================
+
+@!_
+
+---
+
+(ERROR
+  (UNEXPECTED '_'))
+
+==================
 Variable cannot start with a digit
 ==================
 
