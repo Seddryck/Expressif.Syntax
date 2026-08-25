@@ -56,6 +56,32 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void MapShorthandComposesAfterAnOpenExpression()
+    {
+        const string source = "filter(even) |> add(1)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var filter = (FunctionCallSyntax)root.Pipeline[0];
+        var shorthand = (MapShorthandSyntax)root.Pipeline[1];
+        var add = (FunctionCallSyntax)shorthand.Expression.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Text, Is.EqualTo(source));
+            Assert.That(root.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(root.Children, Is.EqualTo(new SyntaxNode[] { filter, shorthand }));
+            Assert.That(filter.Name, Is.EqualTo("filter"));
+            Assert.That(filter.Arguments.Single().Value.Text, Is.EqualTo("even"));
+            Assert.That(shorthand.Kind, Is.EqualTo(SyntaxKind.MapShorthand));
+            Assert.That(shorthand.Text, Is.EqualTo("|> add(1)"));
+            Assert.That(shorthand.Span, Is.EqualTo(new SourceSpan(13, 9)));
+            Assert.That(shorthand.Children, Is.EqualTo(new SyntaxNode[] { shorthand.Expression }));
+            Assert.That(shorthand.Expression.Text, Is.EqualTo("add(1)"));
+            Assert.That(add.Name, Is.EqualTo("add"));
+            Assert.That(add.Arguments.Single().Value.Text, Is.EqualTo("1"));
+        });
+    }
+
+    [Test]
     public void PipelinesAndFunctionCallDetailsPreserveSourceOrder()
     {
         var root = (OpenExpressionSyntax)ExpressifSyntax.Parse("LOWER | text-to-lower() | unknown(5, 10)");
