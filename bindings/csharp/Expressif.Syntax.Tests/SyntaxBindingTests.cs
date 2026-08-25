@@ -274,7 +274,7 @@ public class SyntaxBindingTests
     {
         const string source = "{ @foo | text-to-func(\"bar\") }";
         var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
-        var element = (ClosedExpressionSyntax)array.Values.Single();
+        var element = (ClosedExpressionSyntax)array.Values.Single()!;
 
         Assert.Multiple(() =>
         {
@@ -307,13 +307,44 @@ public class SyntaxBindingTests
             Assert.That(spread.Expression, Is.TypeOf<ArrayLiteralSyntax>());
             Assert.That(spread.Text, Is.EqualTo("...{2,3}"));
             Assert.That(spread.Span, Is.EqualTo(new SourceSpan(4, 8)));
-            Assert.That(spread.Children, Is.EqualTo(new SyntaxNode[] { spread.Expression }));
+            Assert.That(spread.Children, Is.EqualTo(new SyntaxNode[] { spread.Expression! }));
         });
     }
 
     [Test]
-    public void ArraySpreadMarkerRequiresAnExpression()
-        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{1, ..., 3}"));
+    public void BareArraySpreadUsesAnImplicitCurrentObject()
+    {
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{1, ..., 3}")).Value;
+        var spread = array.Elements[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(spread.IsSpread, Is.True);
+            Assert.That(spread.IsImplicitSpread, Is.True);
+            Assert.That(spread.Expression, Is.Null);
+            Assert.That(spread.Text, Is.EqualTo("..."));
+            Assert.That(spread.Span, Is.EqualTo(new SourceSpan(4, 3)));
+            Assert.That(spread.Children, Is.Empty);
+            Assert.That(array.Values[1], Is.Null);
+        });
+    }
+
+    [Test]
+    public void ExplicitArraySpreadsDistinguishCurrentObjectVariableAndFunction()
+    {
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{...@_, ...@args, ...args}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(array.Elements.Select(element => element.IsSpread), Is.All.True);
+            Assert.That(array.Elements.Select(element => element.IsImplicitSpread), Is.All.False);
+            Assert.That(array.Elements[0].Expression, Is.TypeOf<IncomingValueSyntax>());
+            Assert.That(array.Elements[1].Expression, Is.TypeOf<VariableSyntax>());
+            Assert.That(array.Elements[2].Expression, Is.TypeOf<FunctionCallSyntax>());
+            Assert.That(array.Elements.Select(element => element.Text),
+                Is.EqualTo(new[] { "...@_", "...@args", "...args" }));
+        });
+    }
 
     [Test]
     public void TupleProjectionCompositionCanBeAFunctionArgument()
@@ -395,7 +426,7 @@ public class SyntaxBindingTests
             Assert.That(record.Fields.Select(field => field.Name.Value), Is.EqualTo(new[] { "name", "scores" }));
             Assert.That(record.Fields[1].Name.QuotingStyle, Is.EqualTo(QuotingStyle.Backtick));
             Assert.That(record.Fields[0].Value, Is.TypeOf<VariableSyntax>());
-            Assert.That(((ArrayLiteralSyntax)record.Fields[1].Value).Values[1], Is.TypeOf<RecordAccessSyntax>());
+            Assert.That(((ArrayLiteralSyntax)record.Fields[1].Value!).Values[1], Is.TypeOf<RecordAccessSyntax>());
             Assert.That(record.Children, Is.EqualTo(record.Fields));
         });
     }
@@ -403,13 +434,13 @@ public class SyntaxBindingTests
     [Test]
     public void IncomingValueIsALosslessValueNode()
     {
-        var incoming = (IncomingValueSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("...")).Value;
+        var incoming = (IncomingValueSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("@_")).Value;
 
         Assert.Multiple(() =>
         {
             Assert.That(incoming.Kind, Is.EqualTo(SyntaxKind.IncomingValue));
-            Assert.That(incoming.Text, Is.EqualTo("..."));
-            Assert.That(incoming.Span, Is.EqualTo(new SourceSpan(0, 3)));
+            Assert.That(incoming.Text, Is.EqualTo("@_"));
+            Assert.That(incoming.Span, Is.EqualTo(new SourceSpan(0, 2)));
             Assert.That(incoming.Children, Is.Empty);
         });
     }
@@ -417,30 +448,44 @@ public class SyntaxBindingTests
     [Test]
     public void RecordFieldsPreserveSpreadSemantics()
     {
-        const string source = "{foo := ...args, bar := ...qrz, baz := @value}";
+        const string source = "{foo := ...args, bar := ...@args, current := ..., explicit := ...@_, baz := @value}";
         var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
         var first = record.Fields[0];
 
         Assert.Multiple(() =>
         {
-            Assert.That(record.Fields.Select(field => field.IsSpread), Is.EqualTo(new[] { true, true, false }));
-            Assert.That(record.Fields.Select(field => field.Value.Text), Is.EqualTo(new[] { "args", "qrz", "@value" }));
+            Assert.That(record.Fields.Select(field => field.IsSpread), Is.EqualTo(new[] { true, true, true, true, false }));
+            Assert.That(record.Fields.Select(field => field.IsImplicitSpread),
+                Is.EqualTo(new[] { false, false, true, false, false }));
+            Assert.That(record.Fields.Select(field => field.Value?.Text),
+                Is.EqualTo(new string?[] { "args", "@args", null, "@_", "@value" }));
             Assert.That(first.Value, Is.TypeOf<FunctionCallSyntax>());
             Assert.That(first.Text, Is.EqualTo("foo := ...args"));
             Assert.That(first.Span, Is.EqualTo(new SourceSpan(1, 14)));
-            Assert.That(first.Children, Is.EqualTo(new SyntaxNode[] { first.Name, first.Value }));
+            Assert.That(first.Children, Is.EqualTo(new SyntaxNode[] { first.Name, first.Value! }));
         });
     }
 
     [Test]
-    public void RecordFieldSpreadMarkerRequiresAValue()
-        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{foo := ...}"));
+    public void CurrentObjectCanBeARegularCompoundValue()
+    {
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{1, @_, 3}")).Value;
+        var record = (RecordLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{foo := @_}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(array.Elements[1].IsSpread, Is.False);
+            Assert.That(array.Elements[1].Expression, Is.TypeOf<IncomingValueSyntax>());
+            Assert.That(record.Fields.Single().IsSpread, Is.False);
+            Assert.That(record.Fields.Single().Value, Is.TypeOf<IncomingValueSyntax>());
+        });
+    }
 
     [Test]
     public void IncomingValueComposesAsAnArgumentAndPipelineSource()
     {
-        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("foo(...)")).Pipeline.Single();
-        var pipeline = (ClosedExpressionSyntax)ExpressifSyntax.Parse("... | upper");
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("foo(@_)")).Pipeline.Single();
+        var pipeline = (ClosedExpressionSyntax)ExpressifSyntax.Parse("@_ | upper");
 
         Assert.Multiple(() =>
         {
@@ -507,9 +552,11 @@ public class SyntaxBindingTests
     }
 
     [Test]
-    public void IncomingValueCannotBeAStandaloneArrayElement()
+    public void BareSpreadCanAppearBeforeAnotherArrayElement()
     {
-        Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("{..., #true}"));
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{..., #true}")).Value;
+
+        Assert.That(array.Elements.Select(element => element.IsImplicitSpread), Is.EqualTo(new[] { true, false }));
     }
 
     [Test]
@@ -733,7 +780,7 @@ public class SyntaxBindingTests
             Assert.That(names[2].QuotingStyle, Is.EqualTo(QuotingStyle.Backtick));
             Assert.That(names.SelectMany(name => name.Children), Is.Empty);
             Assert.That(record.Fields[1].Children,
-                Is.EqualTo(new SyntaxNode[] { names[1], record.Fields[1].Value }));
+                Is.EqualTo(new SyntaxNode[] { names[1], record.Fields[1].Value! }));
         });
     }
 

@@ -159,7 +159,7 @@
     "fields": {
       "expression": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "array_literal",
@@ -175,6 +175,10 @@
           },
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "incoming_value",
             "named": true
           },
           {
@@ -449,11 +453,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "incoming_value",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "infinite_bound",
@@ -889,7 +888,7 @@
       },
       "value": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "array_literal",
@@ -901,6 +900,10 @@
           },
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "incoming_value",
             "named": true
           },
           {
@@ -1271,6 +1274,10 @@
   },
   {
     "type": "function_name",
+    "named": true
+  },
+  {
+    "type": "incoming_value",
     "named": true
   },
   {

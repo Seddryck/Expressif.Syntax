@@ -302,11 +302,12 @@ foo(...a)
     (open_expression
       (function_call
         name: (function_name)
+        (ERROR)
         (argument_list
           (positional_argument
-            (incoming_value)))
-        (ERROR
-          (function_name))))))
+            (open_expression
+              (function_call
+                name: (function_name)))))))))
 
 ==================
 Operators are not implemented

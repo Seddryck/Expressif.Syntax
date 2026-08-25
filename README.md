@@ -86,6 +86,35 @@ same `positional_element_access` node; downstream binders decide whether the
 runtime value supports positional access and how invalid or out-of-range access
 is handled.
 
+### Current object and spread
+
+`@_` denotes the current pipeline object as a single value. Spread syntax is
+orthogonal: `...` spreads the current object implicitly, while `...expression`
+spreads an explicit expression.
+
+```text
+@_                 current object as one value
+...                spread the current object (shorthand for ...@_)
+...@_              explicitly spread the current object
+...@args           spread the variable @args
+...args            spread the result of the zero-argument function args
+```
+
+The distinction applies consistently to arrays and named record fields:
+
+```text
+{1, @_, 3}         current object as one array element
+{1, ..., 3}        current object spread into an array
+{1, ...@args, 3}   variable @args spread into an array
+{foo := @_}        current object as a normal field value
+{foo := ...}       current object spread into the field
+{foo := ...@args}  variable @args spread into the field
+```
+
+The syntax tree preserves whether a spread operand was implicit or explicitly
+authored. Parsing records the intent to spread but does not expand or validate
+the runtime value.
+
 ## Repository structure
 
 ```text
