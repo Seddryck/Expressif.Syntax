@@ -181,7 +181,7 @@ export default grammar({
 
     spread_argument: ($) => seq(
       "...",
-      field("value", $._argument_value),
+      field("value", optional($._argument_value)),
     ),
 
     named_argument: ($) => seq(

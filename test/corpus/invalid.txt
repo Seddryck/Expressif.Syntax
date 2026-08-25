@@ -328,21 +328,6 @@ foo(a: 1)
             (numeric_literal)))))))
 
 ==================
-Spread argument requires a value
-==================
-
-array(...)
-
----
-
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        name: (function_name)
-        (ERROR)))))
-
-==================
 Operators are not implemented
 ==================
 
