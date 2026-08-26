@@ -34,6 +34,7 @@ export default grammar({
     [$.value, $._compound_value],
     [$.expression, $._pipeline_expression],
     [$.expression, $._shorthand_operand],
+    [$._map_shorthand_expression, $.value],
     [$.root_expression, $._parenthesized_pipeline_expression],
   ],
 
@@ -63,7 +64,12 @@ export default grammar({
 
     map_shorthand: ($) => seq(
       "|>",
-      field("expression", alias($.expression, $.open_expression)),
+      field("expression", alias($._map_shorthand_expression, $.open_expression)),
+    ),
+
+    _map_shorthand_expression: ($) => choice(
+      $.expression,
+      $.record_access,
     ),
 
     // In a closed-expression pipeline, the next ordinary `|` belongs to the
@@ -76,7 +82,7 @@ export default grammar({
       )),
       seq(
         "|>",
-        field("expression", alias($.expression, $.open_expression)),
+        field("expression", alias($._map_shorthand_expression, $.open_expression)),
       ),
     ),
 
@@ -241,9 +247,14 @@ export default grammar({
     // unambiguous with the ordinary value alternative above.
     _nested_closed_expression: ($) => seq(
       $.value,
-      "|",
-      $._pipeline_expression,
-      repeat(seq("|", $._pipeline_expression)),
+      choice(
+        seq("|", $._pipeline_expression),
+        alias($._pipeline_map_shorthand, $.map_shorthand),
+      ),
+      repeat(choice(
+        seq("|", $._pipeline_expression),
+        alias($._pipeline_map_shorthand, $.map_shorthand),
+      )),
     ),
 
     parameterized_expression: ($) => prec.dynamic(3, seq(

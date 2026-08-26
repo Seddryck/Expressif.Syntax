@@ -115,11 +115,24 @@
             "type": "ALIAS",
             "content": {
               "type": "SYMBOL",
-              "name": "expression"
+              "name": "_map_shorthand_expression"
             },
             "named": true,
             "value": "open_expression"
           }
+        }
+      ]
+    },
+    "_map_shorthand_expression": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "record_access"
         }
       ]
     },
@@ -166,7 +179,7 @@
                 "type": "ALIAS",
                 "content": {
                   "type": "SYMBOL",
-                  "name": "expression"
+                  "name": "_map_shorthand_expression"
                 },
                 "named": true,
                 "value": "open_expression"
@@ -995,25 +1008,58 @@
           "name": "value"
         },
         {
-          "type": "STRING",
-          "value": "|"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_pipeline_expression"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "|"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_pipeline_expression"
+                }
+              ]
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_pipeline_map_shorthand"
+              },
+              "named": true,
+              "value": "map_shorthand"
+            }
+          ]
         },
         {
           "type": "REPEAT",
           "content": {
-            "type": "SEQ",
+            "type": "CHOICE",
             "members": [
               {
-                "type": "STRING",
-                "value": "|"
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "|"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_pipeline_expression"
+                  }
+                ]
               },
               {
-                "type": "SYMBOL",
-                "name": "_pipeline_expression"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_pipeline_map_shorthand"
+                },
+                "named": true,
+                "value": "map_shorthand"
               }
             ]
           }
@@ -2088,6 +2134,10 @@
     [
       "expression",
       "_shorthand_operand"
+    ],
+    [
+      "_map_shorthand_expression",
+      "value"
     ],
     [
       "root_expression",

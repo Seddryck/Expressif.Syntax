@@ -34,6 +34,115 @@ Mapped function with arguments
                 (numeric_literal)))))))))
 
 ==================
+Mapped record access
+==================
+
+|> .amount
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (map_shorthand
+        expression: (open_expression
+          (record_access
+            field: (record_field_selector
+              (named_record_field))))))))
+
+==================
+Mapped record access preserves the outer pipeline boundary
+==================
+
+filter(active) |> .amount | sum
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                name: (function_name))))))
+      (map_shorthand
+        expression: (open_expression
+          (record_access
+            field: (record_field_selector
+              (named_record_field)))))
+      (function_call
+        name: (function_name)))))
+
+==================
+Mapped record access after a closed-expression pipeline
+==================
+
+.orders | filter(active) |> .amount | sum
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (record_access
+        field: (record_field_selector
+          (named_record_field)))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                name: (function_name))))))
+      (map_shorthand
+        expression: (open_expression
+          (record_access
+            field: (record_field_selector
+              (named_record_field)))))
+      (function_call
+        name: (function_name)))))
+
+==================
+Mapped record access in a nested closed-expression pipeline
+==================
+
+record(total:=.orders | filter(active) |> .amount | sum)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (named_argument
+            name: (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
+            value: (closed_expression
+              (record_access
+                field: (record_field_selector
+                  (named_record_field)))
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (open_expression
+                      (function_call
+                        name: (function_name))))))
+              (map_shorthand
+                expression: (open_expression
+                  (record_access
+                    field: (record_field_selector
+                      (named_record_field)))))
+              (function_call
+                name: (function_name)))))))))
+
+==================
 Map shorthand after an open expression
 ==================
 

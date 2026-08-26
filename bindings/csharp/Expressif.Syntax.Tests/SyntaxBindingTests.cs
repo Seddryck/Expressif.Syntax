@@ -40,6 +40,54 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void MapShorthandAcceptsRecordAccessAndPreservesOuterPipelineBoundary()
+    {
+        const string source = ".orders | filter(active) |> .amount | sum";
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var shorthand = (MapShorthandSyntax)root.Pipeline[1];
+        var access = (RecordAccessSyntax)shorthand.Expression.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Text, Is.EqualTo(source));
+            Assert.That(root.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(root.Pipeline, Has.Count.EqualTo(3));
+            Assert.That(shorthand.Kind, Is.EqualTo(SyntaxKind.MapShorthand));
+            Assert.That(shorthand.Text, Is.EqualTo("|> .amount"));
+            Assert.That(shorthand.Span, Is.EqualTo(new SourceSpan(25, 10)));
+            Assert.That(shorthand.Children, Is.EqualTo(new SyntaxNode[] { shorthand.Expression }));
+            Assert.That(shorthand.Expression.Text, Is.EqualTo(".amount"));
+            Assert.That(shorthand.Expression.Span, Is.EqualTo(new SourceSpan(28, 7)));
+            Assert.That(shorthand.Expression.Children, Is.EqualTo(new SyntaxNode[] { access }));
+            Assert.That(access.Kind, Is.EqualTo(SyntaxKind.RecordAccess));
+            Assert.That(access.Text, Is.EqualTo(".amount"));
+            Assert.That(access.Fields.Single().Name, Is.EqualTo("amount"));
+            Assert.That(root.Pipeline[2], Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("sum"));
+        });
+    }
+
+    [Test]
+    public void MapShorthandAcceptsRecordAccessInANestedClosedExpression()
+    {
+        const string source = "record(total:=.orders | filter(active) |> .amount | sum)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var record = (FunctionCallSyntax)root.Pipeline.Single();
+        var value = (ClosedExpressionSyntax)((NamedArgumentSyntax)record.Arguments.Single()).Value;
+        var shorthand = (MapShorthandSyntax)value.Pipeline[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(value.Pipeline, Has.Count.EqualTo(3));
+            Assert.That(shorthand.Text, Is.EqualTo("|> .amount"));
+            Assert.That(shorthand.Expression.Pipeline.Single(), Is.TypeOf<RecordAccessSyntax>()
+                .With.Property(nameof(RecordAccessSyntax.Text)).EqualTo(".amount"));
+            Assert.That(value.Pipeline[2], Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("sum"));
+        });
+    }
+
+    [Test]
     public void MapShorthandComposesInAClosedExpressionPipeline()
     {
         var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse("{1,2,3} |> add(1) | sum");
