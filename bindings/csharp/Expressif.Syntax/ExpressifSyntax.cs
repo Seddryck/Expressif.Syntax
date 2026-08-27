@@ -221,7 +221,7 @@ public static class ExpressifSyntax
             "date_time_literal" => new DateTimeLiteralSyntax(Span(node), node.Text),
             "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
             "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindArrayElement).ToArray()),
-            "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindValue).ToArray()),
+            "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindTupleElement).ToArray()),
             "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
             "interval_literal" => BindInterval(node),
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
@@ -231,6 +231,15 @@ public static class ExpressifSyntax
     private static ArrayElementSyntax BindArrayElement(TsNode node)
     {
         if (node.Type != "array_element")
+            throw Unknown(node);
+
+        var expression = node.GetChildForField("expression");
+        return new(Span(node), node.Text, expression is null ? null : BindExpression(expression), node.GetChildForField("spread") is not null);
+    }
+
+    private static TupleElementSyntax BindTupleElement(TsNode node)
+    {
+        if (node.Type != "tuple_element")
             throw Unknown(node);
 
         var expression = node.GetChildForField("expression");

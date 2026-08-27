@@ -26,6 +26,7 @@ public enum SyntaxKind
     ArrayLiteral,
     ArrayElement,
     TupleLiteral,
+    TupleElement,
     RecordLiteral,
     RecordField,
     RecordFieldName,
@@ -341,10 +342,30 @@ public sealed class ArrayElementSyntax : SyntaxNode
     public bool IsImplicitSpread => IsSpread && Expression is null;
 }
 
-public sealed class TupleLiteralSyntax : SequenceLiteralSyntax
+public sealed class TupleLiteralSyntax : ValueSyntax
 {
-    internal TupleLiteralSyntax(SourceSpan span, string text, IEnumerable<ValueSyntax> values)
-        : base(SyntaxKind.TupleLiteral, span, text, values) { }
+    internal TupleLiteralSyntax(SourceSpan span, string text, IEnumerable<TupleElementSyntax> elements)
+        : this(span, text, elements.ToArray()) { }
+
+    private TupleLiteralSyntax(SourceSpan span, string text, TupleElementSyntax[] elements)
+        : base(SyntaxKind.TupleLiteral, span, text, elements)
+        => Elements = Array.AsReadOnly(elements);
+
+    public IReadOnlyList<TupleElementSyntax> Elements { get; }
+}
+
+public sealed class TupleElementSyntax : SyntaxNode
+{
+    internal TupleElementSyntax(SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
+        : base(SyntaxKind.TupleElement, span, text, expression is null ? [] : [expression])
+    {
+        Expression = expression;
+        IsSpread = isSpread;
+    }
+
+    public ExpressionSyntax? Expression { get; }
+    public bool IsSpread { get; }
+    public bool IsImplicitSpread => IsSpread && Expression is null;
 }
 
 public sealed class RecordLiteralSyntax : ValueSyntax

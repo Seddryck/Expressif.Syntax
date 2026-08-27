@@ -27,8 +27,10 @@ Null literal in collections
           (null_literal))
         (array_element
           (tuple_literal
-            (null_literal)
-            (boolean_literal)))))))
+            (tuple_element
+              (null_literal))
+            (tuple_element
+              (boolean_literal))))))))
 
 ==================
 Array values and whitespace
@@ -121,8 +123,10 @@ T(1, 2)
   (root_expression
     (closed_expression
       (tuple_literal
-        (numeric_literal)
-        (numeric_literal)))))
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal))))))
 
 ==================
 Mixed and nested tuples
@@ -136,16 +140,50 @@ T("foo", #true, T(#"2025-12-17", ^.0), @value)
   (root_expression
     (closed_expression
       (tuple_literal
-        (double_quoted_literal
-          (double_quoted_content))
-        (boolean_literal)
-        (tuple_literal
-          (date_literal)
-          (record_access
-            root: (original_input)
-            field: (original_record_field_selector
-              (positional_record_field))))
-        (variable)))))
+        (tuple_element
+          expression: (double_quoted_literal
+            (double_quoted_content)))
+        (tuple_element
+          expression: (boolean_literal))
+        (tuple_element
+          expression: (tuple_literal
+            (tuple_element
+              expression: (date_literal))
+            (tuple_element
+              expression: (record_access
+                root: (original_input)
+                field: (original_record_field_selector
+                  (positional_record_field))))))
+        (tuple_element
+          expression: (variable))))))
+
+==================
+Tuple spread elements
+==================
+
+T(...T(1, 2), 3, ...T(4, 5), ...)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          expression: (tuple_literal
+            (tuple_element
+              expression: (numeric_literal))
+            (tuple_element
+              expression: (numeric_literal))))
+        (tuple_element
+          expression: (numeric_literal))
+        (tuple_element
+          expression: (tuple_literal
+            (tuple_element
+              expression: (numeric_literal))
+            (tuple_element
+              expression: (numeric_literal))))
+        (tuple_element)))))
 
 ==================
 Empty record
@@ -259,8 +297,10 @@ Nested compound values
             (public_record_field_name
               (unquoted_record_field_name)))
           value: (tuple_literal
-            (numeric_literal)
-            (numeric_literal)))))))
+            (tuple_element
+              expression: (numeric_literal))
+            (tuple_element
+              expression: (numeric_literal))))))))
 
 ==================
 Compound values in pipelines and arguments
@@ -282,8 +322,10 @@ foo({1}, T(1,2), {name := "Alice"}) | consume
                 expression: (numeric_literal))))
           (positional_argument
             (tuple_literal
-              (numeric_literal)
-              (numeric_literal)))
+              (tuple_element
+                expression: (numeric_literal))
+              (tuple_element
+                expression: (numeric_literal))))
           (positional_argument
             (record_literal
               (record_field
@@ -307,8 +349,10 @@ T(1,2) | consume
   (root_expression
     (closed_expression
       (tuple_literal
-        (numeric_literal)
-        (numeric_literal))
+        (tuple_element
+          expression: (numeric_literal))
+        (tuple_element
+          expression: (numeric_literal)))
       (function_call
         name: (function_name)))))
 
@@ -362,7 +406,12 @@ T()
 
 ---
 
-(ERROR)
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (MISSING "..."))))))
 
 ==================
 Compound rejects single-value tuple
@@ -373,7 +422,8 @@ T(1)
 ---
 
 (ERROR
-  (numeric_literal))
+  (tuple_element
+    (numeric_literal)))
 
 ==================
 Compound reports missing closing delimiter

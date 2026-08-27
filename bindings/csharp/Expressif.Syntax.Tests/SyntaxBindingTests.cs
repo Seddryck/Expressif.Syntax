@@ -421,6 +421,68 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void TupleElementsPreserveOrdinaryAndSpreadValuesInOrder()
+    {
+        const string source = "T(...T(1, 2), 3, ...T(4, 5), ...)";
+        var tuple = (TupleLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tuple.Kind, Is.EqualTo(SyntaxKind.TupleLiteral));
+            Assert.That(tuple.Text, Is.EqualTo(source));
+            Assert.That(tuple.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(tuple.Children, Is.EqualTo(tuple.Elements));
+            Assert.That(tuple.Elements.Select(element => element.Kind), Is.All.EqualTo(SyntaxKind.TupleElement));
+            Assert.That(tuple.Elements.Select(element => element.IsSpread),
+                Is.EqualTo(new[] { true, false, true, true }));
+            Assert.That(tuple.Elements.Select(element => element.IsImplicitSpread),
+                Is.EqualTo(new[] { false, false, false, true }));
+            Assert.That(tuple.Elements[0].Expression, Is.TypeOf<TupleLiteralSyntax>());
+            Assert.That(tuple.Elements[1].Expression, Is.TypeOf<NumericLiteralSyntax>());
+            Assert.That(tuple.Elements[2].Expression, Is.TypeOf<TupleLiteralSyntax>());
+            Assert.That(tuple.Elements[3].Expression, Is.Null);
+        });
+    }
+
+    [Test]
+    public void TupleSpreadPreservesAuthoredSourceSpanAndChildren()
+    {
+        const string source = "T(0, ...T(1, 2), 3)";
+        var tuple = (TupleLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        var spread = tuple.Elements[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(spread.Text, Is.EqualTo("...T(1, 2)"));
+            Assert.That(spread.Span, Is.EqualTo(new SourceSpan(5, 10)));
+            Assert.That(spread.Children, Is.EqualTo(new SyntaxNode[] { spread.Expression! }));
+            Assert.That(spread.Expression!.Text, Is.EqualTo("T(1, 2)"));
+        });
+    }
+
+    [TestCase("T(...T(1, 2), 3)")]
+    [TestCase("T(0, ...T(1, 2))")]
+    [TestCase("T(...T(1, 2), ...T(3, 4))")]
+    [TestCase("T(...)")]
+    public void TupleAcceptsLeadingTrailingMultipleAndBareSpreads(string source)
+        => Assert.That(((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value,
+            Is.TypeOf<TupleLiteralSyntax>());
+
+    [Test]
+    public void TupleFunctionRemainsAFunctionCallWithSpreadArguments()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("tuple(...T(1, 2), 3)")).Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(call.Name, Is.EqualTo("tuple"));
+            Assert.That(call.Arguments[0], Is.TypeOf<SpreadArgumentSyntax>());
+            Assert.That(call.Arguments[0].Value, Is.TypeOf<TupleLiteralSyntax>());
+            Assert.That(call.Arguments[1], Is.TypeOf<PositionalArgumentSyntax>());
+        });
+    }
+
+    [Test]
     public void TupleProjectionCompositionCanBeAFunctionArgument()
     {
         const string source = "adjacent($1 | subtract($0) | multiply($1))";
@@ -1356,6 +1418,8 @@ public class SyntaxBindingTests
     [TestCase("foo |BAD bar", false)]
     [TestCase("(foo |AND bar", false)]
     [TestCase("....", false)]
+    [TestCase("T(..)", false)]
+    [TestCase("T(....)", false)]
     [TestCase("{ ..., }", false)]
     [TestCase("@!", false)]
     [TestCase("@!1foo", false)]
