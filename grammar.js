@@ -369,12 +369,44 @@ export default grammar({
     tuple_literal: ($) => seq(
       "T",
       "(",
-      $.value,
-      ",",
-      $.value,
-      repeat(seq(",", $.value)),
+      choice(
+        seq(
+          alias($.tuple_leading_spread_element, $.tuple_element),
+          repeat(seq(",", $.tuple_element)),
+        ),
+        seq(
+          $.tuple_element,
+          ",",
+          $.tuple_element,
+          repeat(seq(",", $.tuple_element)),
+        ),
+      ),
       ")",
     ),
+
+    tuple_element: ($) => choice(
+      seq(
+        field("spread", "..."),
+        field("expression", optional(choice(
+          alias($._array_closed_expression, $.closed_expression),
+          $._compound_value,
+          $.expression,
+        ))),
+      ),
+      field("expression", choice(
+        alias($._array_closed_expression, $.closed_expression),
+        $._compound_value,
+      )),
+    ),
+
+    tuple_leading_spread_element: ($) => prec(1, seq(
+      field("spread", "..."),
+      field("expression", optional(choice(
+        alias($._array_closed_expression, $.closed_expression),
+        $._compound_value,
+        $.expression,
+      ))),
+    )),
 
     record_literal: ($) => choice(
       seq("{", ":", "}"),

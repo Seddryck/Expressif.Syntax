@@ -100,8 +100,10 @@ foo({{1,2,3} | sum | add(1)}, {T(1,2) | some-function}, {{name := "Alice"} | som
           (positional_argument
             (parameterized_expression
               source: (tuple_literal
-                (numeric_literal)
-                (numeric_literal))
+                (tuple_element
+                  expression: (numeric_literal))
+                (tuple_element
+                  expression: (numeric_literal)))
               expression: (open_expression
                 (function_call
                   name: (function_name)))))

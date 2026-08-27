@@ -1605,38 +1605,203 @@
           "value": "("
         },
         {
-          "type": "SYMBOL",
-          "name": "value"
-        },
-        {
-          "type": "STRING",
-          "value": ","
-        },
-        {
-          "type": "SYMBOL",
-          "name": "value"
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "STRING",
-                "value": ","
-              },
-              {
-                "type": "SYMBOL",
-                "name": "value"
-              }
-            ]
-          }
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "tuple_leading_spread_element"
+                  },
+                  "named": true,
+                  "value": "tuple_element"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "tuple_element"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "tuple_element"
+                },
+                {
+                  "type": "STRING",
+                  "value": ","
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "tuple_element"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "tuple_element"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "STRING",
           "value": ")"
         }
       ]
+    },
+    "tuple_element": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "spread",
+              "content": {
+                "type": "STRING",
+                "value": "..."
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "expression",
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_array_closed_expression"
+                        },
+                        "named": true,
+                        "value": "closed_expression"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "_compound_value"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "expression"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "BLANK"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "expression",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_array_closed_expression"
+                },
+                "named": true,
+                "value": "closed_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_compound_value"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "tuple_leading_spread_element": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "spread",
+            "content": {
+              "type": "STRING",
+              "value": "..."
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "expression",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_array_closed_expression"
+                      },
+                      "named": true,
+                      "value": "closed_expression"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "_compound_value"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "expression"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          }
+        ]
+      }
     },
     "record_literal": {
       "type": "CHOICE",
