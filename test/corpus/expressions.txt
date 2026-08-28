@@ -245,6 +245,119 @@ array(1, name := 2, ...@values,)
             value: (variable)))))))
 
 ==================
+Text function with bare incoming-value spread
+==================
+
+{"Nikola", "Tesla"} | text("foo", ..., "bar")
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (array_element
+          (double_quoted_literal
+            (double_quoted_content)))
+        (array_element
+          (double_quoted_literal
+            (double_quoted_content))))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))
+          (spread_argument)
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content))))))))
+
+==================
+Text function with explicit collection spread
+==================
+
+text("foo", ...{"Nikola", "Tesla"}, "bar")
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))
+          (spread_argument
+            (array_literal
+              (array_element
+                (double_quoted_literal
+                  (double_quoted_content)))
+              (array_element
+                (double_quoted_literal
+                  (double_quoted_content)))))
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content))))))))
+
+==================
+Text function with variable spread
+==================
+
+text("foo", ...@names, "bar")
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))
+          (spread_argument
+            (variable))
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content))))))))
+
+==================
+Text function with pipelined spread expression
+==================
+
+text("foo", ...{"Nikola", "Tesla"} | prepend-space, "bar")
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))
+          (spread_argument
+            (closed_expression
+              (array_literal
+                (array_element
+                  (double_quoted_literal
+                    (double_quoted_content)))
+                (array_element
+                  (double_quoted_literal
+                    (double_quoted_content))))
+              (function_call
+                (function_name))))
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content))))))))
+
+==================
 Open expression pipeline
 ==================
 
