@@ -931,6 +931,54 @@ public class SyntaxBindingTests
         }));
     }
 
+    [TestCase("{\"Nikola\", \"Tesla\"} | text(\"foo\", ..., \"bar\")")]
+    [TestCase("text(\"foo\", ...{\"Nikola\", \"Tesla\"}, \"bar\")")]
+    [TestCase("text(\"foo\", ...@names, \"bar\")")]
+    [TestCase("text(\"foo\", ...{\"Nikola\", \"Tesla\"} | prepend-space, \"bar\")")]
+    public void TextFunctionAcceptsSpreadArguments(string source)
+    {
+        var root = ExpressifSyntax.Parse(source);
+        var call = root switch
+        {
+            OpenExpressionSyntax open => (FunctionCallSyntax)open.Pipeline.Last(),
+            ClosedExpressionSyntax closed => (FunctionCallSyntax)closed.Pipeline.Last(),
+            _ => throw new AssertionException($"Unexpected root syntax type {root.GetType().Name}."),
+        };
+        var spread = (SpreadArgumentSyntax)call.Arguments[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(call.Name, Is.EqualTo("text"));
+            Assert.That(call.Arguments.Select(argument => argument.Kind), Is.EqualTo(new[]
+            {
+                SyntaxKind.PositionalArgument,
+                SyntaxKind.SpreadArgument,
+                SyntaxKind.PositionalArgument,
+            }));
+            Assert.That(spread.IsImplicitSpread, Is.EqualTo(spread.Text == "..."));
+            Assert.That(root.Text, Is.EqualTo(source));
+        });
+    }
+
+    [Test]
+    public void TextFunctionPreservesPipelinedSpreadOperand()
+    {
+        const string source = "text(\"foo\", ...{\"Nikola\", \"Tesla\"} | prepend-space, \"bar\")";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var spread = (SpreadArgumentSyntax)call.Arguments[1];
+        var pipeline = (ClosedExpressionSyntax)spread.Value!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pipeline.Value, Is.TypeOf<ArrayLiteralSyntax>());
+            Assert.That(pipeline.Pipeline.Single(), Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("prepend-space"));
+            Assert.That(spread.Text, Is.EqualTo("...{\"Nikola\", \"Tesla\"} | prepend-space"));
+            Assert.That(spread.Children, Is.EqualTo(new SyntaxNode[] { pipeline }));
+        });
+    }
+
     [Test]
     public void OpenExpressionCanBeAPositionalArgument()
     {
