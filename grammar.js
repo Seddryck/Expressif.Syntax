@@ -88,6 +88,7 @@ export default grammar({
 
     expression: ($) => choice(
       $.binary_expression,
+      $.guarded_expression,
       $.unary_expression,
       ordinaryExpression($),
     ),
@@ -111,7 +112,18 @@ export default grammar({
 
     unary_operator: (_) => "!",
 
+    guarded_expression: ($) => prec.right(2, seq(
+      "*",
+      field("expression", choice(
+        $.guarded_expression,
+        $.unary_expression,
+        ordinaryExpression($),
+        $.value,
+      )),
+    )),
+
     _shorthand_operand: ($) => choice(
+      $.guarded_expression,
       $.unary_expression,
       ordinaryExpression($),
       $.value,
@@ -119,6 +131,7 @@ export default grammar({
 
     _pipeline_expression: ($) => choice(
       $.binary_expression,
+      $.guarded_expression,
       $.unary_expression,
       $.function_call,
       prec(1, $.record_access),
@@ -200,6 +213,7 @@ export default grammar({
       $.tuple_projection,
       $.parameterized_expression,
       $.parenthesized_expression,
+      $.guarded_expression,
       $.unary_expression,
       $.binary_expression,
     ),
@@ -228,6 +242,7 @@ export default grammar({
 
     _argument_value: ($) => choice(
       $.binary_expression,
+      $.guarded_expression,
       $.unary_expression,
       alias($._nested_closed_expression, $.closed_expression),
       $.value,
@@ -367,6 +382,7 @@ export default grammar({
       alias($._array_closed_expression, $.closed_expression),
       $._compound_value,
       $.parenthesized_expression,
+      $.guarded_expression,
       $.unary_expression,
       $.binary_expression,
     ),

@@ -149,6 +149,12 @@ public static class ExpressifSyntax
             BindExpression(operand));
     }
 
+    private static GuardedExpressionSyntax BindGuardedExpression(TsNode node)
+    {
+        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindExpression(expression));
+    }
+
     private static BinaryExpressionSyntax BindBinaryExpression(TsNode node)
     {
         var left = node.GetChildForField("left") ?? throw Unknown(node);
@@ -180,6 +186,7 @@ public static class ExpressifSyntax
         "closed_expression" => BindClosed(node),
         "binary_expression" => BindBinaryExpression(node),
         "function_call" => BindFunctionCall(node),
+        "guarded_expression" => BindGuardedExpression(node),
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
         "parameterized_expression" => BindParameterizedExpression(node),

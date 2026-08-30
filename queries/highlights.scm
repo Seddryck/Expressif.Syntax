@@ -5,6 +5,7 @@
 (type_literal) @type
 (binary_operator) @operator
 (unary_operator) @operator
+(guarded_expression "*" @operator)
 (escape_sequence) @string.escape
 
 [
