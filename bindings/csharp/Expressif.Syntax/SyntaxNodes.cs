@@ -328,10 +328,10 @@ public sealed class ArrayLiteralSyntax : ValueSyntax
     public IReadOnlyList<ExpressionSyntax?> Values { get; }
 }
 
-public sealed class ArrayElementSyntax : SyntaxNode
+public abstract class PositionalElementSyntax : SyntaxNode
 {
-    internal ArrayElementSyntax(SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
-        : base(SyntaxKind.ArrayElement, span, text, expression is null ? [] : [expression])
+    protected PositionalElementSyntax(SyntaxKind kind, SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
+        : base(kind, span, text, expression is null ? [] : [expression])
     {
         Expression = expression;
         IsSpread = isSpread;
@@ -340,6 +340,12 @@ public sealed class ArrayElementSyntax : SyntaxNode
     public ExpressionSyntax? Expression { get; }
     public bool IsSpread { get; }
     public bool IsImplicitSpread => IsSpread && Expression is null;
+}
+
+public sealed class ArrayElementSyntax : PositionalElementSyntax
+{
+    internal ArrayElementSyntax(SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
+        : base(SyntaxKind.ArrayElement, span, text, expression, isSpread) { }
 }
 
 public sealed class TupleLiteralSyntax : ValueSyntax
@@ -354,18 +360,10 @@ public sealed class TupleLiteralSyntax : ValueSyntax
     public IReadOnlyList<TupleElementSyntax> Elements { get; }
 }
 
-public sealed class TupleElementSyntax : SyntaxNode
+public sealed class TupleElementSyntax : PositionalElementSyntax
 {
     internal TupleElementSyntax(SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
-        : base(SyntaxKind.TupleElement, span, text, expression is null ? [] : [expression])
-    {
-        Expression = expression;
-        IsSpread = isSpread;
-    }
-
-    public ExpressionSyntax? Expression { get; }
-    public bool IsSpread { get; }
-    public bool IsImplicitSpread => IsSpread && Expression is null;
+        : base(SyntaxKind.TupleElement, span, text, expression, isSpread) { }
 }
 
 public sealed class RecordLiteralSyntax : ValueSyntax
