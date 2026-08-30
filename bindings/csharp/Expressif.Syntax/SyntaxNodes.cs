@@ -39,6 +39,7 @@ public enum SyntaxKind
     MapShorthand,
     UnaryExpression,
     UnaryOperator,
+    GuardedExpression,
     BinaryExpression,
     BinaryOperator,
 }
@@ -172,6 +173,15 @@ public sealed class UnaryExpressionSyntax : ExpressionSyntax
 
     public UnaryOperatorSyntax Operator { get; }
     public ExpressionSyntax Operand { get; }
+}
+
+public sealed class GuardedExpressionSyntax : ExpressionSyntax
+{
+    internal GuardedExpressionSyntax(SourceSpan span, string text, ExpressionSyntax expression)
+        : base(SyntaxKind.GuardedExpression, span, text, [expression])
+        => Expression = expression;
+
+    public ExpressionSyntax Expression { get; }
 }
 
 public sealed class BinaryOperatorSyntax : SyntaxNode

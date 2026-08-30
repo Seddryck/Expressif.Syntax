@@ -1217,6 +1217,77 @@ public class SyntaxBindingTests
         });
     }
 
+    [TestCase("*trim", typeof(FunctionCallSyntax))]
+    [TestCase("*add(1)", typeof(FunctionCallSyntax))]
+    [TestCase("*(trim | append-space)", typeof(ParenthesizedExpressionSyntax))]
+    public void GuardedExpressionsPreserveTheirExactOperandBoundary(string source, Type expressionType)
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var guarded = (GuardedExpressionSyntax)root.Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(guarded.Kind, Is.EqualTo(SyntaxKind.GuardedExpression));
+            Assert.That(guarded.Expression, Is.TypeOf(expressionType));
+            Assert.That(guarded.Text, Is.EqualTo(source));
+            Assert.That(guarded.Children, Is.EqualTo(new SyntaxNode[] { guarded.Expression }));
+            Assert.That(guarded.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+        });
+    }
+
+    [TestCase("walk(*trim)", typeof(FunctionCallSyntax))]
+    [TestCase("walk(*add(1))", typeof(FunctionCallSyntax))]
+    [TestCase("walk(*(trim | append-space))", typeof(ParenthesizedExpressionSyntax))]
+    public void GuardedExpressionsComposeAsFunctionArguments(string source, Type expressionType)
+    {
+        var walk = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+        var guarded = (GuardedExpressionSyntax)walk.Arguments.Single().Value;
+
+        Assert.That(guarded.Expression, Is.TypeOf(expressionType));
+    }
+
+    [TestCase("42 | *trim | append-space")]
+    [TestCase("42|*trim|append-space")]
+    [TestCase("42 |* trim| append-space")]
+    public void BareGuardOnlyScopesTheFollowingPipelineStage(string source)
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var guarded = (GuardedExpressionSyntax)root.Pipeline[0];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Pipeline, Has.Count.EqualTo(2));
+            Assert.That(guarded.Expression, Is.TypeOf<FunctionCallSyntax>());
+            Assert.That(((FunctionCallSyntax)guarded.Expression).Name, Is.EqualTo("trim"));
+            Assert.That(root.Pipeline[1], Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("append-space"));
+        });
+    }
+
+    [TestCase("42 | *(trim | append-space)")]
+    [TestCase("42|*(trim|append-space)")]
+    public void ParenthesesExtendTheGuardAcrossTheCompletePipeline(string source)
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var guarded = (GuardedExpressionSyntax)root.Pipeline.Single();
+        var grouped = (ParenthesizedExpressionSyntax)guarded.Expression;
+        var expression = (OpenExpressionSyntax)grouped.Expression;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(expression.Pipeline.Cast<FunctionCallSyntax>().Select(call => call.Name),
+                Is.EqualTo(new[] { "trim", "append-space" }));
+            Assert.That(guarded.Text.StartsWith("*", StringComparison.Ordinal), Is.True);
+            Assert.That(guarded.Text.Contains("|*", StringComparison.Ordinal), Is.False);
+        });
+    }
+
+    [Test]
+    public void GuardMarkerRequiresAnExpression()
+    {
+        Assert.That(() => ExpressifSyntax.Parse("*"), Throws.TypeOf<ExpressifSyntaxException>());
+    }
+
     [Test]
     public void RepeatedUnaryShorthandRemainsNestedSyntax()
     {

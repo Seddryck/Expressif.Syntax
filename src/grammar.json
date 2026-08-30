@@ -198,6 +198,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "guarded_expression"
+        },
+        {
+          "type": "SYMBOL",
           "name": "unary_expression"
         },
         {
@@ -357,9 +361,68 @@
       "type": "STRING",
       "value": "!"
     },
+    "guarded_expression": {
+      "type": "PREC_RIGHT",
+      "value": 2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "*"
+          },
+          {
+            "type": "FIELD",
+            "name": "expression",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "guarded_expression"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "unary_expression"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "function_call"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "map_shorthand"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "tuple_projection"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "parenthesized_expression"
+                    }
+                  ]
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "value"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
     "_shorthand_operand": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "SYMBOL",
+          "name": "guarded_expression"
+        },
         {
           "type": "SYMBOL",
           "name": "unary_expression"
@@ -397,6 +460,10 @@
         {
           "type": "SYMBOL",
           "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "guarded_expression"
         },
         {
           "type": "SYMBOL",
@@ -852,6 +919,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "guarded_expression"
+        },
+        {
+          "type": "SYMBOL",
           "name": "unary_expression"
         },
         {
@@ -938,6 +1009,10 @@
         {
           "type": "SYMBOL",
           "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "guarded_expression"
         },
         {
           "type": "SYMBOL",
@@ -1616,6 +1691,10 @@
         {
           "type": "SYMBOL",
           "name": "parenthesized_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "guarded_expression"
         },
         {
           "type": "SYMBOL",

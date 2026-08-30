@@ -12,6 +12,10 @@
         "named": true
       },
       {
+        "type": "guarded_expression",
+        "named": true
+      },
+      {
         "type": "map_shorthand",
         "named": true
       },
@@ -194,6 +198,10 @@
             "named": true
           },
           {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
             "type": "incoming_value",
             "named": true
           },
@@ -306,6 +314,10 @@
             "named": true
           },
           {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
             "type": "map_shorthand",
             "named": true
           },
@@ -343,6 +355,10 @@
         "types": [
           {
             "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
             "named": true
           },
           {
@@ -393,6 +409,10 @@
         },
         {
           "type": "function_call",
+          "named": true
+        },
+        {
+          "type": "guarded_expression",
           "named": true
         },
         {
@@ -461,6 +481,46 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "guarded_expression",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -638,6 +698,10 @@
             "named": true
           },
           {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
             "type": "open_expression",
             "named": true
           },
@@ -771,6 +835,10 @@
         },
         {
           "type": "closed_expression",
+          "named": true
+        },
+        {
+          "type": "guarded_expression",
           "named": true
         },
         {
@@ -1096,6 +1164,10 @@
             "named": true
           },
           {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
             "type": "parameterized_expression",
             "named": true
           },
@@ -1145,6 +1217,10 @@
           },
           {
             "type": "constant_reference",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
             "named": true
           },
           {
@@ -1368,6 +1444,10 @@
   },
   {
     "type": ")",
+    "named": false
+  },
+  {
+    "type": "*",
     "named": false
   },
   {
