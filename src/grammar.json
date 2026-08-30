@@ -270,6 +270,10 @@
       "members": [
         {
           "type": "STRING",
+          "value": "->"
+        },
+        {
+          "type": "STRING",
           "value": "|AND"
         },
         {
@@ -1167,6 +1171,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "type_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "record_access"
         },
         {
@@ -1633,6 +1641,10 @@
         {
           "type": "SYMBOL",
           "name": "variable"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "type_literal"
         },
         {
           "type": "SYMBOL",
@@ -2201,6 +2213,22 @@
           "value": "#false"
         }
       ]
+    },
+    "type_literal": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": ":"
+          },
+          {
+            "type": "PATTERN",
+            "value": "[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*"
+          }
+        ]
+      }
     },
     "null_literal": {
       "type": "STRING",

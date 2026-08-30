@@ -114,6 +114,10 @@
         "named": true
       },
       {
+        "type": "type_literal",
+        "named": true
+      },
+      {
         "type": "variable",
         "named": true
       }
@@ -227,6 +231,10 @@
           },
           {
             "type": "tuple_literal",
+            "named": true
+          },
+          {
+            "type": "type_literal",
             "named": true
           },
           {
@@ -963,6 +971,10 @@
             "named": true
           },
           {
+            "type": "type_literal",
+            "named": true
+          },
+          {
             "type": "variable",
             "named": true
           }
@@ -1176,6 +1188,10 @@
             "named": true
           },
           {
+            "type": "type_literal",
+            "named": true
+          },
+          {
             "type": "unary_expression",
             "named": true
           },
@@ -1363,6 +1379,10 @@
     "named": false
   },
   {
+    "type": "->",
+    "named": false
+  },
+  {
     "type": "-INF",
     "named": false
   },
@@ -1464,6 +1484,10 @@
   },
   {
     "type": "tuple_index",
+    "named": true
+  },
+  {
+    "type": "type_literal",
     "named": true
   },
   {
