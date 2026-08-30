@@ -659,6 +659,40 @@ public class SyntaxBindingTests
         });
     }
 
+    [TestCase(":text")]
+    [TestCase(":integer")]
+    [TestCase(":numeric")]
+    [TestCase(":boolean")]
+    [TestCase(":date")]
+    [TestCase(":datetime")]
+    [TestCase(":time")]
+    [TestCase(":duration")]
+    [TestCase(":array")]
+    [TestCase(":tuple")]
+    [TestCase(":record")]
+    public void TypeLiteralsAreDedicatedLosslessValueNodes(string source)
+    {
+        var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
+        var literal = (TypeLiteralSyntax)root.Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Kind, Is.EqualTo(SyntaxKind.TypeLiteral));
+            Assert.That(literal.Name, Is.EqualTo(source[1..]));
+            Assert.That(literal.Text, Is.EqualTo(source));
+            Assert.That(literal.Children, Is.Empty);
+        });
+    }
+
+    [TestCase(":")]
+    [TestCase(":1integer")]
+    [TestCase(":integer-")]
+    [TestCase(":integer_type")]
+    public void MalformedTypeLiteralsAreRejected(string source)
+    {
+        Assert.That(() => ExpressifSyntax.Parse(source), Throws.TypeOf<ExpressifSyntaxException>());
+    }
+
     [Test]
     public void RecordFieldsPreserveSpreadSemantics()
     {
@@ -891,6 +925,82 @@ public class SyntaxBindingTests
             SyntaxKind.NamedArgument,
             SyntaxKind.PositionalArgument,
         }));
+    }
+
+    [TestCase("coerce(:integer)", new[] { "integer" })]
+    [TestCase("coerce(:text, :integer)", new[] { "text", "integer" })]
+    [TestCase("coerce(:text, :integer, :boolean)", new[] { "text", "integer", "boolean" })]
+    public void TypeLiteralArgumentsPreserveTheirAuthoredOrder(string source, string[] expectedNames)
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+
+        Assert.That(call.Arguments.Select(argument => ((TypeLiteralSyntax)argument.Value).Name),
+            Is.EqualTo(expectedNames));
+    }
+
+    [TestCase("coerce(name -> :text)", new[] { "name" }, new[] { "text" })]
+    [TestCase("coerce(name -> :text, age -> :integer)", new[] { "name", "age" }, new[] { "text", "integer" })]
+    [TestCase("coerce($1 -> :text, $2 -> :integer)", new[] { "$1", "$2" }, new[] { "text", "integer" })]
+    public void MappingArgumentsPreserveSelectorsOperatorsAndTypes(
+        string source,
+        string[] expectedSelectors,
+        string[] expectedTypes)
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+        var mappings = call.Arguments.Select(argument => (BinaryExpressionSyntax)argument.Value).ToArray();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(mappings.Select(mapping => mapping.Left.Text), Is.EqualTo(expectedSelectors));
+            Assert.That(mappings.Select(mapping => mapping.Operator.Text), Is.All.EqualTo("->"));
+            Assert.That(mappings.Select(mapping => ((TypeLiteralSyntax)mapping.Right).Name), Is.EqualTo(expectedTypes));
+            Assert.That(mappings.Select(mapping => mapping.Children.Count), Is.All.EqualTo(3));
+        });
+    }
+
+    [TestCase("\"42\" | coerce(:integer)")]
+    [TestCase("T(\"42\", \"Bob\") | coerce(:integer)")]
+    [TestCase("T(\"Bob\", \"42\") | coerce(:text, :integer)")]
+    [TestCase("{name := \"bob\", age := \"42\"} | coerce(age -> :integer)")]
+    [TestCase("T(\"bob\", \"42\") | coerce($2 -> :integer)")]
+    public void CoercionSyntaxComposesWithScalarTupleAndRecordInputs(string source)
+    {
+        Assert.That(ExpressifSyntax.Parse(source), Is.Not.Null);
+    }
+
+    [Test]
+    public void MixedCoercionFormsRemainDistinctForSemanticValidation()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(
+            "coerce(:text, $2 -> :integer)")).Pipeline.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(call.Arguments[0].Value, Is.TypeOf<TypeLiteralSyntax>());
+            Assert.That(call.Arguments[1].Value, Is.TypeOf<BinaryExpressionSyntax>());
+        });
+    }
+
+    [Test]
+    public void TypeMappingOperatorAssociatesLeftToRight()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(
+            "coerce(name -> :text -> :integer)")).Pipeline.Single();
+        var outer = (BinaryExpressionSyntax)call.Arguments.Single().Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(outer.Left, Is.TypeOf<BinaryExpressionSyntax>());
+            Assert.That(outer.Operator.Text, Is.EqualTo("->"));
+            Assert.That(outer.Right, Is.TypeOf<TypeLiteralSyntax>());
+        });
+    }
+
+    [TestCase("coerce(name ->)")]
+    [TestCase("coerce(-> :integer)")]
+    public void MalformedTypeMappingsAreRejected(string source)
+    {
+        Assert.That(() => ExpressifSyntax.Parse(source), Throws.TypeOf<ExpressifSyntaxException>());
     }
 
     [Test]

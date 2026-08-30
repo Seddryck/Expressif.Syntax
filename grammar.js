@@ -99,6 +99,7 @@ export default grammar({
     )),
 
     binary_operator: (_) => choice(
+      "->",
       "|AND", "|OR", "|XOR",
       "|NAND", "|NOR", "|NXOR",
     ),
@@ -279,6 +280,7 @@ export default grammar({
       $.incoming_value,
       $.constant_reference,
       $.variable,
+      $.type_literal,
       $.record_access,
       $.numeric_literal,
       $.boolean_literal,
@@ -373,6 +375,7 @@ export default grammar({
       $.incoming_value,
       $.constant_reference,
       $.variable,
+      $.type_literal,
       $.record_access,
       $.numeric_literal,
       $.boolean_literal,
@@ -504,6 +507,8 @@ export default grammar({
     positional_record_field: (_) => /\.(?:0|[1-9][0-9]*)/,
 
     boolean_literal: (_) => choice("#true", "#false"),
+
+    type_literal: (_) => token(seq(":", /[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/)),
 
     null_literal: (_) => "#null",
 

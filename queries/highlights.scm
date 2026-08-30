@@ -2,6 +2,9 @@
 
 (numeric_literal) @number
 (boolean_literal) @boolean
+(type_literal) @type
+(binary_operator) @operator
+(unary_operator) @operator
 (escape_sequence) @string.escape
 
 [

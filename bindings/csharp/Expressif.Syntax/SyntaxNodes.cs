@@ -12,6 +12,7 @@ public enum SyntaxKind
     SpreadArgument,
     NamedArgument,
     ArgumentName,
+    TypeLiteral,
     NumericLiteral,
     BooleanLiteral,
     NullLiteral,
@@ -282,6 +283,14 @@ public sealed class VariableSyntax : ValueSyntax
 public sealed class IncomingValueSyntax : ValueSyntax
 {
     internal IncomingValueSyntax(SourceSpan span, string text) : base(SyntaxKind.IncomingValue, span, text) { }
+}
+
+public sealed class TypeLiteralSyntax : ValueSyntax
+{
+    internal TypeLiteralSyntax(SourceSpan span, string text) : base(SyntaxKind.TypeLiteral, span, text)
+        => Name = text[1..];
+
+    public string Name { get; }
 }
 
 public readonly record struct RecordFieldSelector(string? Name, int? Index)
