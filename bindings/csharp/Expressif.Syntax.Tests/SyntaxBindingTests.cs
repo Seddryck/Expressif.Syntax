@@ -404,9 +404,9 @@ public class SyntaxBindingTests
     }
 
     [Test]
-    public void ExplicitArraySpreadsDistinguishCurrentObjectVariableAndFunction()
+    public void ExplicitArraySpreadsDistinguishCurrentObjectAndVariable()
     {
-        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{...@_, ...@args, ...args}")).Value;
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{...@_, ...@args}")).Value;
 
         Assert.Multiple(() =>
         {
@@ -414,10 +414,53 @@ public class SyntaxBindingTests
             Assert.That(array.Elements.Select(element => element.IsImplicitSpread), Is.All.False);
             Assert.That(array.Elements[0].Expression, Is.TypeOf<IncomingValueSyntax>());
             Assert.That(array.Elements[1].Expression, Is.TypeOf<VariableSyntax>());
-            Assert.That(array.Elements[2].Expression, Is.TypeOf<FunctionCallSyntax>());
             Assert.That(array.Elements.Select(element => element.Text),
-                Is.EqualTo(new[] { "...@_", "...@args", "...args" }));
+                Is.EqualTo(new[] { "...@_", "...@args" }));
         });
+    }
+
+    private static PositionalElementSyntax ParsePositionalSpread(string source)
+    {
+        var value = ((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+        return value switch
+        {
+            ArrayLiteralSyntax array => array.Elements[1],
+            TupleLiteralSyntax tuple => tuple.Elements[1],
+            _ => throw new AssertionException($"Unexpected value syntax type {value.GetType().Name}."),
+        };
+    }
+
+    [TestCase("{1, ..., 2}", null, true)]
+    [TestCase("T(1, ..., 2)", null, true)]
+    [TestCase("{1, ...@values, 2}", typeof(VariableSyntax), false)]
+    [TestCase("T(1, ...@values, 2)", typeof(VariableSyntax), false)]
+    [TestCase("{1, ...{3,4}, 2}", typeof(ArrayLiteralSyntax), false)]
+    [TestCase("T(1, ...{3,4}, 2)", typeof(ArrayLiteralSyntax), false)]
+    [TestCase("{1, ...T(3,4), 2}", typeof(TupleLiteralSyntax), false)]
+    [TestCase("T(1, ...T(3,4), 2)", typeof(TupleLiteralSyntax), false)]
+    [TestCase("{1, ...(@values |> append-space), 2}", typeof(ParenthesizedExpressionSyntax), false)]
+    [TestCase("T(1, ...(@values |> append-space), 2)", typeof(ParenthesizedExpressionSyntax), false)]
+    [TestCase("{1, ...(append-space), 2}", typeof(ParenthesizedExpressionSyntax), false)]
+    [TestCase("T(1, ...(append-space), 2)", typeof(ParenthesizedExpressionSyntax), false)]
+    [TestCase("{1, ...@values |> append-space, 2}", typeof(ClosedExpressionSyntax), false)]
+    [TestCase("T(1, ...@values |> append-space, 2)", typeof(ClosedExpressionSyntax), false)]
+    public void ArraysAndTuplesShareSpreadOperandSyntax(string source, Type? expressionType, bool isImplicit)
+    {
+        var spread = ParsePositionalSpread(source);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(spread.IsSpread, Is.True);
+            Assert.That(spread.IsImplicitSpread, Is.EqualTo(isImplicit));
+            Assert.That(spread.Expression, expressionType is null ? Is.Null : Is.TypeOf(expressionType));
+        });
+    }
+
+    [TestCase("{1, ...append-space, 2}")]
+    [TestCase("T(1, ...append-space, 2)")]
+    public void PositionalSpreadRejectsUnparenthesizedOpenExpressions(string source)
+    {
+        Assert.That(() => ExpressifSyntax.Parse(source), Throws.TypeOf<ExpressifSyntaxException>());
     }
 
     [Test]
@@ -958,6 +1001,33 @@ public class SyntaxBindingTests
             Assert.That(spread.IsImplicitSpread, Is.EqualTo(spread.Text == "..."));
             Assert.That(root.Text, Is.EqualTo(source));
         });
+    }
+
+    [TestCase("text(\"a\", ..., \"b\")", null, true)]
+    [TestCase("text(\"a\", ...@values, \"b\")", typeof(VariableSyntax), false)]
+    [TestCase("text(\"a\", ...{3,4}, \"b\")", typeof(ArrayLiteralSyntax), false)]
+    [TestCase("text(\"a\", ...T(3,4), \"b\")", typeof(TupleLiteralSyntax), false)]
+    [TestCase("text(\"a\", ...(@values |> append-space), \"b\")", typeof(ParenthesizedExpressionSyntax), false)]
+    [TestCase("text(\"a\", ...(append-space), \"b\")", typeof(ParenthesizedExpressionSyntax), false)]
+    [TestCase("text(\"a\", ...@values |> append-space, \"b\")", typeof(ClosedExpressionSyntax), false)]
+    public void FunctionSpreadsSharePositionalSpreadOperandSyntax(string source, Type? valueType, bool isImplicit)
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var call = (FunctionCallSyntax)root.Pipeline.Single();
+        var spread = (SpreadArgumentSyntax)call.Arguments[1];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(spread.IsImplicitSpread, Is.EqualTo(isImplicit));
+            Assert.That(spread.Value, valueType is null ? Is.Null : Is.TypeOf(valueType));
+        });
+    }
+
+    [Test]
+    public void FunctionSpreadRejectsUnparenthesizedOpenExpressions()
+    {
+        Assert.That(() => ExpressifSyntax.Parse("text(\"a\", ...append-space, \"b\")"),
+            Throws.TypeOf<ExpressifSyntaxException>());
     }
 
     [Test]

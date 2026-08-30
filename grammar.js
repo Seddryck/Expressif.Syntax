@@ -190,7 +190,17 @@ export default grammar({
 
     spread_argument: ($) => seq(
       "...",
-      field("value", optional($._argument_value)),
+      field("value", optional($._spread_operand)),
+    ),
+
+    _spread_operand: ($) => choice(
+      alias($._nested_closed_expression, $.closed_expression),
+      $.value,
+      $.tuple_projection,
+      $.parameterized_expression,
+      $.parenthesized_expression,
+      $.unary_expression,
+      $.binary_expression,
     ),
 
     named_argument: ($) => seq(
@@ -331,11 +341,7 @@ export default grammar({
     array_element: ($) => choice(
       seq(
         field("spread", "..."),
-        field("expression", optional(choice(
-          alias($._array_closed_expression, $.closed_expression),
-          $._compound_value,
-          $.expression,
-        ))),
+        field("expression", optional($._positional_spread_operand)),
       ),
       field("expression", choice(
         alias($._array_closed_expression, $.closed_expression),
@@ -345,10 +351,23 @@ export default grammar({
 
     _array_closed_expression: ($) => prec.right(2, seq(
       $._compound_value,
-      "|",
-      $._pipeline_expression,
-      repeat(seq("|", $._pipeline_expression)),
+      choice(
+        seq("|", $._pipeline_expression),
+        alias($._pipeline_map_shorthand, $.map_shorthand),
+      ),
+      repeat(choice(
+        seq("|", $._pipeline_expression),
+        alias($._pipeline_map_shorthand, $.map_shorthand),
+      )),
     )),
+
+    _positional_spread_operand: ($) => choice(
+      alias($._array_closed_expression, $.closed_expression),
+      $._compound_value,
+      $.parenthesized_expression,
+      $.unary_expression,
+      $.binary_expression,
+    ),
 
     _compound_value: ($) => choice(
       $.incoming_value,
@@ -387,11 +406,7 @@ export default grammar({
     tuple_element: ($) => choice(
       seq(
         field("spread", "..."),
-        field("expression", optional(choice(
-          alias($._array_closed_expression, $.closed_expression),
-          $._compound_value,
-          $.expression,
-        ))),
+        field("expression", optional($._positional_spread_operand)),
       ),
       field("expression", choice(
         alias($._array_closed_expression, $.closed_expression),
@@ -401,11 +416,7 @@ export default grammar({
 
     tuple_leading_spread_element: ($) => prec(1, seq(
       field("spread", "..."),
-      field("expression", optional(choice(
-        alias($._array_closed_expression, $.closed_expression),
-        $._compound_value,
-        $.expression,
-      ))),
+      field("expression", optional($._positional_spread_operand)),
     )),
 
     record_literal: ($) => choice(
