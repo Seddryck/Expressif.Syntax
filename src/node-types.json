@@ -86,6 +86,10 @@
         "named": true
       },
       {
+        "type": "grouping_literal",
+        "named": true
+      },
+      {
         "type": "incoming_value",
         "named": true
       },
@@ -203,6 +207,10 @@
           },
           {
             "type": "constant_reference",
+            "named": true
+          },
+          {
+            "type": "grouping_literal",
             "named": true
           },
           {
@@ -502,6 +510,21 @@
       "types": [
         {
           "type": "argument_list",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "grouping_literal",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "pair_literal",
           "named": true
         }
       ]
@@ -1065,6 +1088,10 @@
             "named": true
           },
           {
+            "type": "grouping_literal",
+            "named": true
+          },
+          {
             "type": "incoming_value",
             "named": true
           },
@@ -1290,6 +1317,10 @@
             "named": true
           },
           {
+            "type": "grouping_literal",
+            "named": true
+          },
+          {
             "type": "guarded_expression",
             "named": true
           },
@@ -1478,6 +1509,10 @@
   },
   {
     "type": "#true",
+    "named": false
+  },
+  {
+    "type": "#{",
     "named": false
   },
   {
