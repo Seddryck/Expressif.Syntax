@@ -1776,6 +1776,63 @@ public class SyntaxBindingTests
     public void MalformedPairLiteralsAreRejected(string source)
         => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
 
+    [Test]
+    public void EmptyGroupingLiteralIsADedicatedLosslessValue()
+    {
+        var grouping = (GroupingLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("#{}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(grouping.Kind, Is.EqualTo(SyntaxKind.GroupingLiteral));
+            Assert.That(grouping.Text, Is.EqualTo("#{}"));
+            Assert.That(grouping.Span, Is.EqualTo(new SourceSpan(0, 3)));
+            Assert.That(grouping.Entries, Is.Empty);
+            Assert.That(grouping.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void GroupingLiteralPreservesOrderedPairEntries()
+    {
+        const string source = "#{(\"BE\" => {\"Alice\", \"Bob\"}), (\"FR\" => {\"Charlie\"})}";
+        var grouping = (GroupingLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(grouping.Text, Is.EqualTo(source));
+            Assert.That(grouping.Entries, Has.Count.EqualTo(2));
+            Assert.That(grouping.Entries.Select(entry => entry.Key.Text), Is.EqualTo(new[] { "\"BE\"", "\"FR\"" }));
+            Assert.That(grouping.Entries.Select(entry => entry.Value), Is.All.TypeOf<ArrayLiteralSyntax>());
+            Assert.That(grouping.Children, Is.EqualTo(grouping.Entries));
+        });
+    }
+
+    [Test]
+    public void GroupingLiteralPreservesPairsForDownstreamContextualValidation()
+    {
+        var scalar = (GroupingLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("#{(\"BE\" => \"Alice\")}")).Value;
+        var computed = (GroupingLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("#{(\"BE\" => @people)}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(scalar.Entries.Single().Value, Is.TypeOf<QuotedLiteralSyntax>());
+            Assert.That(computed.Entries.Single().Value, Is.TypeOf<VariableSyntax>());
+        });
+    }
+
+    [Test]
+    public void GroupingLiteralComposesAsAFunctionArgument()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("consume(#{(\"BE\" => {\"Alice\"})})")).Pipeline.Single();
+        Assert.That(call.Arguments.Single().Value, Is.TypeOf<GroupingLiteralSyntax>());
+    }
+
+    [TestCase("# {(\"BE\" => {\"Alice\"})}")]
+    [TestCase("#{1}")]
+    [TestCase("#{(\"BE\" => {\"Alice\"})")]
+    public void MalformedGroupingLiteralsAreRejected(string source)
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
+
     [TestCase("add(", false)]
     [TestCase("10 |", false)]
     [TestCase("\"unterminated", false)]

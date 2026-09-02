@@ -317,6 +317,7 @@ export default grammar({
       $.array_literal,
       $.tuple_literal,
       $.pair_literal,
+      $.grouping_literal,
       $.record_literal,
       $.interval_literal,
     ),
@@ -414,6 +415,7 @@ export default grammar({
       $.array_literal,
       $.tuple_literal,
       $.pair_literal,
+      $.grouping_literal,
       $.record_literal,
       $.interval_literal,
     ),
@@ -458,6 +460,15 @@ export default grammar({
       "=>",
       field("value", $.root_expression),
       ")",
+    ),
+
+    grouping_literal: ($) => seq(
+      "#{",
+      optional(seq(
+        $.pair_literal,
+        repeat(seq(",", $.pair_literal)),
+      )),
+      "}",
     ),
 
     record_literal: ($) => choice(

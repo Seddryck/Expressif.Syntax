@@ -1367,6 +1367,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "grouping_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "record_literal"
         },
         {
@@ -1848,6 +1852,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "grouping_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "record_literal"
         },
         {
@@ -2060,6 +2068,52 @@
         {
           "type": "STRING",
           "value": ")"
+        }
+      ]
+    },
+    "grouping_literal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "#{"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "pair_literal"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "pair_literal"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "}"
         }
       ]
     },

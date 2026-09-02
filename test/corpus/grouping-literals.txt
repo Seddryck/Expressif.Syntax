@@ -1,0 +1,71 @@
+==================
+Empty grouping literal
+==================
+
+#{}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (grouping_literal))))
+
+==================
+Grouping literal preserves pair entries
+==================
+
+#{("BE" => {"Alice", "Bob"}), ("FR" => {"Charlie"})}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (grouping_literal
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+                (array_literal
+                  (array_element
+                    expression: (double_quoted_literal
+                      (double_quoted_content)))
+                  (array_element
+                    expression: (double_quoted_literal
+                    (double_quoted_content)))))))
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (array_literal
+                (array_element
+                  expression: (double_quoted_literal
+                    (double_quoted_content)))))))))))
+
+==================
+Grouping literal accepts computed collection expression
+==================
+
+#{("BE" => @people)}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (grouping_literal
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (variable))))))))
