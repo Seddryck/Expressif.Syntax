@@ -411,8 +411,7 @@ Unary shorthand requires an operand
     (open_expression
       (unary_expression
         (unary_operator)
-        (function_call
-          (MISSING function_name))))))
+        (MISSING pair_component_access)))))
 
 ==================
 Binary shorthand requires a right operand
@@ -429,8 +428,7 @@ foo |AND
         (function_call
           (function_name))
         (binary_operator)
-        (function_call
-          (MISSING function_name))))))
+        (MISSING pair_component_access)))))
 
 ==================
 Binary shorthand requires a left operand
@@ -502,8 +500,7 @@ foo |NAND
         (function_call
           (function_name))
         (binary_operator)
-        (function_call
-          (MISSING function_name))))))
+        (MISSING pair_component_access)))))
 
 ==================
 Complementary binary shorthand requires a left operand

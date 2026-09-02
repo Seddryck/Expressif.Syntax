@@ -6,6 +6,7 @@
 (binary_operator) @operator
 (unary_operator) @operator
 (guarded_expression "*" @operator)
+(pair_literal "=>" @operator)
 (escape_sequence) @string.escape
 
 [

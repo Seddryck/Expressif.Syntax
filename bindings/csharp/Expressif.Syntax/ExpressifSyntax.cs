@@ -8,7 +8,7 @@ public static class ExpressifSyntax
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
         "array_literal", "boolean_literal", "constant_reference", "incoming_value", "null_literal", "numeric_literal", "type_literal",
-        "interval_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
+        "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
     public static RootExpressionSyntax Parse(string source)
@@ -43,7 +43,7 @@ public static class ExpressifSyntax
     private static OpenExpressionSyntax BindOpen(TsNode node)
     {
         var expressions = node.NamedChildren.Select(BindExpression).ToArray();
-        var source = expressions.FirstOrDefault() is TupleProjectionSyntax
+        var source = expressions.FirstOrDefault() is TupleProjectionSyntax or PairComponentAccessSyntax
             ? expressions[0]
             : null;
         var pipeline = expressions.Skip(source is null ? 0 : 1).ToArray();
@@ -189,6 +189,7 @@ public static class ExpressifSyntax
         "guarded_expression" => BindGuardedExpression(node),
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
+        "pair_component_access" => BindPairComponentAccess(node),
         "parameterized_expression" => BindParameterizedExpression(node),
         "parenthesized_expression" => BindParenthesizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),
@@ -213,6 +214,16 @@ public static class ExpressifSyntax
             BindSemanticValue(index, () => int.Parse(index.Text, System.Globalization.CultureInfo.InvariantCulture)));
     }
 
+    private static PairComponentAccessSyntax BindPairComponentAccess(TsNode node) => new(
+        Span(node),
+        node.Text,
+        node.Text switch
+        {
+            "$key" => PairComponent.Key,
+            "$value" => PairComponent.Value,
+            _ => throw Unknown(node),
+        });
+
     private static ValueSyntax BindValue(TsNode node) => BindSemanticValue(node, () => node.Type switch
         {
             "constant_reference" => new ConstantReferenceSyntax(Span(node), node.Text),
@@ -230,11 +241,35 @@ public static class ExpressifSyntax
             "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
             "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindArrayElement).ToArray()),
             "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindTupleElement).ToArray()),
+            "pair_literal" => BindPairLiteral(node),
             "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
             "interval_literal" => BindInterval(node),
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
             _ => throw Unknown(node),
         });
+
+    private static PairLiteralSyntax BindPairLiteral(TsNode node)
+    {
+        var key = node.GetChildForField("key") ?? throw Unknown(node);
+        var value = node.GetChildForField("value") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindPairOperand(key), BindPairOperand(value));
+    }
+
+    private static ExpressionSyntax BindPairOperand(TsNode node)
+    {
+        if (node.Type != "root_expression")
+            throw Unknown(node);
+
+        var expression = SingleNamedChild(node, "root_expression");
+        if (expression.Type == "closed_expression")
+        {
+            var children = expression.NamedChildren.ToArray();
+            if (children.Length == 1)
+                return BindValue(children[0]);
+        }
+
+        return BindRootExpression(expression);
+    }
 
     private static ArrayElementSyntax BindArrayElement(TsNode node)
     {

@@ -20,6 +20,10 @@
         "named": true
       },
       {
+        "type": "pair_component_access",
+        "named": true
+      },
+      {
         "type": "parenthesized_expression",
         "named": true
       },
@@ -95,6 +99,10 @@
       },
       {
         "type": "numeric_literal",
+        "named": true
+      },
+      {
+        "type": "pair_literal",
         "named": true
       },
       {
@@ -218,6 +226,10 @@
             "named": true
           },
           {
+            "type": "pair_literal",
+            "named": true
+          },
+          {
             "type": "parenthesized_expression",
             "named": true
           },
@@ -322,6 +334,10 @@
             "named": true
           },
           {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
             "type": "parenthesized_expression",
             "named": true
           },
@@ -363,6 +379,10 @@
           },
           {
             "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
             "named": true
           },
           {
@@ -417,6 +437,10 @@
         },
         {
           "type": "map_shorthand",
+          "named": true
+        },
+        {
+          "type": "pair_component_access",
           "named": true
         },
         {
@@ -501,6 +525,10 @@
           },
           {
             "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
             "named": true
           },
           {
@@ -706,6 +734,10 @@
             "named": true
           },
           {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
             "type": "parameterized_expression",
             "named": true
           },
@@ -765,6 +797,32 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "pair_literal",
+    "named": true,
+    "fields": {
+      "key": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "root_expression",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "root_expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -843,6 +901,10 @@
         },
         {
           "type": "open_expression",
+          "named": true
+        },
+        {
+          "type": "pair_component_access",
           "named": true
         },
         {
@@ -1019,6 +1081,10 @@
             "named": true
           },
           {
+            "type": "pair_literal",
+            "named": true
+          },
+          {
             "type": "quoted_literal",
             "named": true
           },
@@ -1168,6 +1234,10 @@
             "named": true
           },
           {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
             "type": "parameterized_expression",
             "named": true
           },
@@ -1237,6 +1307,10 @@
           },
           {
             "type": "numeric_literal",
+            "named": true
+          },
+          {
+            "type": "pair_literal",
             "named": true
           },
           {
@@ -1348,6 +1422,10 @@
           },
           {
             "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
             "named": true
           },
           {
@@ -1479,6 +1557,10 @@
     "named": false
   },
   {
+    "type": "=>",
+    "named": false
+  },
+  {
     "type": "I",
     "named": false
   },
@@ -1552,6 +1634,10 @@
   },
   {
     "type": "original_input",
+    "named": true
+  },
+  {
+    "type": "pair_component_access",
     "named": true
   },
   {

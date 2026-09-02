@@ -1703,6 +1703,79 @@ public class SyntaxBindingTests
     public void BareDateLookingIntervalBoundsAreRejected()
         => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse("I[2022-12-10, 2022-12-31]"));
 
+    [Test]
+    public void PairLiteralPreservesKeyValueChildrenAndSource()
+    {
+        const string source = "(\"BE\" => 42)";
+        var pair = (PairLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(pair.Kind, Is.EqualTo(SyntaxKind.PairLiteral));
+            Assert.That(pair.Text, Is.EqualTo(source));
+            Assert.That(pair.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(pair.Key, Is.TypeOf<QuotedLiteralSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("\"BE\""));
+            Assert.That(pair.Value, Is.TypeOf<NumericLiteralSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("42"));
+            Assert.That(pair.Children, Is.EqualTo(new[] { pair.Key, pair.Value }));
+        });
+    }
+
+    [Test]
+    public void PairLiteralAcceptsExpressionOperandsAndNesting()
+    {
+        var accessPair = (PairLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("(.country => .amount)")).Value;
+        var nestedPair = (PairLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("(\"outer\" => (\"inner\" => 42))")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(accessPair.Key, Is.TypeOf<RecordAccessSyntax>());
+            Assert.That(accessPair.Value, Is.TypeOf<RecordAccessSyntax>());
+            Assert.That(nestedPair.Value, Is.TypeOf<PairLiteralSyntax>());
+        });
+    }
+
+    [TestCase("$key", PairComponent.Key)]
+    [TestCase("$value", PairComponent.Value)]
+    public void PairComponentAccessorsAreDedicatedExpressionNodes(string source, PairComponent component)
+    {
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var access = (PairComponentAccessSyntax)root.Source!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(access.Kind, Is.EqualTo(SyntaxKind.PairComponentAccess));
+            Assert.That(access.Component, Is.EqualTo(component));
+            Assert.That(access.Text, Is.EqualTo(source));
+            Assert.That(access.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(access.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void PairSyntaxComposesInArraysArgumentsAndPipelines()
+    {
+        var array = (ArrayLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("{(\"BE\" => 42)}")).Value;
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("consume((\"BE\" => 42))")).Pipeline.Single();
+        var pipeline = (OpenExpressionSyntax)ExpressifSyntax.Parse("$key | trim");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(array.Elements.Single().Expression, Is.TypeOf<PairLiteralSyntax>());
+            Assert.That(call.Arguments.Single().Value, Is.TypeOf<PairLiteralSyntax>());
+            Assert.That(pipeline.Source, Is.TypeOf<PairComponentAccessSyntax>());
+            Assert.That(pipeline.Pipeline.Single(), Is.TypeOf<FunctionCallSyntax>());
+        });
+    }
+
+    [TestCase("(=> 1)")]
+    [TestCase("(1 =>)")]
+    [TestCase("1 => 2")]
+    [TestCase("(1 => 2 => 3)")]
+    public void MalformedPairLiteralsAreRejected(string source)
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
+
     [TestCase("add(", false)]
     [TestCase("10 |", false)]
     [TestCase("\"unterminated", false)]

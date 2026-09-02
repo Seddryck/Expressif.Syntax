@@ -11,6 +11,7 @@ const ordinaryExpression = ($) => choice(
   $.function_call,
   $.map_shorthand,
   $.tuple_projection,
+  prec(-1, $.pair_component_access),
   $.parenthesized_expression,
 );
 
@@ -136,6 +137,7 @@ export default grammar({
       $.function_call,
       prec(1, $.record_access),
       $.tuple_projection,
+      $.pair_component_access,
       alias($._parenthesized_pipeline_expression, $.parenthesized_expression),
     ),
 
@@ -175,6 +177,8 @@ export default grammar({
       ),
     ),
 
+    pair_component_access: (_) => /\$(?:key|value)/,
+
     function_call: ($) => seq(
       field("name", alias($._function_name, $.function_name)),
       optional(seq(
@@ -211,6 +215,7 @@ export default grammar({
       alias($._nested_closed_expression, $.closed_expression),
       $.value,
       $.tuple_projection,
+      $.pair_component_access,
       $.parameterized_expression,
       $.parenthesized_expression,
       $.guarded_expression,
@@ -247,6 +252,7 @@ export default grammar({
       alias($._nested_closed_expression, $.closed_expression),
       $.value,
       $.tuple_projection,
+      $.pair_component_access,
       alias($._nested_open_expression, $.open_expression),
       $.parameterized_expression,
       $.parenthesized_expression,
@@ -261,6 +267,12 @@ export default grammar({
       ),
       seq(
         $.tuple_projection,
+        "|",
+        $._pipeline_expression,
+        repeat(seq("|", $._pipeline_expression)),
+      ),
+      seq(
+        $.pair_component_access,
         "|",
         $._pipeline_expression,
         repeat(seq("|", $._pipeline_expression)),
@@ -304,6 +316,7 @@ export default grammar({
       $.temporal_literal,
       $.array_literal,
       $.tuple_literal,
+      $.pair_literal,
       $.record_literal,
       $.interval_literal,
     ),
@@ -400,6 +413,7 @@ export default grammar({
       $.temporal_literal,
       $.array_literal,
       $.tuple_literal,
+      $.pair_literal,
       $.record_literal,
       $.interval_literal,
     ),
@@ -437,6 +451,14 @@ export default grammar({
       field("spread", "..."),
       field("expression", optional($._positional_spread_operand)),
     )),
+
+    pair_literal: ($) => seq(
+      "(",
+      field("key", $.root_expression),
+      "=>",
+      field("value", $.root_expression),
+      ")",
+    ),
 
     record_literal: ($) => choice(
       seq("{", ":", "}"),

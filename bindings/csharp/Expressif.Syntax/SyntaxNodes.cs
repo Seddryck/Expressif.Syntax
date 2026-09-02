@@ -21,6 +21,7 @@ public enum SyntaxKind
     DateTimeLiteral,
     TimeLiteral,
     TupleProjection,
+    PairComponentAccess,
     ConstantReference,
     Variable,
     RecordAccess,
@@ -28,6 +29,7 @@ public enum SyntaxKind
     ArrayElement,
     TupleLiteral,
     TupleElement,
+    PairLiteral,
     RecordLiteral,
     RecordField,
     RecordFieldName,
@@ -461,6 +463,30 @@ public sealed class TupleProjectionSyntax : ExpressionSyntax
 
     public int Index { get; }
     public TupleProjectionDirection Direction { get; }
+}
+
+public enum PairComponent { Key, Value }
+
+public sealed class PairComponentAccessSyntax : ExpressionSyntax
+{
+    internal PairComponentAccessSyntax(SourceSpan span, string text, PairComponent component)
+        : base(SyntaxKind.PairComponentAccess, span, text, null)
+        => Component = component;
+
+    public PairComponent Component { get; }
+}
+
+public sealed class PairLiteralSyntax : ValueSyntax
+{
+    internal PairLiteralSyntax(SourceSpan span, string text, ExpressionSyntax key, ExpressionSyntax value)
+        : base(SyntaxKind.PairLiteral, span, text, [key, value])
+    {
+        Key = key;
+        Value = value;
+    }
+
+    public ExpressionSyntax Key { get; }
+    public ExpressionSyntax Value { get; }
 }
 
 public sealed class NumericLiteralSyntax : ValueSyntax
