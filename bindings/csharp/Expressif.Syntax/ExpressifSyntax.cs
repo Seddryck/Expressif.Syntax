@@ -8,7 +8,7 @@ public static class ExpressifSyntax
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
         "array_literal", "boolean_literal", "constant_reference", "incoming_value", "null_literal", "numeric_literal", "type_literal",
-        "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
+        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
     public static RootExpressionSyntax Parse(string source)
@@ -243,6 +243,7 @@ public static class ExpressifSyntax
             "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindTupleElement).ToArray()),
             "pair_literal" => BindPairLiteral(node),
             "grouping_literal" => new GroupingLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindPairLiteral).ToArray()),
+            "dictionary_literal" => new DictionaryLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindPairLiteral).ToArray()),
             "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
             "interval_literal" => BindInterval(node),
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),

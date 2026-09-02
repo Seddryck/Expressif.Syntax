@@ -365,7 +365,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "value"
+                  "name": "_unary_value"
                 }
               ]
             }
@@ -376,6 +376,71 @@
     "unary_operator": {
       "type": "STRING",
       "value": "!"
+    },
+    "_unary_value": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "incoming_value"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "constant_reference"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "variable"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "type_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "record_access"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "numeric_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "boolean_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "null_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "quoted_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "temporal_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tuple_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "pair_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "grouping_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "dictionary_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "interval_literal"
+        }
+      ]
     },
     "guarded_expression": {
       "type": "PREC_RIGHT",
@@ -1371,6 +1436,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "dictionary_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "record_literal"
         },
         {
@@ -1856,6 +1925,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "dictionary_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "record_literal"
         },
         {
@@ -2077,6 +2150,52 @@
         {
           "type": "STRING",
           "value": "#{"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "pair_literal"
+                },
+                {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": ","
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "pair_literal"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "}"
+        }
+      ]
+    },
+    "dictionary_literal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "!{"
         },
         {
           "type": "CHOICE",

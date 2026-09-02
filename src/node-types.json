@@ -86,6 +86,10 @@
         "named": true
       },
       {
+        "type": "dictionary_literal",
+        "named": true
+      },
+      {
         "type": "grouping_literal",
         "named": true
       },
@@ -207,6 +211,10 @@
           },
           {
             "type": "constant_reference",
+            "named": true
+          },
+          {
+            "type": "dictionary_literal",
             "named": true
           },
           {
@@ -465,6 +473,21 @@
         },
         {
           "type": "value",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "dictionary_literal",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "pair_literal",
           "named": true
         }
       ]
@@ -1084,6 +1107,10 @@
             "named": true
           },
           {
+            "type": "dictionary_literal",
+            "named": true
+          },
+          {
             "type": "expression",
             "named": true
           },
@@ -1317,6 +1344,10 @@
             "named": true
           },
           {
+            "type": "dictionary_literal",
+            "named": true
+          },
+          {
             "type": "grouping_literal",
             "named": true
           },
@@ -1448,7 +1479,31 @@
         "required": true,
         "types": [
           {
+            "type": "boolean_literal",
+            "named": true
+          },
+          {
+            "type": "constant_reference",
+            "named": true
+          },
+          {
+            "type": "dictionary_literal",
+            "named": true
+          },
+          {
             "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "grouping_literal",
+            "named": true
+          },
+          {
+            "type": "incoming_value",
+            "named": true
+          },
+          {
+            "type": "interval_literal",
             "named": true
           },
           {
@@ -1456,7 +1511,19 @@
             "named": true
           },
           {
+            "type": "null_literal",
+            "named": true
+          },
+          {
+            "type": "numeric_literal",
+            "named": true
+          },
+          {
             "type": "pair_component_access",
+            "named": true
+          },
+          {
+            "type": "pair_literal",
             "named": true
           },
           {
@@ -1464,7 +1531,27 @@
             "named": true
           },
           {
+            "type": "quoted_literal",
+            "named": true
+          },
+          {
+            "type": "record_access",
+            "named": true
+          },
+          {
+            "type": "temporal_literal",
+            "named": true
+          },
+          {
+            "type": "tuple_literal",
+            "named": true
+          },
+          {
             "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "type_literal",
             "named": true
           },
           {
@@ -1472,7 +1559,7 @@
             "named": true
           },
           {
-            "type": "value",
+            "type": "variable",
             "named": true
           }
         ]
@@ -1498,6 +1585,10 @@
     "type": "unquoted_record_field_name",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "!{",
+    "named": false
   },
   {
     "type": "\"",

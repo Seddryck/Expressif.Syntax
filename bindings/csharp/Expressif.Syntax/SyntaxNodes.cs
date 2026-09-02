@@ -31,6 +31,7 @@ public enum SyntaxKind
     TupleElement,
     PairLiteral,
     GroupingLiteral,
+    DictionaryLiteral,
     RecordLiteral,
     RecordField,
     RecordFieldName,
@@ -497,6 +498,18 @@ public sealed class GroupingLiteralSyntax : ValueSyntax
 
     private GroupingLiteralSyntax(SourceSpan span, string text, PairLiteralSyntax[] entries)
         : base(SyntaxKind.GroupingLiteral, span, text, entries)
+        => Entries = Array.AsReadOnly(entries);
+
+    public IReadOnlyList<PairLiteralSyntax> Entries { get; }
+}
+
+public sealed class DictionaryLiteralSyntax : ValueSyntax
+{
+    internal DictionaryLiteralSyntax(SourceSpan span, string text, IEnumerable<PairLiteralSyntax> entries)
+        : this(span, text, entries.ToArray()) { }
+
+    private DictionaryLiteralSyntax(SourceSpan span, string text, PairLiteralSyntax[] entries)
+        : base(SyntaxKind.DictionaryLiteral, span, text, entries)
         => Entries = Array.AsReadOnly(entries);
 
     public IReadOnlyList<PairLiteralSyntax> Entries { get; }
