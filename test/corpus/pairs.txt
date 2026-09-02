@@ -1,0 +1,87 @@
+==================
+Pair literal
+==================
+
+("BE" => 42)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (pair_literal
+        key: (root_expression
+          (closed_expression
+            (double_quoted_literal
+              (double_quoted_content))))
+        value: (root_expression
+          (closed_expression
+            (numeric_literal)))))))
+
+==================
+Pair literal with expression operands
+==================
+
+(.country => .amount)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (pair_literal
+        key: (root_expression
+          (closed_expression
+            (record_access
+              field: (record_field_selector
+                (named_record_field)))))
+        value: (root_expression
+          (closed_expression
+            (record_access
+              field: (record_field_selector
+                (named_record_field)))))))))
+
+==================
+Nested pair literal
+==================
+
+("outer" => ("inner" => 42))
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (pair_literal
+        key: (root_expression
+          (closed_expression
+            (double_quoted_literal
+              (double_quoted_content))))
+        value: (root_expression
+          (closed_expression
+            (pair_literal
+              key: (root_expression
+                (closed_expression
+                  (double_quoted_literal
+                    (double_quoted_content))))
+              value: (root_expression
+                (closed_expression
+                  (numeric_literal))))))))))
+
+==================
+Pair component accessors
+==================
+
+$key | consume($value)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (pair_component_access)
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (pair_component_access)))))))
