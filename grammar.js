@@ -108,10 +108,30 @@ export default grammar({
 
     unary_expression: ($) => prec.right(2, seq(
       field("operator", $.unary_operator),
-      field("operand", choice($.unary_expression, ordinaryExpression($), $.value)),
+      field("operand", choice($.unary_expression, ordinaryExpression($), $._unary_value)),
     )),
 
     unary_operator: (_) => "!",
+
+    // A brace-delimited operand cannot follow unary `!`: `!{` is reserved
+    // for dictionary literals, and whitespace must not turn `! {` into one.
+    _unary_value: ($) => choice(
+      $.incoming_value,
+      $.constant_reference,
+      $.variable,
+      $.type_literal,
+      $.record_access,
+      $.numeric_literal,
+      $.boolean_literal,
+      $.null_literal,
+      $.quoted_literal,
+      $.temporal_literal,
+      $.tuple_literal,
+      $.pair_literal,
+      $.grouping_literal,
+      $.dictionary_literal,
+      $.interval_literal,
+    ),
 
     guarded_expression: ($) => prec.right(2, seq(
       "*",
@@ -318,6 +338,7 @@ export default grammar({
       $.tuple_literal,
       $.pair_literal,
       $.grouping_literal,
+      $.dictionary_literal,
       $.record_literal,
       $.interval_literal,
     ),
@@ -416,6 +437,7 @@ export default grammar({
       $.tuple_literal,
       $.pair_literal,
       $.grouping_literal,
+      $.dictionary_literal,
       $.record_literal,
       $.interval_literal,
     ),
@@ -464,6 +486,15 @@ export default grammar({
 
     grouping_literal: ($) => seq(
       "#{",
+      optional(seq(
+        $.pair_literal,
+        repeat(seq(",", $.pair_literal)),
+      )),
+      "}",
+    ),
+
+    dictionary_literal: ($) => seq(
+      "!{",
       optional(seq(
         $.pair_literal,
         repeat(seq(",", $.pair_literal)),

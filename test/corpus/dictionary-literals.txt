@@ -1,0 +1,69 @@
+==================
+Empty dictionary literal
+==================
+
+!{}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (dictionary_literal))))
+
+==================
+Dictionary literal preserves pair entries
+==================
+
+!{("BE" => "Belgium"), ("FR" => "France")}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (dictionary_literal
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content)))))
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content)))))))))
+
+==================
+Dictionary literal as function argument
+==================
+
+consume(!{("BE" => "Belgium")})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (dictionary_literal
+              (pair_literal
+                key: (root_expression
+                  (closed_expression
+                    (double_quoted_literal
+                      (double_quoted_content))))
+                value: (root_expression
+                  (closed_expression
+                    (double_quoted_literal
+                      (double_quoted_content))))))))))))

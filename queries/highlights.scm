@@ -8,6 +8,7 @@
 (guarded_expression "*" @operator)
 (pair_literal "=>" @operator)
 (grouping_literal "#{" @punctuation.bracket)
+(dictionary_literal "!{" @punctuation.bracket)
 (escape_sequence) @string.escape
 
 [

@@ -1833,6 +1833,57 @@ public class SyntaxBindingTests
     public void MalformedGroupingLiteralsAreRejected(string source)
         => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
 
+    [Test]
+    public void EmptyDictionaryLiteralIsADedicatedLosslessValue()
+    {
+        var dictionary = (DictionaryLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("!{}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(dictionary.Kind, Is.EqualTo(SyntaxKind.DictionaryLiteral));
+            Assert.That(dictionary.Text, Is.EqualTo("!{}"));
+            Assert.That(dictionary.Span, Is.EqualTo(new SourceSpan(0, 3)));
+            Assert.That(dictionary.Entries, Is.Empty);
+            Assert.That(dictionary.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void DictionaryLiteralPreservesOrderedPairEntries()
+    {
+        const string source = "!{(\"BE\" => \"Belgium\"), (\"FR\" => \"France\")}";
+        var dictionary = (DictionaryLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(dictionary.Text, Is.EqualTo(source));
+            Assert.That(dictionary.Entries, Has.Count.EqualTo(2));
+            Assert.That(dictionary.Entries.Select(entry => entry.Key.Text), Is.EqualTo(new[] { "\"BE\"", "\"FR\"" }));
+            Assert.That(dictionary.Entries.Select(entry => entry.Value.Text), Is.EqualTo(new[] { "\"Belgium\"", "\"France\"" }));
+            Assert.That(dictionary.Children, Is.EqualTo(dictionary.Entries));
+        });
+    }
+
+    [Test]
+    public void DictionaryLiteralComposesAsAFunctionArgument()
+    {
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("consume(!{(\"BE\" => \"Belgium\")})")).Pipeline.Single();
+        Assert.That(call.Arguments.Single().Value, Is.TypeOf<DictionaryLiteralSyntax>());
+    }
+
+    [Test]
+    public void DictionaryLiteralPreservesDuplicateLookingEntriesForSemanticValidation()
+    {
+        var dictionary = (DictionaryLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("!{(\"BE\" => 1), (\"BE\" => 2)}")).Value;
+        Assert.That(dictionary.Entries, Has.Count.EqualTo(2));
+    }
+
+    [TestCase("! {(\"BE\" => \"Belgium\")}")]
+    [TestCase("!{1}")]
+    [TestCase("!{(\"BE\" => \"Belgium\")")]
+    public void MalformedDictionaryLiteralsAreRejected(string source)
+        => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
+
     [TestCase("add(", false)]
     [TestCase("10 |", false)]
     [TestCase("\"unterminated", false)]
