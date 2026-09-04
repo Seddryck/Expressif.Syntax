@@ -315,3 +315,27 @@ lower | upper
         name: (function_name))
       (function_call
         name: (function_name)))))
+
+==================
+Leading map shorthand in a nested expression
+==================
+
+summarize(|> .score | sum)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (map_shorthand
+                expression: (open_expression
+                  (record_access
+                    field: (record_field_selector
+                      (named_record_field)))))
+              (function_call
+                name: (function_name)))))))))
