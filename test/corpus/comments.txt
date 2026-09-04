@@ -1,0 +1,47 @@
+==================
+Line and block comments are preserved
+==================
+
+// leading
+lower(/* argument */ "TEXT") | trim // trailing
+/* multiline
+   block */
+
+---
+
+(source_file
+  (line_comment)
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (block_comment)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))))
+      (function_call
+        name: (function_name))))
+  (line_comment)
+  (block_comment))
+
+==================
+Comment markers inside quoted literals are text
+==================
+
+pair("// text", `/* text */`)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))
+          (positional_argument
+            (backtick_quoted_literal
+              (backtick_quoted_content))))))))

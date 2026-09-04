@@ -1711,6 +1711,11 @@
     "named": true
   },
   {
+    "type": "block_comment",
+    "named": true,
+    "extra": true
+  },
+  {
     "type": "constant_reference",
     "named": true
   },
@@ -1745,6 +1750,11 @@
   {
     "type": "incoming_value",
     "named": true
+  },
+  {
+    "type": "line_comment",
+    "named": true,
+    "extra": true
   },
   {
     "type": "named_record_field",
