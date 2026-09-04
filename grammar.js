@@ -282,6 +282,10 @@ export default grammar({
     // function pipeline can be passed directly as a higher-order argument.
     _nested_open_expression: ($) => choice(
       seq(
+        $.map_shorthand,
+        repeat(seq("|", $._pipeline_expression)),
+      ),
+      seq(
         $.function_call,
         repeat(seq("|", $._pipeline_expression)),
       ),

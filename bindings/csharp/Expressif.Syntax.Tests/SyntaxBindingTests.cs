@@ -1177,6 +1177,29 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void LeadingMapShorthandCanBeAPositionalArgument()
+    {
+        const string source = "summarize(|> .score | sum)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var summarize = (FunctionCallSyntax)root.Pipeline.Single();
+        var argument = summarize.Arguments.Single();
+        var nested = (OpenExpressionSyntax)argument.Value;
+        var shorthand = (MapShorthandSyntax)nested.Pipeline[0];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(summarize.Name, Is.EqualTo("summarize"));
+            Assert.That(nested.Text, Is.EqualTo("|> .score | sum"));
+            Assert.That(nested.Pipeline, Has.Count.EqualTo(2));
+            Assert.That(shorthand.Expression.Pipeline.Single(), Is.TypeOf<RecordAccessSyntax>()
+                .With.Property(nameof(RecordAccessSyntax.Fields)).Count.EqualTo(1));
+            Assert.That(nested.Pipeline[1], Is.TypeOf<FunctionCallSyntax>()
+                .With.Property(nameof(FunctionCallSyntax.Name)).EqualTo("sum"));
+            Assert.That(argument.Children, Is.EqualTo(new SyntaxNode[] { nested }));
+        });
+    }
+
+    [Test]
     public void ParenthesizedPipelineIsLossless()
     {
         const string source = "(absolute | add(5))";
