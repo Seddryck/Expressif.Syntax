@@ -4,6 +4,80 @@ using System.Text.Json;
 
 public class SyntaxBindingTests
 {
+    [Test]
+    public void ParseDocumentPreservesCommentsAndCompleteSource()
+    {
+        const string source = "// leading\nlower(/* inner */ \"TEXT\") | trim // trailing\n/* block\n   comment */";
+
+        var document = ExpressifSyntax.ParseDocument(source);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(document.Kind, Is.EqualTo(SyntaxKind.SourceFile));
+            Assert.That(document.Text, Is.EqualTo(source));
+            Assert.That(document.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(document.Expression, Is.TypeOf<OpenExpressionSyntax>());
+            Assert.That(document.Comments, Has.Count.EqualTo(4));
+            Assert.That(document.Comments.Select(comment => comment.Kind), Is.EqualTo(new[]
+            {
+                SyntaxKind.LineComment,
+                SyntaxKind.BlockComment,
+                SyntaxKind.LineComment,
+                SyntaxKind.BlockComment,
+            }));
+            Assert.That(document.Comments.Select(comment => comment.Text), Is.EqualTo(new[]
+            {
+                "// leading",
+                "/* inner */",
+                "// trailing",
+                "/* block\n   comment */",
+            }));
+            Assert.That(document.Children, Is.EqualTo(new SyntaxNode[]
+            {
+                document.Comments[0],
+                document.Expression,
+                document.Comments[1],
+                document.Comments[2],
+                document.Comments[3],
+            }));
+            Assert.That(document.Comments.Select(comment => comment.Children), Is.All.Empty);
+        });
+    }
+
+    [Test]
+    public void ParseRemainsCompatibleWhenCommentsArePresent()
+    {
+        const string source = "// before\nlower(/* before argument */ \"TEXT\") | /* between calls */ trim// after";
+
+        var document = ExpressifSyntax.ParseDocument(source);
+        var root = (OpenExpressionSyntax)document.Expression;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Pipeline, Has.Count.EqualTo(2));
+            Assert.That(root.Pipeline.Select(expression => ((FunctionCallSyntax)expression).Name),
+                Is.EqualTo(new[] { "lower", "trim" }));
+            Assert.That(document.Comments, Has.Count.EqualTo(4));
+        });
+    }
+
+    [Test]
+    public void CommentMarkersInsideQuotedLiteralsRemainLiteralContent()
+    {
+        var document = ExpressifSyntax.ParseDocument("pair(\"// text\", `/* text */`)");
+
+        Assert.That(document.Comments, Is.Empty);
+    }
+
+    [Test]
+    public void UnterminatedBlockCommentIsRejected()
+    {
+        var exception = Assert.Throws<ExpressifSyntaxException>(() =>
+            ExpressifSyntax.ParseDocument("lower /* never closed"));
+
+        Assert.That(exception!.Errors, Is.Not.Empty);
+    }
+
     [TestCase("lower", typeof(OpenExpressionSyntax))]
     [TestCase("lower() | trim", typeof(OpenExpressionSyntax))]
     [TestCase("true", typeof(OpenExpressionSyntax))]

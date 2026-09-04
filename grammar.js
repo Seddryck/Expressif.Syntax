@@ -21,7 +21,11 @@ const unquotedPublicName = /[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*/;
 export default grammar({
   name: "expressif",
 
-  extras: ($) => [/[\s\uFEFF\u2060\u200B]/],
+  extras: ($) => [
+    /[\s\uFEFF\u2060\u200B]/,
+    $.line_comment,
+    $.block_comment,
+  ],
 
   supertypes: ($) => [
     $.value,
@@ -41,6 +45,10 @@ export default grammar({
 
   rules: {
     source_file: ($) => $.root_expression,
+
+    line_comment: (_) => token(prec(-1, seq("//", /[^\r\n]*/))),
+
+    block_comment: (_) => token(prec(-1, seq("/*", /[^*]*\*+([^/*][^*]*\*+)*/, "/"))),
 
     root_expression: ($) => choice(
       $.open_expression,

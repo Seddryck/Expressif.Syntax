@@ -12,6 +12,9 @@ public static class ExpressifSyntax
     };
 
     public static RootExpressionSyntax Parse(string source)
+        => ParseDocument(source).Expression;
+
+    public static SourceFileSyntax ParseDocument(string source)
     {
         ArgumentNullException.ThrowIfNull(source);
 
@@ -28,21 +31,46 @@ public static class ExpressifSyntax
             throw new ExpressifSyntaxException("The source contains syntax errors.", errors);
         }
 
-        var expression = SingleNamedChild(root, "source_file");
+        var expression = root.NamedChildren.FirstOrDefault(child => child.Type == "root_expression")
+            ?? throw Unknown(root);
         if (expression.Type == "root_expression")
             expression = SingleNamedChild(expression, "root_expression");
 
-        return expression.Type switch
+        RootExpressionSyntax boundExpression = expression.Type switch
         {
             "open_expression" => BindOpen(expression),
             "closed_expression" => BindClosed(expression),
             _ => throw Unknown(expression),
         };
+
+        var comments = Descendants(root)
+            .Where(node => node.Type is "line_comment" or "block_comment")
+            .Select(BindComment)
+            .ToArray();
+
+        return new(new SourceSpan(0, source.Length), source, boundExpression, comments);
+    }
+
+    private static CommentSyntax BindComment(TsNode node) => node.Type switch
+    {
+        "line_comment" => new LineCommentSyntax(Span(node), node.Text),
+        "block_comment" => new BlockCommentSyntax(Span(node), node.Text),
+        _ => throw Unknown(node),
+    };
+
+    private static IEnumerable<TsNode> Descendants(TsNode node)
+    {
+        foreach (var child in node.NamedChildren)
+        {
+            yield return child;
+            foreach (var descendant in Descendants(child))
+                yield return descendant;
+        }
     }
 
     private static OpenExpressionSyntax BindOpen(TsNode node)
     {
-        var expressions = node.NamedChildren.Select(BindExpression).ToArray();
+        var expressions = StructuralChildren(node).Select(BindExpression).ToArray();
         var source = expressions.FirstOrDefault() is TupleProjectionSyntax or PairComponentAccessSyntax
             ? expressions[0]
             : null;
@@ -52,7 +80,7 @@ public static class ExpressifSyntax
 
     private static ClosedExpressionSyntax BindClosed(TsNode node)
     {
-        var children = node.NamedChildren.ToArray();
+        var children = StructuralChildren(node).ToArray();
         if (children.Length == 0)
             throw Unknown(node);
 
@@ -66,12 +94,12 @@ public static class ExpressifSyntax
         if (node.Type != "function_call")
             throw Unknown(node);
 
-        var name = node.GetChildForField("name") ?? node.NamedChildren.FirstOrDefault(n => n.Type == "function_name")
+        var name = node.GetChildForField("name") ?? StructuralChildren(node).FirstOrDefault(n => n.Type == "function_name")
             ?? throw Unknown(node);
-        var argumentList = node.NamedChildren.FirstOrDefault(n => n.Type == "argument_list");
+        var argumentList = StructuralChildren(node).FirstOrDefault(n => n.Type == "argument_list");
         var arguments = argumentList is null
             ? []
-            : argumentList.NamedChildren.Select(BindArgument).ToArray();
+            : StructuralChildren(argumentList).Select(BindArgument).ToArray();
         var suffix = node.Text.AsSpan(name.Text.Length).TrimStart();
         return new(Span(node), node.Text, name.Text, suffix.StartsWith("("), arguments);
     }
@@ -239,12 +267,12 @@ public static class ExpressifSyntax
             "date_literal" => new DateLiteralSyntax(Span(node), node.Text),
             "date_time_literal" => new DateTimeLiteralSyntax(Span(node), node.Text),
             "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
-            "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindArrayElement).ToArray()),
-            "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindTupleElement).ToArray()),
+            "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindArrayElement).ToArray()),
+            "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindTupleElement).ToArray()),
             "pair_literal" => BindPairLiteral(node),
-            "grouping_literal" => new GroupingLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindPairLiteral).ToArray()),
-            "dictionary_literal" => new DictionaryLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindPairLiteral).ToArray()),
-            "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, node.NamedChildren.Select(BindRecordEntry).ToArray()),
+            "grouping_literal" => new GroupingLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindPairLiteral).ToArray()),
+            "dictionary_literal" => new DictionaryLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindPairLiteral).ToArray()),
+            "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindRecordEntry).ToArray()),
             "interval_literal" => BindInterval(node),
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
             _ => throw Unknown(node),
@@ -265,7 +293,7 @@ public static class ExpressifSyntax
         var expression = SingleNamedChild(node, "root_expression");
         if (expression.Type == "closed_expression")
         {
-            var children = expression.NamedChildren.ToArray();
+            var children = StructuralChildren(expression).ToArray();
             if (children.Length == 1)
                 return BindValue(children[0]);
         }
@@ -308,7 +336,7 @@ public static class ExpressifSyntax
 
     private static IntervalLiteralSyntax BindInterval(TsNode node)
     {
-        var shorthand = node.NamedChildren.FirstOrDefault(child => child.Type == "interval_shorthand");
+        var shorthand = StructuralChildren(node).FirstOrDefault(child => child.Type == "interval_shorthand");
         if (shorthand is not null)
         {
             var zeroIndex = node.Text.IndexOf('0');
@@ -426,11 +454,14 @@ public static class ExpressifSyntax
 
     private static TsNode SingleNamedChild(TsNode node, string container)
     {
-        var children = node.NamedChildren.ToArray();
+        var children = StructuralChildren(node).ToArray();
         return children.Length == 1
             ? children[0]
             : throw new ExpressifBindingException($"Expected one named child below '{container}', but found {children.Length}.");
     }
+
+    private static IEnumerable<TsNode> StructuralChildren(TsNode node) =>
+        node.NamedChildren.Where(child => child.Type is not "line_comment" and not "block_comment");
 
     private static IEnumerable<SyntaxError> CollectErrors(TsNode node)
     {

@@ -12,6 +12,11 @@
 (escape_sequence) @string.escape
 
 [
+  (line_comment)
+  (block_comment)
+] @comment
+
+[
   (double_quoted_literal)
   (backtick_quoted_literal)
 ] @string

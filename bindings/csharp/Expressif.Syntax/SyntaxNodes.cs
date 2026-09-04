@@ -5,6 +5,9 @@ namespace Expressif.Syntax;
 
 public enum SyntaxKind
 {
+    SourceFile,
+    LineComment,
+    BlockComment,
     OpenExpression,
     ClosedExpression,
     FunctionCall,
@@ -69,6 +72,38 @@ public abstract class SyntaxNode
     public SourceSpan Span { get; }
     public string Text { get; }
     public IReadOnlyList<SyntaxNode> Children => children;
+}
+
+public sealed class SourceFileSyntax : SyntaxNode
+{
+    internal SourceFileSyntax(SourceSpan span, string text, RootExpressionSyntax expression, IEnumerable<CommentSyntax> comments)
+        : base(SyntaxKind.SourceFile, span, text,
+            new SyntaxNode[] { expression }.Concat(comments).OrderBy(child => child.Span.Start))
+    {
+        Expression = expression;
+        Comments = Array.AsReadOnly(comments.OrderBy(comment => comment.Span.Start).ToArray());
+    }
+
+    public RootExpressionSyntax Expression { get; }
+    public IReadOnlyList<CommentSyntax> Comments { get; }
+}
+
+public abstract class CommentSyntax : SyntaxNode
+{
+    protected CommentSyntax(SyntaxKind kind, SourceSpan span, string text)
+        : base(kind, span, text) { }
+}
+
+public sealed class LineCommentSyntax : CommentSyntax
+{
+    internal LineCommentSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.LineComment, span, text) { }
+}
+
+public sealed class BlockCommentSyntax : CommentSyntax
+{
+    internal BlockCommentSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.BlockComment, span, text) { }
 }
 
 public abstract class RootExpressionSyntax : ExpressionSyntax
