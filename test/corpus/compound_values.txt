@@ -411,7 +411,7 @@ T()
     (closed_expression
       (tuple_literal
         (tuple_element
-          (MISSING "...")))))
+          (MISSING "..."))))))
 
 ==================
 Compound rejects single-value tuple
