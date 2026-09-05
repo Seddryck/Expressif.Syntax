@@ -57,12 +57,12 @@ Array values and whitespace
           expression: (variable))
         (array_element
           expression: (record_access
-            root: (original_input)
+            root: (expression_root)
             field: (original_record_field_selector
               (named_record_field))))
         (array_element
           expression: (record_access
-            root: (original_input)
+            root: (expression_root)
             field: (original_record_field_selector
               (positional_record_field))))))))
 
@@ -151,7 +151,7 @@ T("foo", #true, T(#"2025-12-17", ^.0), @value)
               expression: (date_literal))
             (tuple_element
               expression: (record_access
-                root: (original_input)
+                root: (expression_root)
                 field: (original_record_field_selector
                   (positional_record_field))))))
         (tuple_element
@@ -411,7 +411,7 @@ T()
     (closed_expression
       (tuple_literal
         (tuple_element
-          (MISSING "..."))))))
+          (MISSING "...")))))
 
 ==================
 Compound rejects single-value tuple

@@ -632,18 +632,24 @@ public class SyntaxBindingTests
         });
     }
 
-    [TestCase(".name", false, "name", null)]
-    [TestCase(".10", false, null, 10)]
-    [TestCase("^.name", true, "name", null)]
-    [TestCase("^.10", true, null, 10)]
-    public void RecordAccessExposesRootAndField(string source, bool original, string? name, int? index)
+    [TestCase(".name", 0, "name", null)]
+    [TestCase(".10", 0, null, 10)]
+    [TestCase("^.name", 1, "name", null)]
+    [TestCase("^.10", 1, null, 10)]
+    [TestCase("^^.threshold", 2, "threshold", null)]
+    [TestCase("^^^.10", 3, null, 10)]
+    public void RecordAccessExposesRootDepthAndField(string source, int rootDepth, string? name, int? index)
     {
         var root = (ClosedExpressionSyntax)ExpressifSyntax.Parse(source);
         var access = (RecordAccessSyntax)root.Value;
 
         Assert.Multiple(() =>
         {
-            Assert.That(access.IsOriginalInput, Is.EqualTo(original));
+            Assert.That(access.RootDepth, Is.EqualTo(rootDepth));
+            Assert.That(access.IsOriginalInput, Is.EqualTo(rootDepth > 0));
+            Assert.That(access.Root?.Depth, Is.EqualTo(rootDepth == 0 ? null : rootDepth));
+            Assert.That(access.Root?.Text, Is.EqualTo(rootDepth == 0 ? null : new string('^', rootDepth) + "."));
+            Assert.That(access.Children, Is.EqualTo(access.Root is null ? [] : new SyntaxNode[] { access.Root }));
             Assert.That(access.Fields.Single().Name, Is.EqualTo(name));
             Assert.That(access.Fields.Single().Index, Is.EqualTo(index));
         });
@@ -659,6 +665,28 @@ public class SyntaxBindingTests
             new RecordFieldSelector("customer", null),
             new RecordFieldSelector(null, 0),
         }));
+    }
+
+    [Test]
+    public void EnclosingRootAccessIsLosslessInsideNestedExpressions()
+    {
+        const string source = "filter(greater-than(^^.threshold))";
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+        var nestedExpression = (OpenExpressionSyntax)call.Arguments.Single().Value;
+        var nested = (FunctionCallSyntax)nestedExpression.Pipeline.Single();
+        var access = (RecordAccessSyntax)nested.Arguments.Single().Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(access.Kind, Is.EqualTo(SyntaxKind.RecordAccess));
+            Assert.That(access.Root, Is.TypeOf<ExpressionRootSyntax>()
+                .With.Property(nameof(ExpressionRootSyntax.Kind)).EqualTo(SyntaxKind.ExpressionRoot));
+            Assert.That(access.RootDepth, Is.EqualTo(2));
+            Assert.That(access.Text, Is.EqualTo("^^.threshold"));
+            Assert.That(access.Span, Is.EqualTo(new SourceSpan(20, 12)));
+            Assert.That(access.Root!.Span, Is.EqualTo(new SourceSpan(20, 3)));
+            Assert.That(access.Children, Is.EqualTo(new[] { access.Root }));
+        });
     }
 
     [TestCase("@value", typeof(VariableSyntax))]
@@ -2004,6 +2032,8 @@ public class SyntaxBindingTests
     [TestCase("@!foo-", false)]
     [TestCase("@_foo", false)]
     [TestCase("@!_", false)]
+    [TestCase("^^", false)]
+    [TestCase("^^.", false)]
     public void MalformedInputExposesTreeSitterErrors(string source, bool hasMissingError)
     {
         var exception = Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));

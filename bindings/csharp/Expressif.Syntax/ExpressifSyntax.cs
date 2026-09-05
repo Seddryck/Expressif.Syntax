@@ -415,8 +415,10 @@ public static class ExpressifSyntax
 
     private static RecordAccessSyntax BindRecordAccess(TsNode node)
     {
+        var rootNode = node.GetChildForField("root");
+        var root = rootNode is null ? null : new ExpressionRootSyntax(Span(rootNode), rootNode.Text);
         var fields = node.NamedChildren
-            .Where(child => child.Type != "original_input")
+            .Where(child => child.Type != "expression_root")
             .Select(selector => SingleNamedChild(selector, selector.Type))
             .Select(field => field.Type switch
             {
@@ -427,7 +429,7 @@ public static class ExpressifSyntax
                         System.Globalization.CultureInfo.InvariantCulture))),
                 _ => throw Unknown(field),
             });
-        return new(Span(node), node.Text, node.NamedChildren.Any(child => child.Type == "original_input"), fields);
+        return new(Span(node), node.Text, root, fields);
     }
 
     private static RecordFieldSyntax BindRecordField(TsNode node)

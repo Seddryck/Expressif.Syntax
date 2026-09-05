@@ -1059,7 +1059,7 @@
         "required": false,
         "types": [
           {
-            "type": "original_input",
+            "type": "expression_root",
             "named": true
           }
         ]
@@ -1736,6 +1736,10 @@
     "named": true
   },
   {
+    "type": "expression_root",
+    "named": true
+  },
+  {
     "type": "from_end",
     "named": true
   },
@@ -1766,10 +1770,6 @@
   },
   {
     "type": "numeric_literal",
-    "named": true
-  },
-  {
-    "type": "original_input",
     "named": true
   },
   {

@@ -66,8 +66,9 @@ Expressif distinguishes record fields from elements of ordered values:
 ```text
 .name       named field of the current record
 .0          positional field of the current record
-^.name      named field of the original immutable input record
-^.0         positional field of the original immutable input record
+^.name      named field of the current expression root
+^.0         positional field of the current expression root
+^^.name     named field of the enclosing expression root
 $0          first element of the current tuple or array
 $1          second element of the current tuple or array
 $^0         last element of the current tuple or array
@@ -75,9 +76,10 @@ $^1         second-to-last element of the current tuple or array
 ```
 
 Record access always uses `.` for navigation. A leading `^` changes the root
-from the current pipeline value to the original immutable input; it does not
-change how fields are selected. Access can be chained for nested records, for
-example `.customer.address` or `^.customer.0`. The former bracket forms
+from the current pipeline value to the current expression input; each additional
+`^` moves outward by one enclosing expression. It does not change how fields are
+selected. Access can be chained for nested records, for example
+`.customer.address`, `^.customer.0`, or `^^.customer.0`. The former bracket forms
 `[name]` and `[0]` are replaced by `^.name` and `^.0` respectively.
 
 Element positions are zero-based. `$n` counts from the beginning and `$^n`

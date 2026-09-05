@@ -120,7 +120,7 @@ Field shorthand names support underscores
         field: (immediate_record_field_selector
           (named_record_field)))
       (record_access
-        root: (original_input)
+        root: (expression_root)
         field: (original_record_field_selector
           (named_record_field))))))
 
@@ -161,7 +161,7 @@ Record field shorthand pipeline
           (named_record_field))))))
 
 ==================
-Original input named field pipeline
+Expression root named field pipeline
 ==================
 
 ^.name | upper
@@ -172,14 +172,14 @@ Original input named field pipeline
   (root_expression
     (closed_expression
       (record_access
-        root: (original_input)
+        root: (expression_root)
         field: (original_record_field_selector
           (named_record_field)))
       (function_call
         name: (function_name)))))
 
 ==================
-Original input positional field pipeline
+Expression root positional field pipeline
 ==================
 
 ^.1 | add(5)
@@ -190,7 +190,7 @@ Original input positional field pipeline
   (root_expression
     (closed_expression
       (record_access
-        root: (original_input)
+        root: (expression_root)
         field: (original_record_field_selector
           (positional_record_field)))
       (function_call
@@ -221,7 +221,7 @@ example(@foo, .bar, ^.2)
                 (named_record_field))))
           (positional_argument
             (record_access
-              root: (original_input)
+              root: (expression_root)
               field: (original_record_field_selector
                 (positional_record_field)))))))))
 
@@ -251,7 +251,7 @@ example(.1, #true, #false, #"2025-12-17")
             (date_literal)))))))
 
 ==================
-Nested current and original record access
+Nested current and expression-root record access
 ==================
 
 example(.customer.address, ^.customer.0)
@@ -272,11 +272,63 @@ example(.customer.address, ^.customer.0)
                 (named_record_field))))
           (positional_argument
             (record_access
-              root: (original_input)
+              root: (expression_root)
               field: (original_record_field_selector
                 (named_record_field))
               field: (immediate_record_field_selector
                 (positional_record_field)))))))))
+
+==================
+Enclosing expression roots preserve their depth
+==================
+
+example(^^.threshold, ^^^.customer.0)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (record_access
+              root: (expression_root)
+              field: (original_record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              root: (expression_root)
+              field: (original_record_field_selector
+                (named_record_field))
+              field: (immediate_record_field_selector
+                (positional_record_field)))))))))
+
+==================
+Enclosing expression root inside a nested expression
+==================
+
+filter(greater-than(^^.threshold))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (record_access
+                      root: (expression_root)
+                      field: (original_record_field_selector
+                        (named_record_field)))))))))))))
 
 ==================
 Surrounding whitespace is insignificant
