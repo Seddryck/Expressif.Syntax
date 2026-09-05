@@ -158,7 +158,7 @@ $0 | foo(.name, ^.name)
                 (named_record_field))))
           (positional_argument
             (record_access
-              root: (original_input)
+              root: (expression_root)
               field: (original_record_field_selector
                 (named_record_field)))))))))
 

@@ -27,6 +27,7 @@ public enum SyntaxKind
     PairComponentAccess,
     ConstantReference,
     Variable,
+    ExpressionRoot,
     RecordAccess,
     ArrayLiteral,
     ArrayElement,
@@ -348,16 +349,27 @@ public readonly record struct RecordFieldSelector(string? Name, int? Index)
     public bool IsPositional => Index is not null;
 }
 
+public sealed class ExpressionRootSyntax : SyntaxNode
+{
+    internal ExpressionRootSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.ExpressionRoot, span, text)
+        => Depth = text.Length - 1;
+
+    public int Depth { get; }
+}
+
 public sealed class RecordAccessSyntax : ValueSyntax
 {
-    internal RecordAccessSyntax(SourceSpan span, string text, bool isOriginalInput, IEnumerable<RecordFieldSelector> fields)
-        : base(SyntaxKind.RecordAccess, span, text)
+    internal RecordAccessSyntax(SourceSpan span, string text, ExpressionRootSyntax? root, IEnumerable<RecordFieldSelector> fields)
+        : base(SyntaxKind.RecordAccess, span, text, root is null ? [] : [root])
     {
-        IsOriginalInput = isOriginalInput;
+        Root = root;
         Fields = Array.AsReadOnly(fields.ToArray());
     }
 
-    public bool IsOriginalInput { get; }
+    public ExpressionRootSyntax? Root { get; }
+    public int RootDepth => Root?.Depth ?? 0;
+    public bool IsOriginalInput => Root is not null;
     public IReadOnlyList<RecordFieldSelector> Fields { get; }
 }
 

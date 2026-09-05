@@ -2525,7 +2525,7 @@
                   "name": "root",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "original_input"
+                    "name": "expression_root"
                   }
                 },
                 {
@@ -2553,9 +2553,9 @@
         }
       ]
     },
-    "original_input": {
+    "expression_root": {
       "type": "PATTERN",
-      "value": "\\^\\."
+      "value": "\\^+\\."
     },
     "record_field_selector": {
       "type": "CHOICE",

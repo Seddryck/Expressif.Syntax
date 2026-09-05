@@ -570,14 +570,14 @@ export default grammar({
       choice(
         field("field", $.record_field_selector),
         seq(
-          field("root", $.original_input),
+          field("root", $.expression_root),
           field("field", $.original_record_field_selector),
         ),
       ),
       repeat(field("field", $.immediate_record_field_selector)),
     ),
 
-    original_input: (_) => /\^\./,
+    expression_root: (_) => /\^+\./,
 
     record_field_selector: ($) => choice(
       $.named_record_field,
