@@ -353,6 +353,7 @@ public sealed class ExpressionRootSyntax : SyntaxNode
 {
     internal ExpressionRootSyntax(SourceSpan span, string text)
         : base(SyntaxKind.ExpressionRoot, span, text)
+        // Both record (^^.) and tuple (^^$) roots include their delimiter.
         => Depth = text.Length - 1;
 
     public int Depth { get; }
@@ -503,13 +504,16 @@ public enum TupleProjectionDirection { FromStart, FromEnd }
 
 public sealed class TupleProjectionSyntax : ExpressionSyntax
 {
-    internal TupleProjectionSyntax(SourceSpan span, string text, TupleProjectionDirection direction, int index)
-        : base(SyntaxKind.TupleProjection, span, text, null)
+    internal TupleProjectionSyntax(SourceSpan span, string text, TupleProjectionDirection direction, int index, ExpressionRootSyntax? root = null)
+        : base(SyntaxKind.TupleProjection, span, text, root is null ? [] : [root])
     {
         Direction = direction;
         Index = index;
+        Root = root;
     }
 
+    public ExpressionRootSyntax? Root { get; }
+    public int RootDepth => Root?.Depth ?? 0;
     public int Index { get; }
     public TupleProjectionDirection Direction { get; }
 }
