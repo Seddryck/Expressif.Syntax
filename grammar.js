@@ -58,18 +58,18 @@ export default grammar({
     open_expression: ($) => prec.right(seq(
       $.expression,
       repeat(choice(
-        seq("|", $._pipeline_expression),
+        seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       )),
     )),
 
-    closed_expression: ($) => seq(
+    closed_expression: ($) => prec.right(seq(
       $.value,
       repeat(choice(
-        seq("|", $._pipeline_expression),
+        seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       )),
-    ),
+    )),
 
     map_shorthand: ($) => seq(
       "|>",
@@ -158,6 +158,9 @@ export default grammar({
       $.value,
     ),
 
+    // Binding stages are only reachable after an authored pipe and a source.
+    _pipeline_stage: ($) => choice($._pipeline_expression, $.input_binding_expression),
+
     _pipeline_expression: ($) => choice(
       $.binary_expression,
       $.guarded_expression,
@@ -180,7 +183,7 @@ export default grammar({
 
     _pipeline_open_expression: ($) => prec.right(seq(
       $._pipeline_expression,
-      repeat(seq("|", $._pipeline_expression)),
+      repeat(seq("|", $._pipeline_stage)),
     )),
 
     parenthesized_expression: ($) => seq(
@@ -285,7 +288,6 @@ export default grammar({
     ),
 
     _argument_value: ($) => choice(
-      $.input_bound_expression,
       $.binary_expression,
       $.guarded_expression,
       $.unary_expression,
@@ -302,24 +304,30 @@ export default grammar({
     // function pipeline can be passed directly as a higher-order argument.
     _nested_open_expression: ($) => choice(
       seq(
+        choice($.parenthesized_expression, $.unary_expression, $.binary_expression, $.guarded_expression),
+        "|",
+        $._pipeline_stage,
+        repeat(seq("|", $._pipeline_stage)),
+      ),
+      seq(
         $.map_shorthand,
-        repeat(seq("|", $._pipeline_expression)),
+        repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
         $.function_call,
-        repeat(seq("|", $._pipeline_expression)),
+        repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
         $.tuple_projection,
         "|",
-        $._pipeline_expression,
-        repeat(seq("|", $._pipeline_expression)),
+        $._pipeline_stage,
+        repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
         $.pair_component_access,
         "|",
-        $._pipeline_expression,
-        repeat(seq("|", $._pipeline_expression)),
+        $._pipeline_stage,
+        repeat(seq("|", $._pipeline_stage)),
       ),
     ),
 
@@ -330,20 +338,25 @@ export default grammar({
     _nested_closed_expression: ($) => seq(
       $.value,
       choice(
-        seq("|", $._pipeline_expression),
+        seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       ),
       repeat(choice(
-        seq("|", $._pipeline_expression),
+        seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       )),
     ),
 
-    // The binding owns the complete body pipeline up to its enclosing delimiter.
-    input_bound_expression: ($) => prec.right(seq(
+    // A grouped body stops at its closing parenthesis; otherwise the body owns
+    // the remaining pipeline through the enclosing argument/expression boundary.
+    input_binding_expression: ($) => prec.right(seq(
       optional(field("binding", choice($.binding_name, $.positional_binding_pattern))),
       ":>",
-      field("body", $.root_expression),
+      field("body", choice(
+        // Prefer a complete grouped body over extending its outer wrapper.
+        prec(10, alias($.parenthesized_open_expression, $.open_expression)),
+        $.root_expression,
+      )),
     )),
 
     positional_binding_pattern: ($) => seq(
@@ -446,11 +459,11 @@ export default grammar({
     _array_closed_expression: ($) => prec.right(2, seq(
       $._compound_value,
       choice(
-        seq("|", $._pipeline_expression),
+        seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       ),
       repeat(choice(
-        seq("|", $._pipeline_expression),
+        seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
       )),
     )),

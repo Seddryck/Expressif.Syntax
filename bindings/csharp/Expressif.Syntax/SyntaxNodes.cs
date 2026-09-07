@@ -50,7 +50,7 @@ public enum SyntaxKind
     GuardedExpression,
     BinaryExpression,
     BinaryOperator,
-    InputBoundExpression,
+    InputBindingExpression,
     BindingName,
     PositionalBindingPattern,
 }
@@ -164,30 +164,30 @@ public sealed class FunctionCallSyntax : ExpressionSyntax
     public IReadOnlyList<ArgumentSyntax> Arguments { get; }
 }
 
-/// <summary>An explicitly input-bound expression with its complete authored body.</summary>
-public sealed class InputBoundExpressionSyntax : ExpressionSyntax
+/// <summary>A pipeline stage that binds its preceding value and preserves its complete authored body.</summary>
+public sealed class InputBindingExpressionSyntax : ExpressionSyntax
 {
-    internal InputBoundExpressionSyntax(SourceSpan span, string text, InputBindingSyntax? binding, RootExpressionSyntax body)
-        : base(SyntaxKind.InputBoundExpression, span, text,
+    internal InputBindingExpressionSyntax(SourceSpan span, string text, BindingPatternSyntax? binding, RootExpressionSyntax body)
+        : base(SyntaxKind.InputBindingExpression, span, text,
             binding is null ? new SyntaxNode[] { body } : [binding, body])
     {
         Binding = binding;
         Body = body;
     }
 
-    public InputBindingSyntax? Binding { get; }
+    public BindingPatternSyntax? Binding { get; }
     public RootExpressionSyntax Body { get; }
 }
 
 /// <summary>The authored binding declaration, independent of runtime name resolution.</summary>
-public abstract class InputBindingSyntax : SyntaxNode
+public abstract class BindingPatternSyntax : SyntaxNode
 {
-    protected InputBindingSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
+    protected BindingPatternSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
         : base(kind, span, text, children) { }
 }
 
 /// <summary>An ordered positional declaration, distinct from a tuple value.</summary>
-public sealed class PositionalBindingPatternSyntax : InputBindingSyntax
+public sealed class PositionalBindingPatternSyntax : BindingPatternSyntax
 {
     internal PositionalBindingPatternSyntax(SourceSpan span, string text, IEnumerable<BindingNameSyntax> names)
         : base(SyntaxKind.PositionalBindingPattern, span, text, names)
@@ -196,7 +196,7 @@ public sealed class PositionalBindingPatternSyntax : InputBindingSyntax
     public IReadOnlyList<BindingNameSyntax> Names { get; }
 }
 
-public sealed class BindingNameSyntax : InputBindingSyntax
+public sealed class BindingNameSyntax : BindingPatternSyntax
 {
     internal BindingNameSyntax(SourceSpan span, string text)
         : base(SyntaxKind.BindingName, span, text) { }

@@ -1,8 +1,8 @@
 ==================
-Named binding pipeline
+Named binding at end of top-level pipeline
 ==================
 
-apply(input :> trim | upper)
+Tuple(10, 20) | extend(30) | myTuple :> (@myTuple | $0 | subtract(@myTuple | $1) | multiply(@myTuple | $2))
 
 ---
 
@@ -13,141 +13,48 @@ apply(input :> trim | upper)
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (binding_name)
-              (root_expression
-                (open_expression
-                  (function_call
-                    (function_name))
-                  (function_call
-                    (function_name)))))))))))
-
-==================
-Compact named binding and variable reference
-==================
-
-apply(input1:> @input1 | trim)
-
----
-
-(source_file
-  (root_expression
-    (open_expression
+            (numeric_literal))
+          (positional_argument
+            (numeric_literal))))
       (function_call
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (binding_name)
-              (root_expression
-                (closed_expression
-                  (variable)
-                  (function_call
-                    (function_name)))))))))))
-
-==================
-Anonymous tuple body
-==================
-
-adjacent(:> $1 | subtract($0) | multiply($1))
-
----
-
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (input_bound_expression
-              (root_expression
-                (open_expression
-                  (tuple_projection
-                    (from_start)
-                    (tuple_index))
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
+            (numeric_literal))))
+      (input_binding_expression
+        (binding_name)
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (tuple_projection
+                  (from_start)
+                  (tuple_index))
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (closed_expression
+                        (variable)
                         (tuple_projection
                           (from_start)
-                          (tuple_index)))))
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
+                          (tuple_index))))))
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (closed_expression
+                        (variable)
                         (tuple_projection
                           (from_start)
                           (tuple_index))))))))))))))
 
 ==================
-Anonymous field body
+Anonymous binding at end of pipeline
 ==================
 
-apply(:> .field | trim)
-
----
-
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (input_bound_expression
-              (root_expression
-                (closed_expression
-                  (record_access
-                    (record_field_selector
-                      (named_record_field)))
-                  (function_call
-                    (function_name)))))))))))
-
-==================
-Nested bindings and sibling argument
-==================
-
-choose(outer :> apply(inner :> @inner | trim) | upper, :> #null)
-
----
-
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (input_bound_expression
-              (binding_name)
-              (root_expression
-                (open_expression
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
-                        (input_bound_expression
-                          (binding_name)
-                          (root_expression
-                            (closed_expression
-                              (variable)
-                              (function_call
-                                (function_name))))))))
-                  (function_call
-                    (function_name))))))
-          (positional_argument
-            (input_bound_expression
-              (root_expression
-                (closed_expression
-                  (null_literal))))))))))
-
-==================
-Named argument binding
-==================
-
-apply(transform := input :> @input | trim, :text)
+record(name := "Alice", age := 30) | :> record(n := .name, a := .age)
 
 ---
 
@@ -161,21 +68,39 @@ apply(transform := input :> @input | trim, :text)
             (argument_name
               (public_argument_name
                 (unquoted_argument_name)))
-            (input_bound_expression
-              (binding_name)
-              (root_expression
-                (closed_expression
-                  (variable)
-                  (function_call
-                    (function_name))))))
-          (positional_argument
-            (type_literal)))))))
+            (double_quoted_literal
+              (double_quoted_content)))
+          (named_argument
+            (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
+            (numeric_literal))))
+      (input_binding_expression
+        (root_expression
+          (open_expression
+            (function_call
+              (function_name)
+              (argument_list
+                (named_argument
+                  (argument_name
+                    (public_argument_name
+                      (unquoted_argument_name)))
+                  (record_access
+                    (record_field_selector
+                      (named_record_field))))
+                (named_argument
+                  (argument_name
+                    (public_argument_name
+                      (unquoted_argument_name)))
+                  (record_access
+                    (record_field_selector
+                      (named_record_field))))))))))))
 
 ==================
-Scoped tuple references
+Named binding in nested argument pipeline
 ==================
 
-adjacent(:> ^^$1 | subtract(^$0))
+apply(trim | input :> (@input | upper))
 
 ---
 
@@ -186,25 +111,465 @@ adjacent(:> ^^$1 | subtract(^$0))
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (root_expression
+            (open_expression
+              (function_call
+                (function_name))
+              (input_binding_expression
+                (binding_name)
                 (open_expression
-                  (tuple_projection
-                    (expression_root)
-                    (tuple_index))
+                  (parenthesized_expression
+                    (root_expression
+                      (closed_expression
+                        (variable)
+                        (function_call
+                          (function_name))))))))))))))
+
+==================
+Nested tuple source supplies binding input
+==================
+
+adjacent($1 | current :> (@current | multiply(2)))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (tuple_projection
+                (from_start)
+                (tuple_index))
+              (input_binding_expression
+                (binding_name)
+                (open_expression
+                  (parenthesized_expression
+                    (root_expression
+                      (closed_expression
+                        (variable)
+                        (function_call
+                          (function_name)
+                          (argument_list
+                            (positional_argument
+                              (numeric_literal))))))))))))))))
+
+==================
+Compact anonymous binding
+==================
+
+10|:>add(2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (root_expression
+          (open_expression
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal))))))))))
+
+==================
+Spaced anonymous binding
+==================
+
+10 | :> add(2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (root_expression
+          (open_expression
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal))))))))))
+
+==================
+Ungrouped body consumes remaining pipeline
+==================
+
+10 | n :> @n | add(1) | multiply(2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (binding_name)
+        (root_expression
+          (closed_expression
+            (variable)
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal))))
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (numeric_literal))))))))))
+
+==================
+Grouped body permits outer continuation
+==================
+
+10 | n :> (@n | add(1)) | multiply(2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (binding_name)
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Grouped anonymous body permits outer continuation
+==================
+
+10|:>(@_ | add(1)) | multiply(2)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (incoming_value)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Grouped function body permits continuation
+==================
+
+trim | :> (upper | trim) | lower
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (input_binding_expression
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (open_expression
+                (function_call
+                  (function_name))
+                (function_call
+                  (function_name)))))))
+      (function_call
+        (function_name)))))
+
+==================
+Grouped tuple body preserves source
+==================
+
+T(1, 2) | :> ($0 | add($1)) | round
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (input_binding_expression
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (open_expression
+                (tuple_projection
+                  (from_start)
+                  (tuple_index))
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (tuple_projection
+                        (from_start)
+                        (tuple_index))))))))))
+      (function_call
+        (function_name)))))
+
+==================
+Grouped literal body preserves closed root
+==================
+
+trim | :> (42 | add(1)) | round
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (input_binding_expression
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (numeric_literal)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))))
+      (function_call
+        (function_name)))))
+
+==================
+Ungrouped field body
+==================
+
+record(name := "Alice") | :> .name | upper
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (named_argument
+            (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
+            (double_quoted_literal
+              (double_quoted_content)))))
+      (input_binding_expression
+        (root_expression
+          (closed_expression
+            (record_access
+              (record_field_selector
+                (named_record_field)))
+            (function_call
+              (function_name))))))))
+
+==================
+Ungrouped literal body
+==================
+
+trim | :> #null
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (input_binding_expression
+        (root_expression
+          (closed_expression
+            (null_literal)))))))
+
+==================
+Named argument containing its own source
+==================
+
+apply(expression := trim | input1:> @input1 | upper, 42)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (named_argument
+            (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
+            (open_expression
+              (function_call
+                (function_name))
+              (input_binding_expression
+                (binding_name)
+                (root_expression
+                  (closed_expression
+                    (variable)
+                    (function_call
+                      (function_name)))))))
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Sibling arguments and nested bindings
+==================
+
+choose(trim | outer :> apply(@outer | inner :> @inner | upper) | lower, 10 | :> add(1))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name))
+              (input_binding_expression
+                (binding_name)
+                (root_expression
+                  (open_expression
+                    (function_call
+                      (function_name)
+                      (argument_list
+                        (positional_argument
+                          (closed_expression
+                            (variable)
+                            (input_binding_expression
+                              (binding_name)
+                              (root_expression
+                                (closed_expression
+                                  (variable)
+                                  (function_call
+                                    (function_name)))))))))
+                    (function_call
+                      (function_name)))))))
+          (positional_argument
+            (closed_expression
+              (numeric_literal)
+              (input_binding_expression
+                (root_expression
+                  (open_expression
+                    (function_call
+                      (function_name)
+                      (argument_list
+                        (positional_argument
+                          (numeric_literal))))))))))))))
+
+==================
+Repeated bindings separated by grouped bodies
+==================
+
+10 | a :> (@a | add(1)) | b :> (@b | multiply(2)) | round
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (binding_name)
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))))
+      (input_binding_expression
+        (binding_name)
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (numeric_literal)))))))))
+      (function_call
+        (function_name)))))
+
+==================
+Nested ungrouped bindings own their tails
+==================
+
+10 | a :> @a | b :> @b | add(1)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (binding_name)
+        (root_expression
+          (closed_expression
+            (variable)
+            (input_binding_expression
+              (binding_name)
+              (root_expression
+                (closed_expression
+                  (variable)
                   (function_call
                     (function_name)
                     (argument_list
                       (positional_argument
-                        (tuple_projection
-                          (expression_root)
-                          (tuple_index))))))))))))))
+                        (numeric_literal)))))))))))))
 
 ==================
-Function names remain calls
+Grouping cannot hide preceding expression
 ==================
 
-apply(input :> input)
+apply((trim | input :> @input))
 
 ---
 
@@ -215,21 +580,101 @@ apply(input :> input)
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (binding_name)
+            (parenthesized_expression
               (root_expression
                 (open_expression
                   (function_call
-                    (function_name)))))))))))
+                    (function_name))
+                  (input_binding_expression
+                    (binding_name)
+                    (root_expression
+                      (closed_expression
+                        (variable)))))))))))))
 
 ==================
-Binding multiline comments
+Scoped tuple references in binding body
 ==================
 
-apply(
-  input /* binding */ :>
-  @input | trim
-)
+T(1, 2) | :> ^^$1 | subtract(^$0)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (input_binding_expression
+        (root_expression
+          (open_expression
+            (tuple_projection
+              (expression_root)
+              (tuple_index))
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (tuple_projection
+                    (expression_root)
+                    (tuple_index)))))))))))
+
+==================
+Bare body name remains function call
+==================
+
+trim | input :> input
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (input_binding_expression
+        (binding_name)
+        (root_expression
+          (open_expression
+            (function_call
+              (function_name))))))))
+
+==================
+Multiline binding with comments
+==================
+
+trim |
+ input /* declaration */ :>
+ (@input | upper)
+ | lower
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (input_binding_expression
+        (binding_name)
+        (block_comment)
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (function_call
+                  (function_name)))))))
+      (function_call
+        (function_name)))))
+
+==================
+Map and binary binding bodies
+==================
+
+choose(trim | :> |> .field | sum, trim | :> :text -> trim)
 
 ---
 
@@ -240,20 +685,65 @@ apply(
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
+            (open_expression
+              (function_call
+                (function_name))
+              (input_binding_expression
+                (root_expression
+                  (open_expression
+                    (map_shorthand
+                      (open_expression
+                        (record_access
+                          (record_field_selector
+                            (named_record_field)))))
+                    (function_call
+                      (function_name)))))))
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name))
+              (input_binding_expression
+                (root_expression
+                  (open_expression
+                    (binary_expression
+                      (type_literal)
+                      (binary_operator)
+                      (function_call
+                        (function_name)))))))))))))
+
+==================
+Compound element pipeline supports binding
+==================
+
+{10 | n :> @n | add(1), 20}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (array_element
+          (closed_expression
+            (numeric_literal)
+            (input_binding_expression
               (binding_name)
-              (block_comment)
               (root_expression
                 (closed_expression
                   (variable)
                   (function_call
-                    (function_name)))))))))))
+                    (function_name)
+                    (argument_list
+                      (positional_argument
+                        (numeric_literal)))))))))
+        (array_element
+          (numeric_literal))))))
 
 ==================
-Body keeps binary and map expressions
+Parameterized pipeline supports binding
 ==================
 
-apply(:> |> .field | sum, :> :text -> trim)
+apply({@source | trim | input :> @input})
 
 ---
 
@@ -264,121 +754,453 @@ apply(:> |> .field | sum, :> :text -> trim)
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (root_expression
-                (open_expression
-                  (map_shorthand
-                    (open_expression
-                      (record_access
-                        (record_field_selector
-                          (named_record_field)))))
-                  (function_call
-                    (function_name))))))
+            (parameterized_expression
+              (variable)
+              (open_expression
+                (function_call
+                  (function_name))
+                (input_binding_expression
+                  (binding_name)
+                  (root_expression
+                    (closed_expression
+                      (variable))))))))))))
+
+==================
+Ordinary shorthand arguments remain valid
+==================
+
+choose(apply(trim | upper), adjacent(subtract))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
           (positional_argument
-            (input_bound_expression
-              (root_expression
-                (open_expression
-                  (binary_expression
-                    (type_literal)
-                    (binary_operator)
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (open_expression
+                      (function_call
+                        (function_name))
+                      (function_call
+                        (function_name))))))))
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (open_expression
+                      (function_call
+                        (function_name)))))))))))))
+
+==================
+Reject unsupported binding 1: apply(input :> @input)
+:error
+==================
+
+apply(input :> @input)
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 2: apply(:> $0 | add($1))
+:error
+==================
+
+apply(:> $0 | add($1))
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 3: map(input :> @input)
+:error
+==================
+
+map(input :> @input)
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 4: apply(expression := input :> @input)
+:error
+==================
+
+apply(expression := input :> @input)
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 5: apply((input :> @input))
+:error
+==================
+
+apply((input :> @input))
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 6: apply((:> $0))
+:error
+==================
+
+apply((:> $0))
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 7: apply(expression := (:> $0))
+:error
+==================
+
+apply(expression := (:> $0))
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 8: name :> @name
+:error
+==================
+
+name :> @name
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 9: :> $0
+:error
+==================
+
+:> $0
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 10: |:> $0
+:error
+==================
+
+|:> $0
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 11: apply(|:> $0)
+:error
+==================
+
+apply(|:> $0)
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 12: trim | (:> $0)
+:error
+==================
+
+trim | (:> $0)
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 13: trim | (name :> @name)
+:error
+==================
+
+trim | (name :> @name)
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 14: trim | :>
+:error
+==================
+
+trim | :>
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 15: trim | name :>
+:error
+==================
+
+trim | name :>
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 16: trim | name : > upper
+:error
+==================
+
+trim | name : > upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 17: trim | 1name :> upper
+:error
+==================
+
+trim | 1name :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 18: trim | first-name :> upper
+:error
+==================
+
+trim | first-name :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 19: trim | _name :> upper
+:error
+==================
+
+trim | _name :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 20: trim | @name :> upper
+:error
+==================
+
+trim | @name :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 21: trim | name :> upper |
+:error
+==================
+
+trim | name :> upper |
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 22: trim | name :> (upper
+:error
+==================
+
+trim | name :> (upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 23: trim | name :> ()
+:error
+==================
+
+trim | name :> ()
+
+---
+
+(ERROR)
+
+==================
+Grouped preceding stage in argument
+==================
+
+apply((trim | upper) | input :> @input)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (parenthesized_expression
+                (root_expression
+                  (open_expression
                     (function_call
-                      (function_name))))))))))))
+                      (function_name))
+                    (function_call
+                      (function_name)))))
+              (input_binding_expression
+                (binding_name)
+                (root_expression
+                  (closed_expression
+                    (variable)))))))))))
 
 ==================
-Invalid input binding 1
-:error
+Unary preceding stage in argument
 ==================
 
-apply(:>)
+apply(!is-empty | input :> @input)
 
 ---
 
-(ERROR)
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (unary_expression
+                (unary_operator)
+                (function_call
+                  (function_name)))
+              (input_binding_expression
+                (binding_name)
+                (root_expression
+                  (closed_expression
+                    (variable)))))))))))
 
 ==================
-Invalid input binding 2
-:error
+Binary preceding stage in argument
 ==================
 
-apply(name :>)
+apply(:text -> trim | input :> @input)
 
 ---
 
-(ERROR)
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (binary_expression
+                (type_literal)
+                (binary_operator)
+                (function_call
+                  (function_name)))
+              (input_binding_expression
+                (binding_name)
+                (root_expression
+                  (closed_expression
+                    (variable)))))))))))
 
 ==================
-Invalid input binding 3
-:error
+Guarded preceding stage in argument
 ==================
 
-apply(name : > trim)
+apply(*trim | input :> @input)
 
 ---
 
-(ERROR)
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (guarded_expression
+                (function_call
+                  (function_name)))
+              (input_binding_expression
+                (binding_name)
+                (root_expression
+                  (closed_expression
+                    (variable)))))))))))
 
 ==================
-Invalid input binding 4
-:error
+Anonymous compact body with binary expression
 ==================
 
-apply(1name :> trim)
+10|:>:text -> trim
 
 ---
 
-(ERROR)
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (root_expression
+          (open_expression
+            (binary_expression
+              (type_literal)
+              (binary_operator)
+              (function_call
+                (function_name)))))))))
 
 ==================
-Invalid input binding 5
-:error
+Anonymous compact body with pair literal
 ==================
 
-apply(first-name :> trim)
+10|:>("key" => 2)
 
 ---
 
-(ERROR)
-
-==================
-Invalid input binding 6
-:error
-==================
-
-apply(_name :> trim)
-
----
-
-(ERROR)
-
-==================
-Invalid input binding 7
-:error
-==================
-
-apply(@name :> trim)
-
----
-
-(ERROR)
-
-==================
-Invalid input binding 8
-:error
-==================
-
-apply(name :> trim |)
-
----
-
-(ERROR)
-
-==================
-Invalid input binding 9
-:error
-==================
-
-apply(name :> , upper)
-
----
-
-(ERROR)
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (input_binding_expression
+        (root_expression
+          (closed_expression
+            (pair_literal
+              (root_expression
+                (closed_expression
+                  (double_quoted_literal
+                    (double_quoted_content))))
+              (root_expression
+                (closed_expression
+                  (numeric_literal))))))))))
