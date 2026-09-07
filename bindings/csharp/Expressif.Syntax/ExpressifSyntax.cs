@@ -152,9 +152,17 @@ public static class ExpressifSyntax
         var binding = node.GetChildForField("binding");
         var body = node.GetChildForField("body") ?? throw Unknown(node);
         return new(Span(node), node.Text,
-            binding is null ? null : new BindingNameSyntax(Span(binding), binding.Text),
+            binding is null ? null : BindInputBinding(binding),
             BindRootExpression(body));
     }
+
+    private static InputBindingSyntax BindInputBinding(TsNode node) => node.Type switch
+    {
+        "binding_name" => new BindingNameSyntax(Span(node), node.Text),
+        "positional_binding_pattern" => new PositionalBindingPatternSyntax(Span(node), node.Text,
+            StructuralChildren(node).Select(child => (BindingNameSyntax)BindInputBinding(child)).ToArray()),
+        _ => throw Unknown(node),
+    };
 
     private static ParameterizedExpressionSyntax BindParameterizedExpression(TsNode node)
     {

@@ -642,6 +642,10 @@
           {
             "type": "binding_name",
             "named": true
+          },
+          {
+            "type": "positional_binding_pattern",
+            "named": true
           }
         ]
       },
@@ -1018,6 +1022,22 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "positional_binding_pattern",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "binding_name",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
