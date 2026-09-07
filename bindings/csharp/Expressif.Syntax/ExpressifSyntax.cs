@@ -147,20 +147,20 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, nameSyntax, BindExpression(value));
     }
 
-    private static InputBoundExpressionSyntax BindInputBoundExpression(TsNode node)
+    private static InputBindingExpressionSyntax BindInputBindingExpression(TsNode node)
     {
         var binding = node.GetChildForField("binding");
         var body = node.GetChildForField("body") ?? throw Unknown(node);
         return new(Span(node), node.Text,
-            binding is null ? null : BindInputBinding(binding),
+            binding is null ? null : BindBindingPattern(binding),
             BindRootExpression(body));
     }
 
-    private static InputBindingSyntax BindInputBinding(TsNode node) => node.Type switch
+    private static BindingPatternSyntax BindBindingPattern(TsNode node) => node.Type switch
     {
         "binding_name" => new BindingNameSyntax(Span(node), node.Text),
         "positional_binding_pattern" => new PositionalBindingPatternSyntax(Span(node), node.Text,
-            StructuralChildren(node).Select(child => (BindingNameSyntax)BindInputBinding(child)).ToArray()),
+            StructuralChildren(node).Select(child => (BindingNameSyntax)BindBindingPattern(child)).ToArray()),
         _ => throw Unknown(node),
     };
 
@@ -232,7 +232,7 @@ public static class ExpressifSyntax
         "binary_expression" => BindBinaryExpression(node),
         "function_call" => BindFunctionCall(node),
         "guarded_expression" => BindGuardedExpression(node),
-        "input_bound_expression" => BindInputBoundExpression(node),
+        "input_binding_expression" => BindInputBindingExpression(node),
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
         "pair_component_access" => BindPairComponentAccess(node),

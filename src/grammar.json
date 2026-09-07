@@ -87,7 +87,7 @@
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "_pipeline_expression"
+                      "name": "_pipeline_stage"
                     }
                   ]
                 },
@@ -107,43 +107,47 @@
       }
     },
     "closed_expression": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "value"
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "|"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_pipeline_expression"
-                  }
-                ]
-              },
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_pipeline_map_shorthand"
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "value"
+          },
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "|"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "_pipeline_stage"
+                    }
+                  ]
                 },
-                "named": true,
-                "value": "map_shorthand"
-              }
-            ]
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_pipeline_map_shorthand"
+                  },
+                  "named": true,
+                  "value": "map_shorthand"
+                }
+              ]
+            }
           }
-        }
-      ]
+        ]
+      }
     },
     "map_shorthand": {
       "type": "SEQ",
@@ -595,6 +599,19 @@
         }
       ]
     },
+    "_pipeline_stage": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_pipeline_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "input_binding_expression"
+        }
+      ]
+    },
     "_pipeline_expression": {
       "type": "CHOICE",
       "members": [
@@ -697,7 +714,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "_pipeline_expression"
+                  "name": "_pipeline_stage"
                 }
               ]
             }
@@ -1232,10 +1249,6 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "input_bound_expression"
-        },
-        {
-          "type": "SYMBOL",
           "name": "binary_expression"
         },
         {
@@ -1293,6 +1306,56 @@
           "type": "SEQ",
           "members": [
             {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "parenthesized_expression"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "unary_expression"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "binary_expression"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "guarded_expression"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "|"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_pipeline_stage"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "|"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_pipeline_stage"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
               "type": "SYMBOL",
               "name": "map_shorthand"
             },
@@ -1307,7 +1370,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_pipeline_expression"
+                    "name": "_pipeline_stage"
                   }
                 ]
               }
@@ -1332,7 +1395,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_pipeline_expression"
+                    "name": "_pipeline_stage"
                   }
                 ]
               }
@@ -1352,7 +1415,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "_pipeline_expression"
+              "name": "_pipeline_stage"
             },
             {
               "type": "REPEAT",
@@ -1365,7 +1428,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_pipeline_expression"
+                    "name": "_pipeline_stage"
                   }
                 ]
               }
@@ -1385,7 +1448,7 @@
             },
             {
               "type": "SYMBOL",
-              "name": "_pipeline_expression"
+              "name": "_pipeline_stage"
             },
             {
               "type": "REPEAT",
@@ -1398,7 +1461,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_pipeline_expression"
+                    "name": "_pipeline_stage"
                   }
                 ]
               }
@@ -1426,7 +1489,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "_pipeline_expression"
+                  "name": "_pipeline_stage"
                 }
               ]
             },
@@ -1455,7 +1518,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_pipeline_expression"
+                    "name": "_pipeline_stage"
                   }
                 ]
               },
@@ -1473,7 +1536,7 @@
         }
       ]
     },
-    "input_bound_expression": {
+    "input_binding_expression": {
       "type": "PREC_RIGHT",
       "value": 0,
       "content": {
@@ -1512,8 +1575,26 @@
             "type": "FIELD",
             "name": "body",
             "content": {
-              "type": "SYMBOL",
-              "name": "root_expression"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "PREC",
+                  "value": 10,
+                  "content": {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "parenthesized_open_expression"
+                    },
+                    "named": true,
+                    "value": "open_expression"
+                  }
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "root_expression"
+                }
+              ]
             }
           }
         ]
@@ -2038,7 +2119,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "_pipeline_expression"
+                    "name": "_pipeline_stage"
                   }
                 ]
               },
@@ -2067,7 +2148,7 @@
                     },
                     {
                       "type": "SYMBOL",
-                      "name": "_pipeline_expression"
+                      "name": "_pipeline_stage"
                     }
                   ]
                 },

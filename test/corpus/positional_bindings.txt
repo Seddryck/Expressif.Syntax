@@ -1,8 +1,8 @@
 ==================
-Positional binding with complete pipeline
+Positional binding pipeline
 ==================
 
-adjacent((previous, current) :> @current | subtract(@previous) | multiply(@current))
+Tuple(10, 20) | extend(30) | (current, minus, factor) :> (@current | subtract(@minus) | multiply(@factor))
 
 ---
 
@@ -13,29 +13,40 @@ adjacent((previous, current) :> @current | subtract(@previous) | multiply(@curre
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (binding_name))
-              (root_expression
-                (closed_expression
-                  (variable)
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
-                        (variable))))
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
-                        (variable)))))))))))))
+            (numeric_literal))
+          (positional_argument
+            (numeric_literal))))
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))))
+      (input_binding_expression
+        (positional_binding_pattern
+          (binding_name)
+          (binding_name)
+          (binding_name))
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (variable))))
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (variable))))))))))))
 
 ==================
-Positional binding commas versus argument commas
+Positional names versus sibling arguments
 ==================
 
-choose((a, b, c) :> @a | add(@b), :> #null)
+choose(T(1, 2) | (a, b) :> @a | add(@b), 42)
 
 ---
 
@@ -46,72 +57,116 @@ choose((a, b, c) :> @a | add(@b), :> #null)
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (binding_name)
-                (binding_name))
-              (root_expression
-                (closed_expression
-                  (variable)
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
-                        (variable))))))))
+            (closed_expression
+              (tuple_literal
+                (tuple_element
+                  (numeric_literal))
+                (tuple_element
+                  (numeric_literal)))
+              (input_binding_expression
+                (positional_binding_pattern
+                  (binding_name)
+                  (binding_name))
+                (root_expression
+                  (closed_expression
+                    (variable)
+                    (function_call
+                      (function_name)
+                      (argument_list
+                        (positional_argument
+                          (variable)))))))))
           (positional_argument
-            (input_bound_expression
-              (root_expression
-                (closed_expression
-                  (null_literal))))))))))
+            (numeric_literal)))))))
 
 ==================
-Nested positional and whole-input bindings
+Grouped positional body outer continuation
 ==================
 
-apply((a, b) :> apply(c :> @c) | apply((x, y) :> @x))
+T(1, 2) | (a, b) :> (@a | add(@b)) | round
 
 ---
 
 (source_file
   (root_expression
-    (open_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (input_binding_expression
+        (positional_binding_pattern
+          (binding_name)
+          (binding_name))
+        (open_expression
+          (parenthesized_expression
+            (root_expression
+              (closed_expression
+                (variable)
+                (function_call
+                  (function_name)
+                  (argument_list
+                    (positional_argument
+                      (variable)))))))))
       (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (binding_name))
-              (root_expression
-                (open_expression
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
-                        (input_bound_expression
-                          (binding_name)
-                          (root_expression
-                            (closed_expression
-                              (variable)))))))
-                  (function_call
-                    (function_name)
-                    (argument_list
-                      (positional_argument
-                        (input_bound_expression
-                          (positional_binding_pattern
-                            (binding_name)
-                            (binding_name))
-                          (root_expression
-                            (closed_expression
-                              (variable))))))))))))))))
+        (function_name)))))
 
 ==================
-Named argument with positional binding
+Nested named and positional bindings
 ==================
 
-apply(transform := (a1,b2):> @a1)
+T(1, 2) | (a, b) :> apply(@a | c :> @c) | apply(T(3, 4) | (x, y) :> @x)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (input_binding_expression
+        (positional_binding_pattern
+          (binding_name)
+          (binding_name))
+        (root_expression
+          (open_expression
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (closed_expression
+                    (variable)
+                    (input_binding_expression
+                      (binding_name)
+                      (root_expression
+                        (closed_expression
+                          (variable))))))))
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (closed_expression
+                    (tuple_literal
+                      (tuple_element
+                        (numeric_literal))
+                      (tuple_element
+                        (numeric_literal)))
+                    (input_binding_expression
+                      (positional_binding_pattern
+                        (binding_name)
+                        (binding_name))
+                      (root_expression
+                        (closed_expression
+                          (variable))))))))))))))
+
+==================
+Positional pattern in named argument
+==================
+
+apply(transform := T(1, 2) | (a1,b2):> @a1)
 
 ---
 
@@ -125,45 +180,79 @@ apply(transform := (a1,b2):> @a1)
             (argument_name
               (public_argument_name
                 (unquoted_argument_name)))
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (binding_name))
-              (root_expression
-                (closed_expression
-                  (variable))))))))))
+            (closed_expression
+              (tuple_literal
+                (tuple_element
+                  (numeric_literal))
+                (tuple_element
+                  (numeric_literal)))
+              (input_binding_expression
+                (positional_binding_pattern
+                  (binding_name)
+                  (binding_name))
+                (root_expression
+                  (closed_expression
+                    (variable)))))))))))
 
 ==================
-Duplicate positional names remain syntax
+Duplicate positional names preserve spans
 ==================
 
-apply((a, a) :> @a)
+T(1, 2) | (a, a) :> @a
 
 ---
 
 (source_file
   (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (binding_name))
-              (root_expression
-                (closed_expression
-                  (variable))))))))))
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (input_binding_expression
+        (positional_binding_pattern
+          (binding_name)
+          (binding_name))
+        (root_expression
+          (closed_expression
+            (variable)))))))
 
 ==================
 Positional comments and multiline layout
 ==================
 
-apply((
+T(1, 2) | (
  a, /* next */ b
 ) :>
- @b | trim)
+ @b | trim
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (input_binding_expression
+        (positional_binding_pattern
+          (binding_name)
+          (block_comment)
+          (binding_name))
+        (root_expression
+          (closed_expression
+            (variable)
+            (function_call
+              (function_name))))))))
+
+==================
+Pairs and grouping remain distinct
+==================
+
+choose(T(1, 2) | (a, b) :> (@a | trim), ("key" => 2), (trim))
 
 ---
 
@@ -174,37 +263,16 @@ apply((
         (function_name)
         (argument_list
           (positional_argument
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (block_comment)
-                (binding_name))
-              (root_expression
-                (closed_expression
-                  (variable)
-                  (function_call
-                    (function_name)))))))))))
-
-==================
-Pair and grouping remain expressions next to binding
-==================
-
-choose((a, b) :> (@a | trim), ("key" => 2), (trim))
-
----
-
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (input_bound_expression
-              (positional_binding_pattern
-                (binding_name)
-                (binding_name))
-              (root_expression
+            (closed_expression
+              (tuple_literal
+                (tuple_element
+                  (numeric_literal))
+                (tuple_element
+                  (numeric_literal)))
+              (input_binding_expression
+                (positional_binding_pattern
+                  (binding_name)
+                  (binding_name))
                 (open_expression
                   (parenthesized_expression
                     (root_expression
@@ -229,121 +297,176 @@ choose((a, b) :> (@a | trim), ("key" => 2), (trim))
                     (function_name)))))))))))
 
 ==================
-Invalid positional binding 1
+Reject unsupported binding 1: adjacent((previous, current) :> @current | subtract(@previous))
 :error
 ==================
 
-apply(() :> trim)
+adjacent((previous, current) :> @current | subtract(@previous))
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 2
+Reject unsupported binding 2: apply(expression := (a,b) :> @a)
 :error
 ==================
 
-apply((a) :> trim)
+apply(expression := (a,b) :> @a)
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 3
+Reject unsupported binding 3: apply(((a,b) :> @a))
 :error
 ==================
 
-apply((a,) :> trim)
+apply(((a,b) :> @a))
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 4
+Reject unsupported binding 4: (a,b) :> @a
 :error
 ==================
 
-apply((a, b,) :> trim)
+(a,b) :> @a
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 5
+Reject unsupported binding 5: trim | ((a,b) :> @a)
 :error
 ==================
 
-apply((a,,b) :> trim)
+trim | ((a,b) :> @a)
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 6
+Reject unsupported binding 6: trim | () :> upper
 :error
 ==================
 
-apply((a, b) :>)
+trim | () :> upper
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 7
+Reject unsupported binding 7: trim | (a) :> upper
 :error
 ==================
 
-apply((a, b :> trim)
+trim | (a) :> upper
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 8
+Reject unsupported binding 8: trim | (a,) :> upper
 :error
 ==================
 
-apply((a, 1b) :> trim)
+trim | (a,) :> upper
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 9
+Reject unsupported binding 9: trim | (a,b,) :> upper
 :error
 ==================
 
-apply((a, first-name) :> trim)
+trim | (a,b,) :> upper
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 10
+Reject unsupported binding 10: trim | (a,,b) :> upper
 :error
 ==================
 
-apply((a, (b, c)) :> trim)
+trim | (a,,b) :> upper
 
 ---
 
 (ERROR)
 
 ==================
-Invalid positional binding 11
+Reject unsupported binding 11: trim | (a,b) :>
 :error
 ==================
 
-apply((a, ...b) :> trim)
+trim | (a,b) :>
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 12: trim | (a,b :> upper
+:error
+==================
+
+trim | (a,b :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 13: trim | (a,1b) :> upper
+:error
+==================
+
+trim | (a,1b) :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 14: trim | (a,first-name) :> upper
+:error
+==================
+
+trim | (a,first-name) :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 15: trim | (a,(b,c)) :> upper
+:error
+==================
+
+trim | (a,(b,c)) :> upper
+
+---
+
+(ERROR)
+
+==================
+Reject unsupported binding 16: trim | (a,...b) :> upper
+:error
+==================
+
+trim | (a,...b) :> upper
 
 ---
 

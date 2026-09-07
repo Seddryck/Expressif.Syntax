@@ -457,6 +457,10 @@
           "named": true
         },
         {
+          "type": "input_binding_expression",
+          "named": true
+        },
+        {
           "type": "map_shorthand",
           "named": true
         },
@@ -632,7 +636,7 @@
     "fields": {}
   },
   {
-    "type": "input_bound_expression",
+    "type": "input_binding_expression",
     "named": true,
     "fields": {
       "binding": {
@@ -653,6 +657,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "open_expression",
+            "named": true
+          },
           {
             "type": "root_expression",
             "named": true
@@ -816,10 +824,6 @@
             "named": true
           },
           {
-            "type": "input_bound_expression",
-            "named": true
-          },
-          {
             "type": "open_expression",
             "named": true
           },
@@ -861,6 +865,10 @@
       "types": [
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "input_binding_expression",
           "named": true
         },
         {
@@ -987,10 +995,6 @@
         },
         {
           "type": "guarded_expression",
-          "named": true
-        },
-        {
-          "type": "input_bound_expression",
           "named": true
         },
         {
