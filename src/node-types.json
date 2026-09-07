@@ -1446,7 +1446,7 @@
     "fields": {
       "direction": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "from_end",
@@ -1464,6 +1464,16 @@
         "types": [
           {
             "type": "tuple_index",
+            "named": true
+          }
+        ]
+      },
+      "root": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression_root",
             "named": true
           }
         ]

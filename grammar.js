@@ -195,6 +195,10 @@ export default grammar({
 
     tuple_projection: ($) => choice(
       seq(
+        field("root", alias(/\^+\$/, $.expression_root)),
+        field("index", alias(token.immediate(prec(-1, /(?:0|[1-9][0-9]*)/)), $.tuple_index)),
+      ),
+      seq(
         field("direction", alias("$", $.from_start)),
         field("index", alias(token.immediate(prec(-1, /(?:0|[1-9][0-9]*)/)), $.tuple_index)),
       ),

@@ -227,19 +227,23 @@ public static class ExpressifSyntax
 
     private static TupleProjectionSyntax BindTupleProjection(TsNode node)
     {
-        var direction = node.GetChildForField("direction") ?? throw Unknown(node);
+        var rootNode = node.GetChildForField("root");
+        var root = rootNode is null ? null : new ExpressionRootSyntax(Span(rootNode), rootNode.Text);
+        var direction = node.GetChildForField("direction");
         var index = node.GetChildForField("index") ?? throw Unknown(node);
-        var parsedDirection = direction.Type switch
+        var parsedDirection = direction?.Type switch
         {
+            null when root is not null => TupleProjectionDirection.FromStart,
             "from_start" => TupleProjectionDirection.FromStart,
             "from_end" => TupleProjectionDirection.FromEnd,
-            _ => throw Unknown(direction),
+            _ => throw Unknown(direction ?? node),
         };
         return new(
             Span(node),
             node.Text,
             parsedDirection,
-            BindSemanticValue(index, () => int.Parse(index.Text, System.Globalization.CultureInfo.InvariantCulture)));
+            BindSemanticValue(index, () => int.Parse(index.Text, System.Globalization.CultureInfo.InvariantCulture)),
+            root);
     }
 
     private static PairComponentAccessSyntax BindPairComponentAccess(TsNode node) => new(

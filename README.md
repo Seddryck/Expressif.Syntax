@@ -73,6 +73,9 @@ $0          first element of the current tuple or array
 $1          second element of the current tuple or array
 $^0         last element of the current tuple or array
 $^1         second-to-last element of the current tuple or array
+^$1         second element of the current expression input
+^^$1        second element of the enclosing expression input
+^^^$1       second element two expression scopes outward
 ```
 
 Record access always uses `.` for navigation. A leading `^` changes the root
@@ -84,9 +87,22 @@ selected. Access can be chained for nested records, for example
 
 Element positions are zero-based. `$n` counts from the beginning and `$^n`
 counts from the end. The parser represents both tuple and array access with the
-same `positional_element_access` node; downstream binders decide whether the
+same `tuple_projection` node; downstream binders decide whether the
 runtime value supports positional access and how invalid or out-of-range access
 is handled.
+
+Leading carets on tuple projections follow the same root-depth convention as
+record access: `^^^^$1` and `^^^^.name` both have root depth 4. Any positive
+number of carets is supported. `TupleProjectionSyntax.Root` preserves the prefix
+as an `ExpressionRootSyntax`, including its `$` delimiter, text, and source span;
+`RootDepth` counts the carets (zero for unqualified projections). `Direction` and
+`Index` remain independent properties. The root is included in `Children`.
+
+`^$1` selects from an expression input; `$^1` counts from the end of the current
+value. Combined forms such as `^^$^1`, negative indexes, and whitespace inside
+the shorthand are invalid. Pipeline stages and grouping do not create scopes;
+nested expression invocations do. Resolving those scopes belongs to downstream
+evaluation, while the syntax tree preserves the authored reference directly.
 
 ### Current object and spread
 

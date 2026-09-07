@@ -742,6 +742,44 @@
           "members": [
             {
               "type": "FIELD",
+              "name": "root",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "PATTERN",
+                  "value": "\\^+\\$"
+                },
+                "named": true,
+                "value": "expression_root"
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "index",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "PREC",
+                    "value": -1,
+                    "content": {
+                      "type": "PATTERN",
+                      "value": "(?:0|[1-9][0-9]*)"
+                    }
+                  }
+                },
+                "named": true,
+                "value": "tuple_index"
+              }
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "FIELD",
               "name": "direction",
               "content": {
                 "type": "ALIAS",

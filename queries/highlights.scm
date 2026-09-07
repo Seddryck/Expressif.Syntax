@@ -6,6 +6,7 @@
 (binary_operator) @operator
 (unary_operator) @operator
 (guarded_expression "*" @operator)
+; Record (^^.) and tuple (^^$) expression-root prefixes.
 (expression_root) @variable.builtin
 (pair_literal "=>" @operator)
 (grouping_literal "#{" @punctuation.bracket)
