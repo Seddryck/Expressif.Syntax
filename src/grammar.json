@@ -929,9 +929,26 @@
         }
       ]
     },
-    "_function_name": {
+    "_identifier": {
       "type": "PATTERN",
-      "value": "[A-Za-z]+(?:-[A-Za-z]+)*"
+      "value": "[A-Za-z]+"
+    },
+    "_alphanumeric_identifier": {
+      "type": "PATTERN",
+      "value": "[A-Za-z][A-Za-z0-9]*[0-9][A-Za-z0-9]*"
+    },
+    "_function_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_identifier"
+        },
+        {
+          "type": "PATTERN",
+          "value": "[A-Za-z]+(?:-[A-Za-z]+)+"
+        }
+      ]
     },
     "argument_list": {
       "type": "PREC_LEFT",
@@ -1191,12 +1208,32 @@
       ]
     },
     "unquoted_argument_name": {
-      "type": "PATTERN",
-      "value": "[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_alphanumeric_identifier"
+        },
+        {
+          "type": "TOKEN",
+          "content": {
+            "type": "PREC",
+            "value": -1,
+            "content": {
+              "type": "PATTERN",
+              "value": "[A-Za-z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*"
+            }
+          }
+        }
+      ]
     },
     "_argument_value": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "SYMBOL",
+          "name": "input_bound_expression"
+        },
         {
           "type": "SYMBOL",
           "name": "binary_expression"
@@ -1433,6 +1470,56 @@
               }
             ]
           }
+        }
+      ]
+    },
+    "input_bound_expression": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "FIELD",
+                "name": "binding",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "binding_name"
+                }
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": ":>"
+          },
+          {
+            "type": "FIELD",
+            "name": "body",
+            "content": {
+              "type": "SYMBOL",
+              "name": "root_expression"
+            }
+          }
+        ]
+      }
+    },
+    "binding_name": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_alphanumeric_identifier"
         }
       ]
     },

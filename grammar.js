@@ -223,7 +223,11 @@ export default grammar({
       )),
     ),
 
-    _function_name: (_) => /[A-Za-z]+(?:-[A-Za-z]+)*/,
+    _identifier: (_) => /[A-Za-z]+/,
+
+    _alphanumeric_identifier: (_) => /[A-Za-z][A-Za-z0-9]*[0-9][A-Za-z0-9]*/,
+
+    _function_name: ($) => choice($._identifier, /[A-Za-z]+(?:-[A-Za-z]+)+/),
 
     argument_list: ($) => prec.left(seq(
       choice($.positional_argument, $.named_argument, $.spread_argument),
@@ -275,9 +279,13 @@ export default grammar({
       $.backtick_quoted_literal,
     ),
 
-    unquoted_argument_name: (_) => unquotedPublicName,
+    unquoted_argument_name: ($) => choice(
+      $._alphanumeric_identifier,
+      token(prec(-1, unquotedPublicName)),
+    ),
 
     _argument_value: ($) => choice(
+      $.input_bound_expression,
       $.binary_expression,
       $.guarded_expression,
       $.unary_expression,
@@ -330,6 +338,15 @@ export default grammar({
         alias($._pipeline_map_shorthand, $.map_shorthand),
       )),
     ),
+
+    // The binding owns the complete body pipeline up to its enclosing delimiter.
+    input_bound_expression: ($) => prec.right(seq(
+      optional(field("binding", $.binding_name)),
+      ":>",
+      field("body", $.root_expression),
+    )),
+
+    binding_name: ($) => choice($._identifier, $._alphanumeric_identifier),
 
     parameterized_expression: ($) => prec.dynamic(3, seq(
       "{",

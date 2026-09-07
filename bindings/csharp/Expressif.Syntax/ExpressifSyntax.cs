@@ -147,6 +147,15 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, nameSyntax, BindExpression(value));
     }
 
+    private static InputBoundExpressionSyntax BindInputBoundExpression(TsNode node)
+    {
+        var binding = node.GetChildForField("binding");
+        var body = node.GetChildForField("body") ?? throw Unknown(node);
+        return new(Span(node), node.Text,
+            binding is null ? null : new BindingNameSyntax(Span(binding), binding.Text),
+            BindRootExpression(body));
+    }
+
     private static ParameterizedExpressionSyntax BindParameterizedExpression(TsNode node)
     {
         var source = node.GetChildForField("source") ?? throw Unknown(node);
@@ -215,6 +224,7 @@ public static class ExpressifSyntax
         "binary_expression" => BindBinaryExpression(node),
         "function_call" => BindFunctionCall(node),
         "guarded_expression" => BindGuardedExpression(node),
+        "input_bound_expression" => BindInputBoundExpression(node),
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
         "pair_component_access" => BindPairComponentAccess(node),

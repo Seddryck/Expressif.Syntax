@@ -6,13 +6,8 @@ Function name cannot start with a digit
 
 ---
 
-(source_file
-  (ERROR
-    (numeric_literal))
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)))))
+(source_file (root_expression (closed_expression (numeric_literal))) (ERROR))
+
 
 ==================
 Function name cannot contain a digit
@@ -103,13 +98,8 @@ Incoming value cannot have a suffix
 
 ---
 
-(source_file
-  (ERROR
-    (incoming_value))
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)))))
+(source_file (root_expression (closed_expression (incoming_value))) (ERROR))
+
 
 ==================
 Constant reference cannot start with an underscore
@@ -283,13 +273,8 @@ second"
 
 ---
 
-(source_file
-  (root_expression
-    (closed_expression
-      (double_quoted_literal
-        (double_quoted_content)
-        (ERROR
-          (function_name))))))
+(source_file (root_expression (closed_expression (double_quoted_literal (double_quoted_content) (ERROR)))))
+
 
 ==================
 Backtick literal cannot contain a newline
@@ -300,32 +285,20 @@ second`
 
 ---
 
-(source_file
-  (root_expression
-    (closed_expression
-      (backtick_quoted_literal
-        (backtick_quoted_content)
-        (ERROR
-          (function_name))))))
+(source_file (root_expression (closed_expression (backtick_quoted_literal (backtick_quoted_content) (ERROR)))))
+
 
 ==================
 Colon is not a named argument separator
+:error
 ==================
 
 foo(a: 1)
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (ERROR
-          (function_name))
-        (argument_list
-          (positional_argument
-            (numeric_literal)))))))
+(ERROR)
+
 
 ==================
 Operators are not implemented

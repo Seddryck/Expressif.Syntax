@@ -50,6 +50,8 @@ public enum SyntaxKind
     GuardedExpression,
     BinaryExpression,
     BinaryOperator,
+    InputBoundExpression,
+    BindingName,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -159,6 +161,36 @@ public sealed class FunctionCallSyntax : ExpressionSyntax
     public string Name { get; }
     public bool HasParentheses { get; }
     public IReadOnlyList<ArgumentSyntax> Arguments { get; }
+}
+
+/// <summary>An explicitly input-bound expression with its complete authored body.</summary>
+public sealed class InputBoundExpressionSyntax : ExpressionSyntax
+{
+    internal InputBoundExpressionSyntax(SourceSpan span, string text, InputBindingSyntax? binding, RootExpressionSyntax body)
+        : base(SyntaxKind.InputBoundExpression, span, text,
+            binding is null ? new SyntaxNode[] { body } : [binding, body])
+    {
+        Binding = binding;
+        Body = body;
+    }
+
+    public InputBindingSyntax? Binding { get; }
+    public RootExpressionSyntax Body { get; }
+}
+
+/// <summary>The authored binding declaration, independent of runtime name resolution.</summary>
+public abstract class InputBindingSyntax : SyntaxNode
+{
+    protected InputBindingSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
+        : base(kind, span, text, children) { }
+}
+
+public sealed class BindingNameSyntax : InputBindingSyntax
+{
+    internal BindingNameSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.BindingName, span, text) { }
+
+    public string Name => Text;
 }
 
 public sealed class ParameterizedExpressionSyntax : ExpressionSyntax

@@ -488,16 +488,8 @@ Compound rejects mixed array and record members
 
 ---
 
-(source_file
-  (root_expression
-    (closed_expression
-      (array_literal
-        (array_element
-          (numeric_literal))
-        (ERROR
-          (function_name))
-        (array_element
-          (numeric_literal))))))
+(source_file (root_expression (closed_expression (array_literal (array_element (numeric_literal)) (ERROR) (array_element (numeric_literal))))))
+
 
 ==================
 Public record field names

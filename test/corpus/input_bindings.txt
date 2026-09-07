@@ -1,0 +1,384 @@
+==================
+Named binding pipeline
+==================
+
+apply(input :> trim | upper)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (binding_name)
+              (root_expression
+                (open_expression
+                  (function_call
+                    (function_name))
+                  (function_call
+                    (function_name)))))))))))
+
+==================
+Compact named binding and variable reference
+==================
+
+apply(input1:> @input1 | trim)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (binding_name)
+              (root_expression
+                (closed_expression
+                  (variable)
+                  (function_call
+                    (function_name)))))))))))
+
+==================
+Anonymous tuple body
+==================
+
+adjacent(:> $1 | subtract($0) | multiply($1))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (root_expression
+                (open_expression
+                  (tuple_projection
+                    (from_start)
+                    (tuple_index))
+                  (function_call
+                    (function_name)
+                    (argument_list
+                      (positional_argument
+                        (tuple_projection
+                          (from_start)
+                          (tuple_index)))))
+                  (function_call
+                    (function_name)
+                    (argument_list
+                      (positional_argument
+                        (tuple_projection
+                          (from_start)
+                          (tuple_index))))))))))))))
+
+==================
+Anonymous field body
+==================
+
+apply(:> .field | trim)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (root_expression
+                (closed_expression
+                  (record_access
+                    (record_field_selector
+                      (named_record_field)))
+                  (function_call
+                    (function_name)))))))))))
+
+==================
+Nested bindings and sibling argument
+==================
+
+choose(outer :> apply(inner :> @inner | trim) | upper, :> #null)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (binding_name)
+              (root_expression
+                (open_expression
+                  (function_call
+                    (function_name)
+                    (argument_list
+                      (positional_argument
+                        (input_bound_expression
+                          (binding_name)
+                          (root_expression
+                            (closed_expression
+                              (variable)
+                              (function_call
+                                (function_name))))))))
+                  (function_call
+                    (function_name))))))
+          (positional_argument
+            (input_bound_expression
+              (root_expression
+                (closed_expression
+                  (null_literal))))))))))
+
+==================
+Named argument binding
+==================
+
+apply(transform := input :> @input | trim, :text)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (named_argument
+            (argument_name
+              (public_argument_name
+                (unquoted_argument_name)))
+            (input_bound_expression
+              (binding_name)
+              (root_expression
+                (closed_expression
+                  (variable)
+                  (function_call
+                    (function_name))))))
+          (positional_argument
+            (type_literal)))))))
+
+==================
+Scoped tuple references
+==================
+
+adjacent(:> ^^$1 | subtract(^$0))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (root_expression
+                (open_expression
+                  (tuple_projection
+                    (expression_root)
+                    (tuple_index))
+                  (function_call
+                    (function_name)
+                    (argument_list
+                      (positional_argument
+                        (tuple_projection
+                          (expression_root)
+                          (tuple_index))))))))))))))
+
+==================
+Function names remain calls
+==================
+
+apply(input :> input)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (binding_name)
+              (root_expression
+                (open_expression
+                  (function_call
+                    (function_name)))))))))))
+
+==================
+Binding multiline comments
+==================
+
+apply(
+  input /* binding */ :>
+  @input | trim
+)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (binding_name)
+              (block_comment)
+              (root_expression
+                (closed_expression
+                  (variable)
+                  (function_call
+                    (function_name)))))))))))
+
+==================
+Body keeps binary and map expressions
+==================
+
+apply(:> |> .field | sum, :> :text -> trim)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (input_bound_expression
+              (root_expression
+                (open_expression
+                  (map_shorthand
+                    (open_expression
+                      (record_access
+                        (record_field_selector
+                          (named_record_field)))))
+                  (function_call
+                    (function_name))))))
+          (positional_argument
+            (input_bound_expression
+              (root_expression
+                (open_expression
+                  (binary_expression
+                    (type_literal)
+                    (binary_operator)
+                    (function_call
+                      (function_name))))))))))))
+
+==================
+Invalid input binding 1
+:error
+==================
+
+apply(:>)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 2
+:error
+==================
+
+apply(name :>)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 3
+:error
+==================
+
+apply(name : > trim)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 4
+:error
+==================
+
+apply(1name :> trim)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 5
+:error
+==================
+
+apply(first-name :> trim)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 6
+:error
+==================
+
+apply(_name :> trim)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 7
+:error
+==================
+
+apply(@name :> trim)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 8
+:error
+==================
+
+apply(name :> trim |)
+
+---
+
+(ERROR)
+
+==================
+Invalid input binding 9
+:error
+==================
+
+apply(name :> , upper)
+
+---
+
+(ERROR)
