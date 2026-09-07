@@ -230,19 +230,8 @@ foo({| lower})
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (closed_expression
-              (array_literal
-                (MISSING "}"))
-              (function_call
-                (function_name)))))
-        (ERROR)))))
+(source_file (root_expression (open_expression (function_call (function_name) (argument_list (positional_argument (array_literal (ERROR))))))))
+
 
 ==================
 Missing separator recovery snapshot rejects an array literal
@@ -252,17 +241,8 @@ foo({@foo lower})
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (argument_list
-          (positional_argument
-            (array_literal
-              (array_element
-                (variable))
-              (ERROR))))))))
+(source_file (root_expression (open_expression (function_call (function_name) (argument_list (positional_argument (array_literal (array_element (variable)) (ERROR (unquoted_record_field_name)))))))))
+
 
 ==================
 Missing right-hand expression recovery snapshot rejects an array literal
@@ -292,19 +272,4 @@ foo({@foo | bar({ | baz})})
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        name: (function_name)
-        (argument_list
-          (positional_argument
-            (parameterized_expression
-              source: (variable)
-              expression: (open_expression
-                (function_call
-                  name: (function_name))
-                (ERROR)
-                (function_call
-                  name: (function_name)))))))))
-  (ERROR))
+(source_file (root_expression (open_expression (function_call name: (function_name) (argument_list (positional_argument (parameterized_expression source: (variable) expression: (open_expression (function_call name: (function_name) (argument_list (positional_argument (array_literal (ERROR)))))))))))))

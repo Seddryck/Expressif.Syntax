@@ -453,15 +453,8 @@ foo |BAD bar
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name))
-      (function_call
-        (function_name))))
-  (ERROR
-    (function_name)))
+(source_file (root_expression (open_expression (function_call (function_name)) (function_call (function_name)))) (ERROR))
+
 
 ==================
 Parenthesized shorthand requires a closing parenthesis
@@ -525,15 +518,8 @@ foo |XNOR bar
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name))
-      (function_call
-        (function_name))))
-  (ERROR
-    (function_name)))
+(source_file (root_expression (open_expression (function_call (function_name)) (function_call (function_name)))) (ERROR))
+
 
 ==================
 Negated predicate in a closed pipeline

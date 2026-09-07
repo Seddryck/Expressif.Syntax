@@ -38,3 +38,6 @@
   "("
   ")"
 ] @punctuation.bracket
+
+(binding_name) @variable.parameter
+(input_bound_expression ":>" @operator)
