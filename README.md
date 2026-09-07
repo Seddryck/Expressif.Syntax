@@ -191,6 +191,28 @@ lifetime and restoration, and the meaning of field/tuple references within a bou
 body. Explicit tuple scope prefixes (`^$1`, `^^$1`) remain distinct from from-end
 projection (`$^1`). Parsing does not add or evaluate runtime scopes.
 
+### Positional input bindings
+
+A parenthesized list declares positional names while reusing the same binding body:
+
+```expressif
+adjacent((previous, current) :> @current | subtract(@previous))
+apply(transform := (first, second, third) :> @third)
+```
+
+The declaration is a `PositionalBindingPatternSyntax` with ordered
+`IReadOnlyList<BindingNameSyntax> Names`, exposed through the expression's
+`Binding` property. Its parentheses and commas remain in its `Text` and CST;
+managed children are the ordered names, each with its own span. It is distinct
+from a tuple literal, pair literal, or grouped expression.
+
+Lists require at least two names. Empty lists, single-name parenthesized lists,
+trailing commas, rest bindings, and nested patterns are rejected. Use
+`name :> body` for whole-input binding. Duplicate names are retained so the
+semantic layer can diagnose them precisely. The parser does not check input types,
+component ordering, group key/value conventions, or destructuring arity; these
+remain runtime concerns for tuples, pairs, groups, and vectors.
+
 ## Development
 
 Install the dependencies:

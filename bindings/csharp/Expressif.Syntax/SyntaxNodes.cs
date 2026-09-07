@@ -52,6 +52,7 @@ public enum SyntaxKind
     BinaryOperator,
     InputBoundExpression,
     BindingName,
+    PositionalBindingPattern,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -183,6 +184,16 @@ public abstract class InputBindingSyntax : SyntaxNode
 {
     protected InputBindingSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children = null)
         : base(kind, span, text, children) { }
+}
+
+/// <summary>An ordered positional declaration, distinct from a tuple value.</summary>
+public sealed class PositionalBindingPatternSyntax : InputBindingSyntax
+{
+    internal PositionalBindingPatternSyntax(SourceSpan span, string text, IEnumerable<BindingNameSyntax> names)
+        : base(SyntaxKind.PositionalBindingPattern, span, text, names)
+        => Names = Array.AsReadOnly(names.ToArray());
+
+    public IReadOnlyList<BindingNameSyntax> Names { get; }
 }
 
 public sealed class BindingNameSyntax : InputBindingSyntax

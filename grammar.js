@@ -341,10 +341,19 @@ export default grammar({
 
     // The binding owns the complete body pipeline up to its enclosing delimiter.
     input_bound_expression: ($) => prec.right(seq(
-      optional(field("binding", $.binding_name)),
+      optional(field("binding", choice($.binding_name, $.positional_binding_pattern))),
       ":>",
       field("body", $.root_expression),
     )),
+
+    positional_binding_pattern: ($) => seq(
+      "(",
+      field("name", $.binding_name),
+      ",",
+      field("name", $.binding_name),
+      repeat(seq(",", field("name", $.binding_name))),
+      ")",
+    ),
 
     binding_name: ($) => choice($._identifier, $._alphanumeric_identifier),
 
