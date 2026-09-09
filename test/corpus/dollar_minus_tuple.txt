@@ -1,0 +1,428 @@
+==================
+Dollar-minus tuple projection from start
+==================
+
+$0
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index)))))
+
+==================
+Dollar-minus tuple projection with multi-digit index
+==================
+
+$10
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index)))))
+
+==================
+Dollar-minus tuple projection from end
+==================
+
+$-1
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_end)
+        index: (tuple_index)))))
+
+==================
+Dollar-minus tuple projection from end with multi-digit index
+==================
+
+$-13
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_end)
+        index: (tuple_index)))))
+
+==================
+Dollar-minus tuple projection in pipeline
+==================
+
+$1 | add(5)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal)))))))
+
+==================
+Dollar-minus tuple projections as function arguments
+==================
+
+foo($0, $-1)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (tuple_projection
+              direction: (from_start)
+              index: (tuple_index)))
+          (positional_argument
+            (tuple_projection
+              direction: (from_end)
+              index: (tuple_index))))))))
+
+==================
+Dollar-minus tuple projection compositions as function arguments
+==================
+
+adjacent($1 | subtract($0) | multiply($1))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (tuple_projection
+                direction: (from_start)
+                index: (tuple_index))
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (tuple_projection
+                      direction: (from_start)
+                      index: (tuple_index)))))
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (tuple_projection
+                      direction: (from_start)
+                      index: (tuple_index))))))))))))
+
+==================
+Dollar-minus tuple projection is distinct from field access
+==================
+
+$0 | foo(.name, ^.name)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_projection
+        direction: (from_start)
+        index: (tuple_index))
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (record_access
+              field: (record_field_selector
+                (named_record_field))))
+          (positional_argument
+            (record_access
+              root: (expression_root)
+              field: (original_record_field_selector
+                (named_record_field)))))))))
+
+==================
+Surrounding whitespace is insignificant
+==================
+
+foo(  $0  )
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (tuple_projection
+              direction: (from_start)
+              index: (tuple_index))))))))
+
+==================
+Malformed dollar-minus $-0
+:error
+==================
+
+$-0
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $-00
+:error
+==================
+
+$-00
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $-01
+:error
+==================
+
+$-01
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $-
+:error
+==================
+
+$-
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $--1
+:error
+==================
+
+$--1
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $-+1
+:error
+==================
+
+$-+1
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $^-1
+:error
+==================
+
+$^-1
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $-^1
+:error
+==================
+
+$-^1
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $ -1
+:error
+==================
+
+$ -1
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $- 1
+:error
+==================
+
+$- 1
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus $-1.5
+:error
+==================
+
+$-1.5
+
+---
+
+(ERROR)
+
+==================
+Malformed dollar-minus ^^$-1
+:error
+==================
+
+^^$-1
+
+---
+
+(ERROR)
+
+==================
+Dollar-minus Pipeline stage
+==================
+
+lower | $-2
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name))
+      (tuple_projection
+        (from_end)
+        (tuple_index)))))
+
+==================
+Dollar-minus Grouped argument
+==================
+
+select(($-2))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (parenthesized_expression
+              (root_expression
+                (open_expression
+                  (tuple_projection
+                    (from_end)
+                    (tuple_index)))))))))))
+
+==================
+Dollar-minus Nested expression
+==================
+
+select({$-2 | upper})
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (parameterized_expression
+              (tuple_projection
+                (from_end)
+                (tuple_index))
+              (open_expression
+                (function_call
+                  (function_name))))))))))
+
+==================
+Dollar-minus Nested argument
+==================
+
+apply(T(1, 2) | add($-2))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (closed_expression
+              (tuple_literal
+                (tuple_element
+                  (numeric_literal))
+                (tuple_element
+                  (numeric_literal)))
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (tuple_projection
+                      (from_end)
+                      (tuple_index))))))))))))
+
+==================
+Dollar-minus Comments and quoted lookalikes
+==================
+
+select("$-1 $^0", `$-0 $^1`) /* $-2 */ // $^2
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (double_quoted_literal
+              (double_quoted_content)))
+          (positional_argument
+            (backtick_quoted_literal
+              (backtick_quoted_content)))))))
+  (block_comment)
+  (line_comment))

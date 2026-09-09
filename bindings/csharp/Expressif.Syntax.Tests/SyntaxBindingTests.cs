@@ -2015,7 +2015,7 @@ public class SyntaxBindingTests
     [TestCase("foo({| lower})", false)]
     [TestCase("append(.firstName |)", false)]
     [TestCase("foo(name :=)", true)]
-    [TestCase("foo(, 5)", false)]
+    [TestCase("foo(, 5)", true)]
     [TestCase("foo(5,,6)", false)]
     [TestCase("!", false)]
     [TestCase("foo |AND", true)]

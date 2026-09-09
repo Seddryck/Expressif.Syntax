@@ -210,6 +210,11 @@ export default grammar({
         field("direction", alias(token.immediate("^"), $.from_end)),
         field("index", alias(token.immediate(prec(-1, /(?:0|[1-9][0-9]*)/)), $.tuple_index)),
       ),
+      seq(
+        "$",
+        field("direction", alias(token.immediate("-"), $.from_end)),
+        field("index", alias(token.immediate(prec(-1, /[1-9][0-9]*/)), $.tuple_index)),
+      ),
     ),
 
     pair_component_access: (_) => /\$(?:key|value)/,

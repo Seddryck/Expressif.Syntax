@@ -557,6 +557,12 @@ public sealed class TupleProjectionSyntax : ExpressionSyntax
 
     public ExpressionRootSyntax? Root { get; }
     public int RootDepth => Root?.Depth ?? 0;
+    /// <summary>
+    /// The integer written in the reference, without normalization. Dollar-minus
+    /// references use one-based positions from the end; legacy dollar-caret
+    /// references use zero-based offsets. Consult Text to distinguish them:
+    /// $-1 and $^0 select the same element but have indices 1 and 0 respectively.
+    /// </summary>
     public int Index { get; }
     public TupleProjectionDirection Direction { get; }
 }

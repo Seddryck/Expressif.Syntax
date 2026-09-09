@@ -71,8 +71,8 @@ Expressif distinguishes record fields from elements of ordered values:
 ^^.name     named field of the enclosing expression root
 $0          first element of the current tuple or array
 $1          second element of the current tuple or array
-$^0         last element of the current tuple or array
-$^1         second-to-last element of the current tuple or array
+$-1         last element of the current tuple or array
+$-2         second-to-last element of the current tuple or array
 ^$1         second element of the current expression input
 ^^$1        second element of the enclosing expression input
 ^^^$1       second element two expression scopes outward
@@ -85,11 +85,23 @@ selected. Access can be chained for nested records, for example
 `.customer.address`, `^.customer.0`, or `^^.customer.0`. The former bracket forms
 `[name]` and `[0]` are replaced by `^.name` and `^.0` respectively.
 
-Element positions are zero-based. `$n` counts from the beginning and `$^n`
-counts from the end. The parser represents both tuple and array access with the
-same `tuple_projection` node; downstream binders decide whether the
+Element positions with `$n` are zero-based from the beginning. Preferred `$-n`
+counts from the end using one-based positions; `$-0` is invalid. The parser
+represents both tuple and array access with the same `tuple_projection` node; downstream binders decide whether the
 runtime value supports positional access and how invalid or out-of-range access
 is handled.
+
+Legacy `$^n` notation is obsolete/deprecated but remains supported with its
+unchanged zero-based offsets from the end. Migrate `$^0` to `$-1` (last element)
+and `$^1` to `$-2` (second-to-last). No sunset date or removal version is set;
+any future removal requires a separate decision and advance migration notice.
+
+`TupleProjectionSyntax.Index` preserves the written integer without normalization:
+`$-1` has index 1, whereas the equivalent `$^0` has index 0. Both have
+`Direction = FromEnd`. Consumers must inspect the preserved `Text` to distinguish
+the notation and its index base; direction and index alone are insufficient.
+Serialization must preserve that distinction. Unqualified references have no
+`Root`, root depth 0, and empty typed `Children`; punctuation remains in `Text`.
 
 Leading carets on tuple projections follow the same root-depth convention as
 record access: `^^^^$1` and `^^^^.name` both have root depth 4. Any positive
@@ -98,8 +110,8 @@ as an `ExpressionRootSyntax`, including its `$` delimiter, text, and source span
 `RootDepth` counts the carets (zero for unqualified projections). `Direction` and
 `Index` remain independent properties. The root is included in `Children`.
 
-`^$1` selects from an expression input; `$^1` counts from the end of the current
-value. Combined forms such as `^^$^1`, negative indexes, and whitespace inside
+`^$1` selects from an expression input; `$-1` counts from the end of the current
+value. Combined forms such as `^^$^1` and `^^$-1`, and whitespace inside
 the shorthand are invalid. Pipeline stages and grouping do not create scopes;
 nested expression invocations do. Resolving those scopes belongs to downstream
 evaluation, while the syntax tree preserves the authored reference directly.
@@ -246,7 +258,7 @@ are retained for semantic diagnostics.
 
 The Expressif runtime owns capture, lexical resolution, shadowing, scope restoration,
 input types, component ordering, exact destructuring arity, and evaluation results.
-Scoped tuple access (`^$1`, `^^$1`) stays distinct from from-end access (`$^1`).
+Scoped tuple access (`^$1`, `^^$1`) stays distinct from from-end access (`$-1`, or legacy `$^0`).
 This correction supports Expressif #980–#982 and its runtime integration PR #988.
 The corrected package is published by the main-branch release workflow after merge.
 
