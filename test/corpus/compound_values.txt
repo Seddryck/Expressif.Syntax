@@ -482,14 +482,14 @@ Compound reports malformed record field
 
 ==================
 Compound rejects mixed array and record members
+:error
 ==================
 
 {1, name := 2}
 
 ---
 
-(source_file (root_expression (closed_expression (array_literal (array_element (numeric_literal)) (ERROR) (array_element (numeric_literal))))))
-
+(ERROR)
 
 ==================
 Public record field names

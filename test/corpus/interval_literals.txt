@@ -177,23 +177,11 @@ I[#"2022-12-10", #"2022-12-31"[
 
 ==================
 Bare date-looking bounds are rejected
+:error
 ==================
 
 I[2022-12-10, 2022-12-31]
 
 ---
 
-(source_file
-  (root_expression
-    (closed_expression
-      (interval_literal
-        (interval_bound
-          (numeric_literal))
-        (ERROR
-          (numeric_literal)
-          (numeric_literal))
-        (interval_bound
-          (numeric_literal))
-        (ERROR
-          (numeric_literal)
-          (numeric_literal))))))
+(ERROR)

@@ -8,6 +8,10 @@
 (guarded_expression "*" @operator)
 ; Record (^^.) and tuple (^^$) expression-root prefixes.
 (expression_root) @variable.builtin
+; Preferred dollar-minus and legacy dollar-caret tuple directions.
+(from_start) @operator
+(from_end) @operator
+(tuple_index) @number
 (pair_literal "=>" @operator)
 (grouping_literal "#{" @punctuation.bracket)
 (dictionary_literal "!{" @punctuation.bracket)

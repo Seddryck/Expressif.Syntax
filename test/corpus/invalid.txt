@@ -37,36 +37,25 @@ Function name cannot start with a hyphen
 
 ==================
 Function name cannot end with a hyphen
+:error
 ==================
 
 foo-
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name))))
-  (ERROR
-    (UNEXPECTED '\n')))
+(ERROR)
 
 ==================
 Function name cannot contain consecutive hyphens
+:error
 ==================
 
 foo--bar
 
 ---
 
-(source_file
-  (ERROR
-    (function_name)
-    (UNEXPECTED '-'))
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)))))
+(ERROR)
 
 ==================
 Empty variable
@@ -114,20 +103,14 @@ Constant reference cannot start with an underscore
 
 ==================
 Variable cannot start with a digit
+:error
 ==================
 
 @1foo
 
 ---
 
-(source_file
-  (ERROR
-    (UNEXPECTED '1')
-    (numeric_literal))
-  (root_expression
-    (open_expression
-      (function_call
-        name: (function_name)))))
+(ERROR)
 
 ==================
 Variable cannot contain a hyphen
@@ -164,21 +147,14 @@ foo(5
 
 ==================
 Missing first argument
+:error
 ==================
 
 foo(, 5)
 
 ---
 
-(source_file
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)
-        (ERROR)
-        (argument_list
-          (positional_argument
-            (numeric_literal)))))))
+(ERROR)
 
 ==================
 Missing argument between separators
@@ -202,19 +178,14 @@ foo(5,,6)
 
 ==================
 Malformed date literal
+:error
 ==================
 
 #"2025-2-17"
 
 ---
 
-(source_file
-  (ERROR
-    (UNEXPECTED '-'))
-  (root_expression
-    (closed_expression
-      (numeric_literal)))
-  (ERROR))
+(ERROR)
 
 ==================
 Malformed datetime literal
@@ -302,19 +273,14 @@ foo(a: 1)
 
 ==================
 Operators are not implemented
+:error
 ==================
 
 1 + 2
 
 ---
 
-(source_file
-  (ERROR
-    (numeric_literal)
-    (UNEXPECTED ' '))
-  (root_expression
-    (closed_expression
-      (numeric_literal))))
+(ERROR)
 
 ==================
 Legacy property reference is rejected
@@ -350,18 +316,14 @@ Map shorthand operator must be contiguous
 
 ==================
 Legacy index reference is rejected
+:error
 ==================
 
 [1]
 
 ---
 
-(source_file
-  (ERROR)
-  (root_expression
-    (closed_expression
-      (numeric_literal)))
-  (ERROR))
+(ERROR)
 
 ==================
 Record access rejects whitespace after dot
@@ -458,29 +420,22 @@ $^
 
 ==================
 Tuple projection rejects whitespace before index
+:error
 ==================
 
 $ 0
 
 ---
 
-(source_file
-  (ERROR)
-  (root_expression
-    (closed_expression
-      (numeric_literal))))
+(ERROR)
 
 ==================
 End-relative tuple projection rejects internal whitespace
+:error
 ==================
 
 $^ 0
 
 ---
 
-(source_file
-  (ERROR
-    (from_end))
-  (root_expression
-    (closed_expression
-      (numeric_literal))))
+(ERROR)
