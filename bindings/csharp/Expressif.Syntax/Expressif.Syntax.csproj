@@ -57,7 +57,7 @@
            Text="The macOS ARM64 native grammar library was not found in '$(NativeAssetsDirectory)/osx-arm64'." />
   </Target>
 
-  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Condition="'$(NativeAssetsDirectory)' == '' And '$(BuildNativeGrammar)' == 'true'" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
+  <Target Name="BuildExpressifGrammar" BeforeTargets="Build" Condition="'$(NativeAssetsDirectory)' == '' And '$(BuildNativeGrammar)' == 'true'" Inputs="$(MSBuildThisFileDirectory)..\..\..\src\parser.c;$(MSBuildThisFileDirectory)..\..\..\src\scanner.c" Outputs="$(TargetDir)$(ExpressifGrammarLibrary)">
     <Exec WorkingDirectory="$(MSBuildThisFileDirectory)..\..\.." Command="&quot;$(TreeSitterCli)&quot; build -o &quot;$(TargetDir)$(ExpressifGrammarLibrary)&quot; ." />
   </Target>
 </Project>

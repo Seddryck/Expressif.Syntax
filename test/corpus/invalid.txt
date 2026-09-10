@@ -27,13 +27,9 @@ Function name cannot start with a hyphen
 
 ---
 
-(source_file
-  (ERROR
-    (UNEXPECTED 'f'))
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)))))
+(ERROR
+  (UNEXPECTED 'f')
+  (function_name))
 
 ==================
 Function name cannot end with a hyphen
@@ -227,13 +223,9 @@ Boolean literal is case-sensitive
 
 ---
 
-(source_file
-  (ERROR
-    (UNEXPECTED 'T'))
-  (root_expression
-    (open_expression
-      (function_call
-        (function_name)))))
+(ERROR
+  (UNEXPECTED 'T')
+  (function_name))
 
 ==================
 Double-quoted literal cannot contain a newline
@@ -290,13 +282,8 @@ Legacy property reference is rejected
 
 ---
 
-(source_file
-  (ERROR)
-  (root_expression
-    (open_expression
-      (function_call
-        name: (function_name))))
-  (ERROR))
+(ERROR
+  (function_name))
 
 ==================
 Map shorthand operator must be contiguous

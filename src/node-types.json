@@ -28,6 +28,10 @@
         "named": true
       },
       {
+        "type": "tuple_binding_shorthand",
+        "named": true
+      },
+      {
         "type": "tuple_projection",
         "named": true
       },
@@ -358,6 +362,10 @@
             "named": true
           },
           {
+            "type": "tuple_binding_shorthand",
+            "named": true
+          },
+          {
             "type": "tuple_projection",
             "named": true
           },
@@ -403,6 +411,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_binding_shorthand",
             "named": true
           },
           {
@@ -470,6 +482,10 @@
         },
         {
           "type": "parenthesized_expression",
+          "named": true
+        },
+        {
+          "type": "tuple_binding_shorthand",
           "named": true
         },
         {
@@ -593,6 +609,10 @@
           },
           {
             "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_binding_shorthand",
             "named": true
           },
           {
@@ -1384,6 +1404,32 @@
     }
   },
   {
+    "type": "tuple_binding_shorthand",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_name",
+            "named": true
+          }
+        ]
+      },
+      "tilde": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "~",
+            "named": false
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "tuple_element",
     "named": true,
     "fields": {
@@ -1618,6 +1664,10 @@
           },
           {
             "type": "temporal_literal",
+            "named": true
+          },
+          {
+            "type": "tuple_binding_shorthand",
             "named": true
           },
           {
@@ -1915,6 +1965,10 @@
   },
   {
     "type": "}",
+    "named": false
+  },
+  {
+    "type": "~",
     "named": false
   }
 ]

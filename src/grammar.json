@@ -261,6 +261,10 @@
             },
             {
               "type": "SYMBOL",
+              "name": "tuple_binding_shorthand"
+            },
+            {
+              "type": "SYMBOL",
               "name": "map_shorthand"
             },
             {
@@ -388,6 +392,10 @@
                     {
                       "type": "SYMBOL",
                       "name": "function_call"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "tuple_binding_shorthand"
                     },
                     {
                       "type": "SYMBOL",
@@ -523,6 +531,10 @@
                     },
                     {
                       "type": "SYMBOL",
+                      "name": "tuple_binding_shorthand"
+                    },
+                    {
+                      "type": "SYMBOL",
                       "name": "map_shorthand"
                     },
                     {
@@ -570,6 +582,10 @@
             {
               "type": "SYMBOL",
               "name": "function_call"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "tuple_binding_shorthand"
             },
             {
               "type": "SYMBOL",
@@ -630,6 +646,10 @@
         {
           "type": "SYMBOL",
           "name": "function_call"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "tuple_binding_shorthand"
         },
         {
           "type": "PREC",
@@ -925,6 +945,74 @@
     "pair_component_access": {
       "type": "PATTERN",
       "value": "\\$(?:key|value)"
+    },
+    "tuple_binding_shorthand": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "tilde",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_binding_prefix_tilde"
+                },
+                "named": false,
+                "value": "~"
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "name",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "IMMEDIATE_TOKEN",
+                  "content": {
+                    "type": "PATTERN",
+                    "value": "[A-Za-z]+(?:-[A-Za-z]+)*"
+                  }
+                },
+                "named": true,
+                "value": "function_name"
+              }
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "name",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_binding_postfix_name"
+                },
+                "named": true,
+                "value": "function_name"
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "tilde",
+              "content": {
+                "type": "IMMEDIATE_TOKEN",
+                "content": {
+                  "type": "STRING",
+                  "value": "~"
+                }
+              }
+            }
+          ]
+        }
+      ]
     },
     "function_call": {
       "type": "SEQ",
@@ -1426,8 +1514,17 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "function_call"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "function_call"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "tuple_binding_shorthand"
+                }
+              ]
             },
             {
               "type": "REPEAT",
@@ -3149,7 +3246,16 @@
     ]
   ],
   "precedences": [],
-  "externals": [],
+  "externals": [
+    {
+      "type": "SYMBOL",
+      "name": "_binding_prefix_tilde"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_binding_postfix_name"
+    }
+  ],
   "inline": [],
   "supertypes": [
     "value",

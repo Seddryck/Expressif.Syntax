@@ -1,0 +1,287 @@
+==================
+Postfix tuple binding
+==================
+subtract~
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_binding_shorthand
+        (function_name)))))
+
+==================
+Prefix tuple binding
+==================
+~subtract
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_binding_shorthand
+        (function_name)))))
+
+==================
+Tuple pipeline
+==================
+T(120, 135) | subtract~ | ~subtract
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (tuple_binding_shorthand
+        (function_name))
+      (tuple_binding_shorthand
+        (function_name)))))
+
+==================
+Nested binding
+==================
+extend(~subtract, subtract~)
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (tuple_binding_shorthand
+                (function_name))))
+          (positional_argument
+            (open_expression
+              (tuple_binding_shorthand
+                (function_name)))))))))
+
+==================
+Grouped and prefixed binding
+==================
+(*!~subtract) | !subtract~
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (parenthesized_expression
+        (root_expression
+          (open_expression
+            (guarded_expression
+              (unary_expression
+                (unary_operator)
+                (tuple_binding_shorthand
+                  (function_name)))))))
+      (unary_expression
+        (unary_operator)
+        (tuple_binding_shorthand
+          (function_name))))))
+
+==================
+Unknown function name
+==================
+unknown-function~
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (tuple_binding_shorthand
+        (function_name)))))
+
+==================
+Multiline binding
+==================
+extend(
+ ~subtract
+)
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (tuple_binding_shorthand
+                (function_name)))))))))
+
+==================
+Mapped binding
+==================
+T(1, 2) |> ~subtract
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          (numeric_literal))
+        (tuple_element
+          (numeric_literal)))
+      (map_shorthand
+        (open_expression
+          (tuple_binding_shorthand
+            (function_name)))))))
+
+==================
+Malformed tuple binding ~
+:error
+==================
+~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~~subtract
+:error
+==================
+~~subtract
+---
+(ERROR)
+
+==================
+Malformed tuple binding subtract~~
+:error
+==================
+subtract~~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~subtract~
+:error
+==================
+~subtract~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~ subtract
+:error
+==================
+~ subtract
+---
+(ERROR)
+
+==================
+Malformed tuple binding subtract ~
+:error
+==================
+subtract ~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~/*comment*/subtract
+:error
+==================
+~/*comment*/subtract
+---
+(ERROR)
+
+==================
+Malformed tuple binding subtract/*comment*/~
+:error
+==================
+subtract/*comment*/~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~subtract()
+:error
+==================
+~subtract()
+---
+(ERROR)
+
+==================
+Malformed tuple binding subtract()~
+:error
+==================
+subtract()~
+---
+(ERROR)
+
+==================
+Malformed tuple binding subtract~(1)
+:error
+==================
+subtract~(1)
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~(subtract)
+:error
+==================
+~(subtract)
+---
+(ERROR)
+
+==================
+Malformed tuple binding (subtract)~
+:error
+==================
+(subtract)~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~!subtract
+:error
+==================
+~!subtract
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~*subtract
+:error
+==================
+~*subtract
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~subtract1
+:error
+==================
+~subtract1
+---
+(ERROR)
+
+==================
+Malformed tuple binding subtract1~
+:error
+==================
+subtract1~
+---
+(ERROR)
+
+==================
+Malformed tuple binding ~subtract_name
+:error
+==================
+~subtract_name
+---
+(ERROR)
+
+==================
+Malformed tuple binding extend(~, upper)
+:error
+==================
+extend(~, upper)
+---
+(ERROR)
