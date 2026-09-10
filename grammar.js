@@ -9,6 +9,7 @@
 
 const ordinaryExpression = ($) => choice(
   $.function_call,
+  $.tuple_binding_shorthand,
   $.map_shorthand,
   $.tuple_projection,
   prec(-1, $.pair_component_access),
@@ -26,6 +27,8 @@ export default grammar({
     $.line_comment,
     $.block_comment,
   ],
+
+  externals: ($) => [$._binding_prefix_tilde, $._binding_postfix_name],
 
   supertypes: ($) => [
     $.value,
@@ -166,6 +169,7 @@ export default grammar({
       $.guarded_expression,
       $.unary_expression,
       $.function_call,
+      $.tuple_binding_shorthand,
       prec(1, $.record_access),
       $.tuple_projection,
       $.pair_component_access,
@@ -218,6 +222,19 @@ export default grammar({
     ),
 
     pair_component_access: (_) => /\$(?:key|value)/,
+
+    // Tilde binds a function name, never a call or an arbitrary expression.
+    // Scanner lookahead enforces adjacency even across named comment extras.
+    tuple_binding_shorthand: ($) => choice(
+      seq(
+        field("tilde", alias($._binding_prefix_tilde, "~")),
+        field("name", alias(token.immediate(/[A-Za-z]+(?:-[A-Za-z]+)*/), $.function_name)),
+      ),
+      seq(
+        field("name", alias($._binding_postfix_name, $.function_name)),
+        field("tilde", token.immediate("~")),
+      ),
+    ),
 
     function_call: ($) => seq(
       field("name", alias($._function_name, $.function_name)),
@@ -319,7 +336,7 @@ export default grammar({
         repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
-        $.function_call,
+        choice($.function_call, $.tuple_binding_shorthand),
         repeat(seq("|", $._pipeline_stage)),
       ),
       seq(

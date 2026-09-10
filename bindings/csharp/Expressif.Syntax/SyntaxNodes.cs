@@ -53,6 +53,7 @@ public enum SyntaxKind
     InputBindingExpression,
     BindingName,
     PositionalBindingPattern,
+    TupleBindingShorthand,
 }
 
 public readonly record struct SourceSpan(int Start, int Length)
@@ -147,6 +148,31 @@ public abstract class ExpressionSyntax : SyntaxNode
 {
     protected ExpressionSyntax(SyntaxKind kind, SourceSpan span, string text, IEnumerable<SyntaxNode>? children)
         : base(kind, span, text, children) { }
+}
+
+public enum TupleBindingDirection
+{
+    Prefix,
+    Postfix,
+}
+
+/// <summary>An authored tuple-binding shorthand; function eligibility is validated downstream.</summary>
+public sealed class TupleBindingShorthandSyntax : ExpressionSyntax
+{
+    internal TupleBindingShorthandSyntax(SourceSpan span, string text, string name,
+        TupleBindingDirection direction, SourceSpan nameSpan, SourceSpan tildeSpan)
+        : base(SyntaxKind.TupleBindingShorthand, span, text, [])
+    {
+        Name = name;
+        Direction = direction;
+        NameSpan = nameSpan;
+        TildeSpan = tildeSpan;
+    }
+
+    public string Name { get; }
+    public TupleBindingDirection Direction { get; }
+    public SourceSpan NameSpan { get; }
+    public SourceSpan TildeSpan { get; }
 }
 
 public sealed class FunctionCallSyntax : ExpressionSyntax

@@ -306,3 +306,35 @@ The policy's NuGet user must be `Seddryck`, matching the `NuGet/login` step in t
 
 * [Expressif](https://github.com/Seddryck/Expressif) — C# implementation and reference project
 * [Expressif documentation](https://seddryck.github.io/Expressif/) — language documentation
+
+### Tuple-binding shorthands
+
+`f~` and `~f` bind a tuple to a function name. The postfix form represents
+`bind("f")`; the prefix form represents `rotate | bind("f")`, with the default
+rotation offset of `-1`. For `T(a, b, c)`, these correspond to `a | f(b, c)` and
+`c | f(a, b)`. Prefix binding rotates the tuple; it does not reverse it and is
+not restricted to binary functions.
+
+```expressif
+T(120, 135) | subtract~  // runtime result: -15
+T(120, 135) | ~subtract  // runtime result: 15
+extend(~subtract)
+```
+
+The tilde must touch the function name: `~ subtract`, `subtract ~`, and comments
+between the name and tilde are invalid. Names follow ordinary function-name
+syntax (ASCII letters and hyphen-separated letter segments); unknown names are
+preserved for downstream semantic validation. Whitespace and comments around
+the complete shorthand are allowed. Use `(~subtract)` or `(subtract~)` for
+grouping. Existing prefixes wrap the complete shorthand, as in `!~subtract`
+and `*subtract~`; `~!subtract` and `~*subtract` are invalid. A tilde cannot bind a
+call or grouped expression: `~subtract()`, `subtract()~`, `subtract~(1)`,
+`~(subtract)`, and `(subtract)~` are invalid. Bare, repeated, or combined tildes
+such as `~`, `~~subtract`, `subtract~~`, and `~subtract~` are also invalid.
+
+The CST preserves `tuple_binding_shorthand` with a named `function_name` child
+in the `name` field and anonymous `~` in the `tilde` field, in authored order.
+The C# `TupleBindingShorthandSyntax` is an `ExpressionSyntax` exposing `Name`,
+`Direction` (`Prefix` or `Postfix`), `NameSpan`, and `TildeSpan`, as well as exact
+`Text` and full `Span`. Its typed `Children` is empty, consistent with function
+name handling in `FunctionCallSyntax`. No runtime calls are synthesized.

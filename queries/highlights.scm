@@ -1,4 +1,5 @@
 (function_name) @function
+(tuple_binding_shorthand "~" @operator)
 
 (numeric_literal) @number
 (boolean_literal) @boolean

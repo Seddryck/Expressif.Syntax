@@ -89,6 +89,17 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, value, pipeline);
     }
 
+    private static TupleBindingShorthandSyntax BindTupleBindingShorthand(TsNode node)
+    {
+        var name = node.GetChildForField("name") ?? throw Unknown(node);
+        var tilde = node.GetChildForField("tilde") ?? throw Unknown(node);
+        var nameSpan = Span(name);
+        var tildeSpan = Span(tilde);
+        return new(Span(node), node.Text, name.Text,
+            tildeSpan.Start < nameSpan.Start ? TupleBindingDirection.Prefix : TupleBindingDirection.Postfix,
+            nameSpan, tildeSpan);
+    }
+
     private static FunctionCallSyntax BindFunctionCall(TsNode node)
     {
         if (node.Type != "function_call")
@@ -231,6 +242,7 @@ public static class ExpressifSyntax
         "closed_expression" => BindClosed(node),
         "binary_expression" => BindBinaryExpression(node),
         "function_call" => BindFunctionCall(node),
+        "tuple_binding_shorthand" => BindTupleBindingShorthand(node),
         "guarded_expression" => BindGuardedExpression(node),
         "input_binding_expression" => BindInputBindingExpression(node),
         "map_shorthand" => BindMapShorthand(node),
