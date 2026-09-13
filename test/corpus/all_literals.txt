@@ -1,0 +1,68 @@
+==================
+Standalone all literal
+==================
+
+#all
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (all_literal))))
+
+==================
+All literal in tuples and a dictionary
+==================
+
+!{(T("BE", #all) => 230), (T(#all, #all) => 320)}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (dictionary_literal
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (tuple_literal
+                (tuple_element
+                  expression: (double_quoted_literal
+                    (double_quoted_content)))
+                (tuple_element
+                  expression: (all_literal)))))
+          value: (root_expression
+            (closed_expression
+              (numeric_literal))))
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (tuple_literal
+                (tuple_element
+                  expression: (all_literal))
+                (tuple_element
+                  expression: (all_literal)))))
+          value: (root_expression
+            (closed_expression
+              (numeric_literal))))))))
+
+==================
+All, null, and quoted all are distinct
+==================
+
+T(#all, #null, "#all")
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          expression: (all_literal))
+        (tuple_element
+          expression: (null_literal))
+        (tuple_element
+          expression: (double_quoted_literal
+            (double_quoted_content)))))))
