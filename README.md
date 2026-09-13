@@ -59,6 +59,24 @@ This separation allows the same parser to support:
 * language servers
 * syntax highlighting and other editor tooling
 
+### Special scalar literals
+
+Expressif recognizes dedicated scalar syntax for booleans, null, and the
+all-dimension marker:
+
+```text
+#true
+#false
+#null
+#all
+```
+
+`#all` is represented explicitly as an `all_literal` node (and as
+`AllLiteralSyntax` in the C# binding), distinct from `#null` and the quoted
+string `"#all"`. The syntax tree preserves its authored text and source span;
+binding it to an all-dimension runtime value remains the responsibility of an
+Expressif runtime.
+
 ### Structural access
 
 Expressif distinguishes record fields from elements of ordered values:

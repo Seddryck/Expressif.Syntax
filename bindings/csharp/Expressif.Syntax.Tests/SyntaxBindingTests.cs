@@ -252,6 +252,53 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void AllLiteralIsADedicatedLosslessValue()
+    {
+        var literal = (AllLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("#all")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Kind, Is.EqualTo(SyntaxKind.AllLiteral));
+            Assert.That(literal.Text, Is.EqualTo("#all"));
+            Assert.That(literal.Span, Is.EqualTo(new SourceSpan(0, 4)));
+            Assert.That(literal.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void AllLiteralComposesInTuplesAndDictionaries()
+    {
+        var tuple = (TupleLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("T(\"BE\", #all)")).Value;
+        var dictionary = (DictionaryLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(
+            "!{(T(\"BE\", #all) => 230), (T(#all, #all) => 320)}")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tuple.Elements[1].Expression, Is.TypeOf<AllLiteralSyntax>());
+            Assert.That(dictionary.Entries
+                .Select(entry => (TupleLiteralSyntax)entry.Key)
+                .SelectMany(key => key.Elements)
+                .Select(element => element.Expression)
+                .OfType<AllLiteralSyntax>().Count(), Is.EqualTo(3));
+        });
+    }
+
+    [Test]
+    public void AllNullAndQuotedAllRemainDistinct()
+    {
+        var tuple = (TupleLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(
+            "T(#all, #null, \"#all\")")).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tuple.Elements[0].Expression, Is.TypeOf<AllLiteralSyntax>());
+            Assert.That(tuple.Elements[1].Expression, Is.TypeOf<NullLiteralSyntax>());
+            Assert.That(tuple.Elements[2].Expression, Is.TypeOf<QuotedLiteralSyntax>()
+                .With.Property(nameof(QuotedLiteralSyntax.Value)).EqualTo("#all"));
+        });
+    }
+
+    [Test]
     public void NullLiteralExposesNullSemanticValueAndPreservesText()
     {
         var literal = (NullLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse("#null")).Value;

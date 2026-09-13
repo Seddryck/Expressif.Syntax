@@ -18,6 +18,7 @@ public enum SyntaxKind
     TypeLiteral,
     NumericLiteral,
     BooleanLiteral,
+    AllLiteral,
     NullLiteral,
     QuotedLiteral,
     DateLiteral,
@@ -659,6 +660,12 @@ public sealed class BooleanLiteralSyntax : ValueSyntax
         : base(SyntaxKind.BooleanLiteral, span, text) => Value = text == "#true";
 
     public bool Value { get; }
+}
+
+public sealed class AllLiteralSyntax : ValueSyntax
+{
+    internal AllLiteralSyntax(SourceSpan span, string text)
+        : base(SyntaxKind.AllLiteral, span, text) { }
 }
 
 public sealed class NullLiteralSyntax : ValueSyntax

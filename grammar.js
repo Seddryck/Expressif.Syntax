@@ -137,6 +137,7 @@ export default grammar({
       $.record_access,
       $.numeric_literal,
       $.boolean_literal,
+      $.all_literal,
       $.null_literal,
       $.quoted_literal,
       $.temporal_literal,
@@ -421,6 +422,7 @@ export default grammar({
       $.record_access,
       $.numeric_literal,
       $.boolean_literal,
+      $.all_literal,
       $.null_literal,
       $.quoted_literal,
       $.temporal_literal,
@@ -520,6 +522,7 @@ export default grammar({
       $.record_access,
       $.numeric_literal,
       $.boolean_literal,
+      $.all_literal,
       $.null_literal,
       $.quoted_literal,
       $.temporal_literal,
@@ -677,6 +680,8 @@ export default grammar({
     positional_record_field: (_) => /\.(?:0|[1-9][0-9]*)/,
 
     boolean_literal: (_) => choice("#true", "#false"),
+
+    all_literal: (_) => "#all",
 
     type_literal: (_) => token(seq(":", /[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/)),
 
