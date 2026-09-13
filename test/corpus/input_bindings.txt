@@ -1204,3 +1204,56 @@ Anonymous compact body with pair literal
               (root_expression
                 (closed_expression
                   (numeric_literal))))))))))
+
+==================
+Leading positional binding open expression
+==================
+
+(previous, current) :> @current | subtract(@previous)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (input_binding_expression
+        (positional_binding_pattern
+          (binding_name)
+          (binding_name))
+        (root_expression
+          (closed_expression
+            (variable)
+            (function_call
+              (function_name)
+              (argument_list
+                (positional_argument
+                  (variable))))))))))
+
+==================
+Leading positional binding in nested argument
+==================
+
+adjacent((previous, current) :> @current | subtract(@previous))
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (input_binding_expression
+                (positional_binding_pattern
+                  (binding_name)
+                  (binding_name))
+                (root_expression
+                  (closed_expression
+                    (variable)
+                    (function_call
+                      (function_name)
+                      (argument_list
+                        (positional_argument
+                          (variable))))))))))))))

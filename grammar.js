@@ -58,12 +58,15 @@ export default grammar({
       $.closed_expression,
     ),
 
-    open_expression: ($) => prec.right(seq(
-      $.expression,
-      repeat(choice(
-        seq("|", $._pipeline_stage),
-        alias($._pipeline_map_shorthand, $.map_shorthand),
-      )),
+    open_expression: ($) => prec.right(choice(
+      seq(
+        $.expression,
+        repeat(choice(
+          seq("|", $._pipeline_stage),
+          alias($._pipeline_map_shorthand, $.map_shorthand),
+        )),
+      ),
+      alias($._leading_positional_binding_expression, $.input_binding_expression),
     )),
 
     closed_expression: ($) => prec.right(seq(
@@ -325,6 +328,7 @@ export default grammar({
     // Parentheses delimit the nested expression, so a function call or
     // function pipeline can be passed directly as a higher-order argument.
     _nested_open_expression: ($) => choice(
+      alias($._leading_positional_binding_expression, $.input_binding_expression),
       seq(
         choice($.parenthesized_expression, $.unary_expression, $.binary_expression, $.guarded_expression),
         "|",
@@ -376,6 +380,15 @@ export default grammar({
       ":>",
       field("body", choice(
         // Prefer a complete grouped body over extending its outer wrapper.
+        prec(10, alias($.parenthesized_open_expression, $.open_expression)),
+        $.root_expression,
+      )),
+    )),
+
+    _leading_positional_binding_expression: ($) => prec.right(seq(
+      field("binding", $.positional_binding_pattern),
+      ":>",
+      field("body", choice(
         prec(10, alias($.parenthesized_open_expression, $.open_expression)),
         $.root_expression,
       )),

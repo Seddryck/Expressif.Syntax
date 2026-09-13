@@ -67,41 +67,55 @@
       "type": "PREC_RIGHT",
       "value": 0,
       "content": {
-        "type": "SEQ",
+        "type": "CHOICE",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "expression"
-          },
-          {
-            "type": "REPEAT",
-            "content": {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SEQ",
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "expression"
+              },
+              {
+                "type": "REPEAT",
+                "content": {
+                  "type": "CHOICE",
                   "members": [
                     {
-                      "type": "STRING",
-                      "value": "|"
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": "|"
+                        },
+                        {
+                          "type": "SYMBOL",
+                          "name": "_pipeline_stage"
+                        }
+                      ]
                     },
                     {
-                      "type": "SYMBOL",
-                      "name": "_pipeline_stage"
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_pipeline_map_shorthand"
+                      },
+                      "named": true,
+                      "value": "map_shorthand"
                     }
                   ]
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_pipeline_map_shorthand"
-                  },
-                  "named": true,
-                  "value": "map_shorthand"
                 }
-              ]
-            }
+              }
+            ]
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_leading_positional_binding_expression"
+            },
+            "named": true,
+            "value": "input_binding_expression"
           }
         ]
       }
@@ -1436,6 +1450,15 @@
       "type": "CHOICE",
       "members": [
         {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_leading_positional_binding_expression"
+          },
+          "named": true,
+          "value": "input_binding_expression"
+        },
+        {
           "type": "SEQ",
           "members": [
             {
@@ -1708,6 +1731,53 @@
                 "type": "BLANK"
               }
             ]
+          },
+          {
+            "type": "STRING",
+            "value": ":>"
+          },
+          {
+            "type": "FIELD",
+            "name": "body",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "PREC",
+                  "value": 10,
+                  "content": {
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "parenthesized_open_expression"
+                    },
+                    "named": true,
+                    "value": "open_expression"
+                  }
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "root_expression"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "_leading_positional_binding_expression": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "binding",
+            "content": {
+              "type": "SYMBOL",
+              "name": "positional_binding_pattern"
+            }
           },
           {
             "type": "STRING",

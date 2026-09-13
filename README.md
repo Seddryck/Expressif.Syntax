@@ -176,8 +176,9 @@ Language-specific integration is located under `bindings/`.
 
 ## Input binding pipeline stages
 
-A binding must follow a pipe and a preceding expression in the same pipeline.
-It binds the output of that preceding expression and preserves a dedicated body:
+A named or anonymous binding must follow a pipe and a preceding expression in
+the same pipeline. It binds the output of that preceding expression and
+preserves a dedicated body:
 
 ```expressif
 Tuple(10, 20) | extend(30) | myTuple :> (@myTuple | $0 | subtract(@myTuple | $1) | multiply(@myTuple | $2))
@@ -193,24 +194,32 @@ adjacent($1 | current :> (@current | multiply(2)))
 apply(expression := trim | input :> @input | upper)
 ```
 
+A positional binding may also begin an open expression. In that form, its tuple
+receiver consumes the current input supplied when the open expression is invoked:
+
+```expressif
+adjacent((previous, current) :> @current | subtract(@previous))
+apply(expression := (a, b) :> @a | add(@b))
+```
+
 In the second example, the preceding `$1` supplies the value being bound.
-Implicit input supplied by a function does not satisfy the syntactic requirement
-for a preceding expression. These leading forms are **invalid**, including under
-named arguments or extra grouping parentheses:
+Implicit input supplied by a function satisfies the placement rule only for a
+leading positional binding. Leading named and anonymous forms remain **invalid**,
+including under named arguments or extra grouping parentheses:
 
 ```expressif
 apply(input :> @input)
 apply(:> $0 | add($1))
-adjacent((previous, current) :> @current | subtract(@previous))
 map(input :> @input)
 apply(expression := input :> @input)
 apply((input :> @input))
 ```
 
-Bare `name :> body`, `:> body`, and `(a, b) :> body` are also invalid without a
-preceding pipeline expression. Ordinary expression arguments and callable
-shorthands such as `apply(trim | upper)` and `adjacent(subtract)` remain valid.
-No function names are special-cased by the placement rule.
+Bare `name :> body` and `:> body` are also invalid without a preceding pipeline
+expression. A bare `(a, b) :> body` is an open expression and is valid. Ordinary
+expression arguments and callable shorthands such as `apply(trim | upper)` and
+`adjacent(subtract)` remain valid. No function names are special-cased by the
+placement rule.
 
 ### Body boundaries and spacing
 
