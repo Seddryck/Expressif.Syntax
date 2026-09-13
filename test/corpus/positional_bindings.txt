@@ -297,61 +297,6 @@ choose(T(1, 2) | (a, b) :> (@a | trim), ("key" => 2), (trim))
                     (function_name)))))))))))
 
 ==================
-Reject unsupported binding 1: adjacent((previous, current) :> @current | subtract(@previous))
-:error
-==================
-
-adjacent((previous, current) :> @current | subtract(@previous))
-
----
-
-(ERROR)
-
-==================
-Reject unsupported binding 2: apply(expression := (a,b) :> @a)
-:error
-==================
-
-apply(expression := (a,b) :> @a)
-
----
-
-(ERROR)
-
-==================
-Reject unsupported binding 3: apply(((a,b) :> @a))
-:error
-==================
-
-apply(((a,b) :> @a))
-
----
-
-(ERROR)
-
-==================
-Reject unsupported binding 4: (a,b) :> @a
-:error
-==================
-
-(a,b) :> @a
-
----
-
-(ERROR)
-
-==================
-Reject unsupported binding 5: trim | ((a,b) :> @a)
-:error
-==================
-
-trim | ((a,b) :> @a)
-
----
-
-(ERROR)
-
-==================
 Reject unsupported binding 6: trim | () :> upper
 :error
 ==================

@@ -108,11 +108,46 @@ public class PositionalBindingTests
         });
     }
 
+    [Test]
+    public void LeadingPositionalBindingIsAnOpenExpressionWithoutSource()
+    {
+        const string source = "(previous, current) :> @current | subtract(@previous)";
+        var root = (OpenExpressionSyntax)ExpressifSyntax.Parse(source);
+        var binding = (InputBindingExpressionSyntax)root.Pipeline.Single();
+        var pattern = (PositionalBindingPatternSyntax)binding.Binding!;
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.Source, Is.Null);
+            Assert.That(root.Children, Is.EqualTo(new[] { binding }));
+            Assert.That(pattern.Names.Select(name => name.Name), Is.EqualTo(new[] { "previous", "current" }));
+            Assert.That(binding.Body.Text, Is.EqualTo("@current | subtract(@previous)"));
+            Assert.That(binding.Text, Is.EqualTo(source));
+            Assert.That(binding.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+        });
+    }
+
     [TestCase("adjacent((previous, current) :> @current | subtract(@previous))")]
-    [TestCase("apply(expression := (a,b) :> @a)")]
-    [TestCase("apply(((a,b) :> @a))")]
-    [TestCase("(a,b) :> @a")]
-    [TestCase("trim | ((a,b) :> @a)")]
+    [TestCase("apply(expression := (a, b) :> @a | add(@b))")]
+    [TestCase("apply(((a, b) :> @a | add(@b)))")]
+    public void LeadingPositionalBindingComposesAsAnArgument(string source)
+    {
+        var root = ExpressifSyntax.Parse(source);
+        var binding = root.Children
+            .SelectMany(DescendantsAndSelf)
+            .OfType<InputBindingExpressionSyntax>()
+            .Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(binding.Kind, Is.EqualTo(SyntaxKind.InputBindingExpression));
+            Assert.That(binding.Binding, Is.TypeOf<PositionalBindingPatternSyntax>());
+            Assert.That(binding.Children, Is.EqualTo(new SyntaxNode[] { binding.Binding!, binding.Body }));
+        });
+    }
+
+    private static IEnumerable<SyntaxNode> DescendantsAndSelf(SyntaxNode node)
+        => new[] { node }.Concat(node.Children.SelectMany(DescendantsAndSelf));
+
     [TestCase("trim | () :> upper")]
     [TestCase("trim | (a) :> upper")]
     [TestCase("trim | (a,) :> upper")]
