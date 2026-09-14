@@ -1,6 +1,6 @@
 #include "tree_sitter/parser.h"
 
-enum TokenType { BINDING_PREFIX_TILDE, BINDING_POSTFIX_NAME };
+enum TokenType { BINDING_PREFIX_TILDE, BINDING_POSTFIX_NAME, TAGGED_RECORD_NAME };
 
 static bool is_letter(int32_t c) {
   return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
@@ -40,9 +40,10 @@ bool tree_sitter_expressif_external_scanner_scan(void *payload, TSLexer *lexer, 
     return true;
   }
 
-  // Look ahead to the tilde without consuming it, preserving the separate name
-  // and punctuation nodes while excluding comments and whitespace between them.
-  if (valid_symbols[BINDING_POSTFIX_NAME] && is_letter(lexer->lookahead)) {
+  // Look ahead to the adjacent discriminator without consuming it, preserving
+  // separate name and punctuation nodes while excluding comments and whitespace.
+  if ((valid_symbols[BINDING_POSTFIX_NAME] || valid_symbols[TAGGED_RECORD_NAME]) &&
+      is_letter(lexer->lookahead)) {
     do {
       while (is_letter(lexer->lookahead)) lexer->advance(lexer, false);
       if (lexer->lookahead != '-') break;
@@ -50,9 +51,14 @@ bool tree_sitter_expressif_external_scanner_scan(void *payload, TSLexer *lexer, 
       if (!is_letter(lexer->lookahead)) return false;
     } while (true);
     lexer->mark_end(lexer);
-    if (lexer->lookahead != '~') return false;
-    lexer->result_symbol = BINDING_POSTFIX_NAME;
-    return true;
+    if (valid_symbols[BINDING_POSTFIX_NAME] && lexer->lookahead == '~') {
+      lexer->result_symbol = BINDING_POSTFIX_NAME;
+      return true;
+    }
+    if (valid_symbols[TAGGED_RECORD_NAME] && lexer->lookahead == '{') {
+      lexer->result_symbol = TAGGED_RECORD_NAME;
+      return true;
+    }
   }
   return false;
 }

@@ -28,7 +28,7 @@ export default grammar({
     $.block_comment,
   ],
 
-  externals: ($) => [$._binding_prefix_tilde, $._binding_postfix_name],
+  externals: ($) => [$._binding_prefix_tilde, $._binding_postfix_name, $._tagged_record_name],
 
   supertypes: ($) => [
     $.value,
@@ -146,6 +146,7 @@ export default grammar({
       $.pair_literal,
       $.grouping_literal,
       $.dictionary_literal,
+      $.tagged_record_literal,
       $.interval_literal,
     ),
 
@@ -434,6 +435,7 @@ export default grammar({
       $.grouping_literal,
       $.dictionary_literal,
       $.record_literal,
+      $.tagged_record_literal,
       $.interval_literal,
     ),
 
@@ -490,6 +492,7 @@ export default grammar({
         field("expression", optional($._positional_spread_operand)),
       ),
       field("expression", choice(
+        alias($._tuple_binding_open_expression, $.open_expression),
         alias($._array_closed_expression, $.closed_expression),
         $._compound_value,
       )),
@@ -535,6 +538,7 @@ export default grammar({
       $.grouping_literal,
       $.dictionary_literal,
       $.record_literal,
+      $.tagged_record_literal,
       $.interval_literal,
     ),
 
@@ -562,6 +566,7 @@ export default grammar({
         field("expression", optional($._positional_spread_operand)),
       ),
       field("expression", choice(
+        alias($._tuple_binding_open_expression, $.open_expression),
         alias($._array_closed_expression, $.closed_expression),
         $._compound_value,
       )),
@@ -571,6 +576,8 @@ export default grammar({
       field("spread", "..."),
       field("expression", optional($._positional_spread_operand)),
     )),
+
+    _tuple_binding_open_expression: ($) => seq($.tuple_binding_shorthand),
 
     pair_literal: ($) => seq(
       "(",
@@ -606,6 +613,11 @@ export default grammar({
         repeat(seq(",", $._record_entry)),
         "}",
       )),
+    ),
+
+    tagged_record_literal: ($) => seq(
+      field("tag", alias($._tagged_record_name, $.tagged_record_name)),
+      field("record", $.record_literal),
     ),
 
     _record_entry: ($) => choice(

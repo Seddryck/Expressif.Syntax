@@ -1,0 +1,329 @@
+==================
+Tagged record literal preserves its tag and record body
+==================
+
+SortTable{
+    headers := {
+        T(compare-ordinal~, #true, #false),
+        T(compare-numeric~, #false, #false)
+    },
+    rows := {
+        T(T("BE", 42), {name := "Alice"})
+    }
+}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tagged_record_literal
+        (tagged_record_name)
+        (record_literal
+          (record_field
+            (record_field_name
+              (public_record_field_name
+                (unquoted_record_field_name)))
+            (array_literal
+              (array_element
+                (tuple_literal
+                  (tuple_element
+                    (open_expression
+                      (tuple_binding_shorthand
+                        (function_name))))
+                  (tuple_element
+                    (boolean_literal))
+                  (tuple_element
+                    (boolean_literal))))
+              (array_element
+                (tuple_literal
+                  (tuple_element
+                    (open_expression
+                      (tuple_binding_shorthand
+                        (function_name))))
+                  (tuple_element
+                    (boolean_literal))
+                  (tuple_element
+                    (boolean_literal))))))
+          (record_field
+            (record_field_name
+              (public_record_field_name
+                (unquoted_record_field_name)))
+            (array_literal
+              (array_element
+                (tuple_literal
+                  (tuple_element
+                    (tuple_literal
+                      (tuple_element
+                        (double_quoted_literal
+                          (double_quoted_content)))
+                      (tuple_element
+                        (numeric_literal))))
+                  (tuple_element
+                    (record_literal
+                      (record_field
+                        (record_field_name
+                          (public_record_field_name
+                            (unquoted_record_field_name)))
+                        (double_quoted_literal
+                          (double_quoted_content))))))))))))))
+
+==================
+Empty tagged record uses the empty-record spelling
+==================
+
+CustomTag{:}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tagged_record_literal
+        (tagged_record_name)
+        (record_literal)))))
+
+==================
+Tagged record reuses nested values and record spreads
+==================
+
+Envelope{payload := Nested{value := 42}, metadata := {source := "api"}, ...}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tagged_record_literal
+        (tagged_record_name)
+        (record_literal
+          (record_field
+            (record_field_name
+              (public_record_field_name
+                (unquoted_record_field_name)))
+            (tagged_record_literal
+              (tagged_record_name)
+              (record_literal
+                (record_field
+                  (record_field_name
+                    (public_record_field_name
+                      (unquoted_record_field_name)))
+                  (numeric_literal)))))
+          (record_field
+            (record_field_name
+              (public_record_field_name
+                (unquoted_record_field_name)))
+            (record_literal
+              (record_field
+                (record_field_name
+                  (public_record_field_name
+                    (unquoted_record_field_name)))
+                (double_quoted_literal
+                  (double_quoted_content)))))
+          (record_spread))))))
+
+==================
+Sort functions and constructors use ordinary generic syntax
+==================
+
+sort-term(42, compare-numeric~)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))
+          (positional_argument
+            (open_expression
+              (tuple_binding_shorthand
+                (function_name)))))))))
+
+==================
+Sort key uses calls pipelines and comparer bindings
+==================
+
+sort-key(
+    .country | sort-term(compare-ordinal~),
+    .price | sort-term(compare-numeric~) | desc
+)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (closed_expression
+              (record_access
+                (record_field_selector
+                  (named_record_field)))
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (open_expression
+                      (tuple_binding_shorthand
+                        (function_name))))))))
+          (positional_argument
+            (closed_expression
+              (record_access
+                (record_field_selector
+                  (named_record_field)))
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (open_expression
+                      (tuple_binding_shorthand
+                        (function_name))))))
+              (function_call
+                (function_name)))))))))
+
+==================
+Sort by accepts typed ascending key
+==================
+
+sort-by(.name -> :text | asc | nulls-last)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (binary_expression
+                (record_access
+                  (record_field_selector
+                    (named_record_field)))
+                (binary_operator)
+                (type_literal))
+              (function_call
+                (function_name))
+              (function_call
+                (function_name)))))))))
+
+==================
+Sort by accepts multiple typed keys
+==================
+
+sort-by(
+    .country -> :text | asc,
+    .price -> :numeric | desc | nulls-last
+)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (binary_expression
+                (record_access
+                  (record_field_selector
+                    (named_record_field)))
+                (binary_operator)
+                (type_literal))
+              (function_call
+                (function_name))))
+          (positional_argument
+            (open_expression
+              (binary_expression
+                (record_access
+                  (record_field_selector
+                    (named_record_field)))
+                (binary_operator)
+                (type_literal))
+              (function_call
+                (function_name))
+              (function_call
+                (function_name)))))))))
+
+==================
+Serialized sort term remains an ordinary call
+==================
+
+SortTerm(42, compare-numeric~, #true, #false)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (numeric_literal))
+          (positional_argument
+            (open_expression
+              (tuple_binding_shorthand
+                (function_name))))
+          (positional_argument
+            (boolean_literal))
+          (positional_argument
+            (boolean_literal)))))))
+
+==================
+Serialized sort key remains an ordinary call
+==================
+
+SortKey(
+    SortTerm("BE", compare-ordinal~, #true, #false),
+    SortTerm(42, compare-numeric~, #false, #false)
+)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        (function_name)
+        (argument_list
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (double_quoted_literal
+                      (double_quoted_content)))
+                  (positional_argument
+                    (open_expression
+                      (tuple_binding_shorthand
+                        (function_name))))
+                  (positional_argument
+                    (boolean_literal))
+                  (positional_argument
+                    (boolean_literal))))))
+          (positional_argument
+            (open_expression
+              (function_call
+                (function_name)
+                (argument_list
+                  (positional_argument
+                    (numeric_literal))
+                  (positional_argument
+                    (open_expression
+                      (tuple_binding_shorthand
+                        (function_name))))
+                  (positional_argument
+                    (boolean_literal))
+                  (positional_argument
+                    (boolean_literal)))))))))))
