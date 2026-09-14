@@ -166,6 +166,19 @@ The syntax tree preserves whether a spread operand was implicit or explicitly
 authored. Parsing records the intent to spread but does not expand or validate
 the runtime value.
 
+### Tagged records
+
+A record can carry an authored tag for downstream semantic interpretation:
+
+```expressif
+SortTable{headers := {...}, rows := {...}}
+```
+
+The parser exposes this as a `tagged_record_literal` containing the tag and the
+existing `record_literal` structure. It preserves the tag exactly and does not
+resolve or validate it. Empty tagged records use `SortTable{:}` because `{}` is
+the existing empty-array spelling.
+
 ## Repository structure
 
 ```text

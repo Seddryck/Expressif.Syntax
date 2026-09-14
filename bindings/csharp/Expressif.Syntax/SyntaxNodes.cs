@@ -39,6 +39,7 @@ public enum SyntaxKind
     GroupingLiteral,
     DictionaryLiteral,
     RecordLiteral,
+    TaggedRecordLiteral,
     RecordField,
     RecordFieldName,
     RecordSpread,
@@ -522,6 +523,27 @@ public sealed class RecordLiteralSyntax : ValueSyntax
 
     public IReadOnlyList<RecordEntrySyntax> Entries { get; }
     public IReadOnlyList<RecordFieldSyntax> Fields { get; }
+}
+
+/// <summary>A record literal carrying an authored semantic tag that is resolved downstream.</summary>
+public sealed class TaggedRecordLiteralSyntax : ValueSyntax
+{
+    internal TaggedRecordLiteralSyntax(
+        SourceSpan span,
+        string text,
+        string tag,
+        SourceSpan tagSpan,
+        RecordLiteralSyntax record)
+        : base(SyntaxKind.TaggedRecordLiteral, span, text, [record])
+    {
+        Tag = tag;
+        TagSpan = tagSpan;
+        Record = record;
+    }
+
+    public string Tag { get; }
+    public SourceSpan TagSpan { get; }
+    public RecordLiteralSyntax Record { get; }
 }
 
 public abstract class RecordEntrySyntax : SyntaxNode

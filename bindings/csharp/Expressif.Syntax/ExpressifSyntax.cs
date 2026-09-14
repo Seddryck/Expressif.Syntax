@@ -8,7 +8,7 @@ public static class ExpressifSyntax
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
         "all_literal", "array_literal", "boolean_literal", "constant_reference", "incoming_value", "null_literal", "numeric_literal", "ordering_literal", "type_literal",
-        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "temporal_literal", "tuple_literal", "variable",
+        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "tagged_record_literal", "temporal_literal", "tuple_literal", "variable",
     };
 
     public static RootExpressionSyntax Parse(string source)
@@ -309,6 +309,7 @@ public static class ExpressifSyntax
             "grouping_literal" => new GroupingLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindPairLiteral).ToArray()),
             "dictionary_literal" => new DictionaryLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindPairLiteral).ToArray()),
             "record_literal" => new RecordLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindRecordEntry).ToArray()),
+            "tagged_record_literal" => BindTaggedRecordLiteral(node),
             "interval_literal" => BindInterval(node),
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
             _ => throw Unknown(node),
@@ -448,6 +449,18 @@ public static class ExpressifSyntax
         "record_spread" => new RecordSpreadSyntax(Span(node), node.Text),
         _ => throw Unknown(node),
     };
+
+    private static TaggedRecordLiteralSyntax BindTaggedRecordLiteral(TsNode node)
+    {
+        var tag = node.GetChildForField("tag") ?? throw Unknown(node);
+        var record = node.GetChildForField("record") ?? throw Unknown(node);
+        return new(
+            Span(node),
+            node.Text,
+            tag.Text,
+            Span(tag),
+            (RecordLiteralSyntax)BindValue(record));
+    }
 
     private static RecordAccessSyntax BindRecordAccess(TsNode node)
     {

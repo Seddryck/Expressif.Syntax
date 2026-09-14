@@ -4,6 +4,7 @@
 (numeric_literal) @number
 (boolean_literal) @boolean
 (type_literal) @type
+(tagged_record_literal tag: (tagged_record_name) @type)
 (binary_operator) @operator
 (unary_operator) @operator
 (guarded_expression "*" @operator)

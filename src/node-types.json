@@ -138,6 +138,10 @@
         "named": true
       },
       {
+        "type": "tagged_record_literal",
+        "named": true
+      },
+      {
         "type": "temporal_literal",
         "named": true
       },
@@ -258,6 +262,10 @@
             "named": true
           },
           {
+            "type": "open_expression",
+            "named": true
+          },
+          {
             "type": "ordering_literal",
             "named": true
           },
@@ -279,6 +287,10 @@
           },
           {
             "type": "record_literal",
+            "named": true
+          },
+          {
+            "type": "tagged_record_literal",
             "named": true
           },
           {
@@ -1268,6 +1280,10 @@
             "named": true
           },
           {
+            "type": "tagged_record_literal",
+            "named": true
+          },
+          {
             "type": "temporal_literal",
             "named": true
           },
@@ -1433,6 +1449,32 @@
     }
   },
   {
+    "type": "tagged_record_literal",
+    "named": true,
+    "fields": {
+      "record": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "record_literal",
+            "named": true
+          }
+        ]
+      },
+      "tag": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "tagged_record_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "tuple_binding_shorthand",
     "named": true,
     "fields": {
@@ -1519,6 +1561,10 @@
             "named": true
           },
           {
+            "type": "open_expression",
+            "named": true
+          },
+          {
             "type": "ordering_literal",
             "named": true
           },
@@ -1540,6 +1586,10 @@
           },
           {
             "type": "record_literal",
+            "named": true
+          },
+          {
+            "type": "tagged_record_literal",
             "named": true
           },
           {
@@ -1705,6 +1755,10 @@
           },
           {
             "type": "record_access",
+            "named": true
+          },
+          {
+            "type": "tagged_record_literal",
             "named": true
           },
           {
@@ -1962,6 +2016,10 @@
   },
   {
     "type": "positional_record_field",
+    "named": true
+  },
+  {
+    "type": "tagged_record_name",
     "named": true
   },
   {

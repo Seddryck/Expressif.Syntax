@@ -516,6 +516,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "tagged_record_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "interval_literal"
         }
       ]
@@ -2009,6 +2013,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "tagged_record_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "interval_literal"
         }
       ]
@@ -2311,6 +2319,15 @@
                 "type": "ALIAS",
                 "content": {
                   "type": "SYMBOL",
+                  "name": "_tuple_binding_open_expression"
+                },
+                "named": true,
+                "value": "open_expression"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
                   "name": "_array_closed_expression"
                 },
                 "named": true,
@@ -2506,6 +2523,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "tagged_record_literal"
+        },
+        {
+          "type": "SYMBOL",
           "name": "interval_literal"
         }
       ]
@@ -2637,6 +2658,15 @@
                 "type": "ALIAS",
                 "content": {
                   "type": "SYMBOL",
+                  "name": "_tuple_binding_open_expression"
+                },
+                "named": true,
+                "value": "open_expression"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
                   "name": "_array_closed_expression"
                 },
                 "named": true,
@@ -2683,6 +2713,15 @@
           }
         ]
       }
+    },
+    "_tuple_binding_open_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "tuple_binding_shorthand"
+        }
+      ]
     },
     "pair_literal": {
       "type": "SEQ",
@@ -2864,6 +2903,32 @@
                 "value": "}"
               }
             ]
+          }
+        }
+      ]
+    },
+    "tagged_record_literal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "tag",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_tagged_record_name"
+            },
+            "named": true,
+            "value": "tagged_record_name"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "record",
+          "content": {
+            "type": "SYMBOL",
+            "name": "record_literal"
           }
         }
       ]
@@ -3369,6 +3434,10 @@
     {
       "type": "SYMBOL",
       "name": "_binding_postfix_name"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_tagged_record_name"
     }
   ],
   "inline": [],
