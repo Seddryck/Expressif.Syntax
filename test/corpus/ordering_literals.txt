@@ -1,0 +1,87 @@
+==================
+Standalone less literal
+==================
+
+#less
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (ordering_literal))))
+
+==================
+Standalone equal literal
+==================
+
+#equal
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (ordering_literal))))
+
+==================
+Standalone greater literal
+==================
+
+#greater
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (ordering_literal))))
+
+==================
+Ordering literals in a tuple
+==================
+
+T(#less, #equal, #greater)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (tuple_literal
+        (tuple_element
+          expression: (ordering_literal))
+        (tuple_element
+          expression: (ordering_literal))
+        (tuple_element
+          expression: (ordering_literal))))))
+
+==================
+Ordering literal in a pipeline
+==================
+
+#greater | coerce(:integer)
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (ordering_literal)
+      (function_call
+        name: (function_name)
+        (argument_list
+          (positional_argument
+            (type_literal)))))))
+
+==================
+Unknown hash-prefixed token remains invalid
+==================
+
+#unordered
+
+---
+
+(ERROR
+  (UNEXPECTED 'u')
+  (function_name))
