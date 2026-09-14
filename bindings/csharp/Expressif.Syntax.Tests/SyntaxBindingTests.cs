@@ -251,6 +251,39 @@ public class SyntaxBindingTests
         Assert.That(((BooleanLiteralSyntax)root.Value).Value, Is.EqualTo(expected));
     }
 
+    [TestCase("#less")]
+    [TestCase("#equal")]
+    [TestCase("#greater")]
+    public void OrderingLiteralsAreDedicatedLosslessValues(string source)
+    {
+        var literal = (OrderingLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(literal.Kind, Is.EqualTo(SyntaxKind.OrderingLiteral));
+            Assert.That(literal.Text, Is.EqualTo(source));
+            Assert.That(literal.Span, Is.EqualTo(new SourceSpan(0, source.Length)));
+            Assert.That(literal.Children, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void OrderingLiteralsComposeInTuplesAndPipelines()
+    {
+        var tuple = (TupleLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(
+            "T(#less, #equal, #greater)")).Value;
+        var pipeline = (ClosedExpressionSyntax)ExpressifSyntax.Parse("#greater | coerce(:integer)");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tuple.Elements.Select(element => element.Expression), Is.All.TypeOf<OrderingLiteralSyntax>());
+            Assert.That(tuple.Elements.Select(element => element.Expression.Text),
+                Is.EqualTo(new[] { "#less", "#equal", "#greater" }));
+            Assert.That(pipeline.Value, Is.TypeOf<OrderingLiteralSyntax>()
+                .With.Property(nameof(SyntaxNode.Text)).EqualTo("#greater"));
+        });
+    }
+
     [Test]
     public void AllLiteralIsADedicatedLosslessValue()
     {
