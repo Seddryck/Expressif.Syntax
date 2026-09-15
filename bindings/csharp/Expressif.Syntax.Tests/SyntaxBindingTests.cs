@@ -2070,6 +2070,38 @@ public class SyntaxBindingTests
     }
 
     [Test]
+    public void DictionaryLiteralAcceptsUnparenthesizedEntriesWithoutLosingSource()
+    {
+        const string source = "!{\"BE\" => 100, \"FR\" => 80}";
+        var dictionary = (DictionaryLiteralSyntax)((ClosedExpressionSyntax)ExpressifSyntax.Parse(source)).Value;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(dictionary.Text, Is.EqualTo(source));
+            Assert.That(dictionary.Kind, Is.EqualTo(SyntaxKind.DictionaryLiteral));
+            Assert.That(dictionary.Entries.Select(entry => entry.Text), Is.EqualTo(new[] { "\"BE\" => 100", "\"FR\" => 80" }));
+            Assert.That(dictionary.Entries.Select(entry => entry.Kind), Is.All.EqualTo(SyntaxKind.PairLiteral));
+            Assert.That(dictionary.Entries.Select(entry => entry.Key.Text), Is.EqualTo(new[] { "\"BE\"", "\"FR\"" }));
+            Assert.That(dictionary.Entries.Select(entry => entry.Value.Text), Is.EqualTo(new[] { "100", "80" }));
+            Assert.That(dictionary.Entries.Select(entry => entry.Span), Is.EqualTo(new[] {
+                new SourceSpan(2, 11), new SourceSpan(15, 10),
+            }));
+            Assert.That(dictionary.Entries.All(entry => entry.Children.SequenceEqual(new[] { entry.Key, entry.Value })), Is.True);
+            Assert.That(dictionary.Children, Is.EqualTo(dictionary.Entries));
+        });
+    }
+
+    [Test]
+    public void DictionaryLiteralAcceptsMixedEntryStylesAsAnArgument()
+    {
+        const string source = "consume(!{(\"BE\" => 100), \"FR\" => 80})";
+        var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse(source)).Pipeline.Single();
+        var dictionary = (DictionaryLiteralSyntax)call.Arguments.Single().Value!;
+
+        Assert.That(dictionary.Entries.Select(entry => entry.Text), Is.EqualTo(new[] { "(\"BE\" => 100)", "\"FR\" => 80" }));
+    }
+
+    [Test]
     public void DictionaryLiteralComposesAsAFunctionArgument()
     {
         var call = (FunctionCallSyntax)((OpenExpressionSyntax)ExpressifSyntax.Parse("consume(!{(\"BE\" => \"Belgium\")})")).Pipeline.Single();
@@ -2086,6 +2118,8 @@ public class SyntaxBindingTests
     [TestCase("! {(\"BE\" => \"Belgium\")}")]
     [TestCase("!{1}")]
     [TestCase("!{(\"BE\" => \"Belgium\")")]
+    [TestCase("!{\"BE\" =>}")]
+    [TestCase("!{\"BE\" => 100,}")]
     public void MalformedDictionaryLiteralsAreRejected(string source)
         => Assert.Throws<ExpressifSyntaxException>(() => ExpressifSyntax.Parse(source));
 
