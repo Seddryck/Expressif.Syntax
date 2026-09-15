@@ -67,3 +67,61 @@ consume(!{("BE" => "Belgium")})
                   (closed_expression
                     (double_quoted_literal
                       (double_quoted_content))))))))))))
+
+==================
+Dictionary entries without parentheses
+==================
+
+!{"BE" => 100, "FR" => 80}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (dictionary_literal
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (numeric_literal))))
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (numeric_literal))))))))
+
+==================
+Mixed dictionary entry styles
+==================
+
+!{("BE" => 100), "FR" => 80}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (dictionary_literal
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (numeric_literal))))
+        (pair_literal
+          key: (root_expression
+            (closed_expression
+              (double_quoted_literal
+                (double_quoted_content))))
+          value: (root_expression
+            (closed_expression
+              (numeric_literal))))))))

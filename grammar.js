@@ -587,6 +587,17 @@ export default grammar({
       ")",
     ),
 
+    _dictionary_pair_shorthand: ($) => seq(
+      field("key", $.root_expression),
+      "=>",
+      field("value", $.root_expression),
+    ),
+
+    _dictionary_entry: ($) => choice(
+      $.pair_literal,
+      alias($._dictionary_pair_shorthand, $.pair_literal),
+    ),
+
     grouping_literal: ($) => seq(
       "#{",
       optional(seq(
@@ -599,8 +610,8 @@ export default grammar({
     dictionary_literal: ($) => seq(
       "!{",
       optional(seq(
-        $.pair_literal,
-        repeat(seq(",", $.pair_literal)),
+        $._dictionary_entry,
+        repeat(seq(",", $._dictionary_entry)),
       )),
       "}",
     ),
