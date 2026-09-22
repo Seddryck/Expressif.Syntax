@@ -2754,30 +2754,6 @@
     "named": false
   },
   {
-    "type": "|AND",
-    "named": false
-  },
-  {
-    "type": "|NAND",
-    "named": false
-  },
-  {
-    "type": "|NOR",
-    "named": false
-  },
-  {
-    "type": "|NXOR",
-    "named": false
-  },
-  {
-    "type": "|OR",
-    "named": false
-  },
-  {
-    "type": "|XOR",
-    "named": false
-  },
-  {
     "type": "}",
     "named": false
   },

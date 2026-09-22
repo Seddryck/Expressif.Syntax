@@ -1,0 +1,55 @@
+==================
+Boolean operators accept authored casing
+==================
+
+a |and b |Or c |xOR d |Nand e |nOR f |NxOr g
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (binary_expression
+        left: (binary_expression
+          left: (binary_expression
+            left: (binary_expression
+              left: (binary_expression
+                left: (binary_expression
+                  left: (function_call
+                    name: (function_name))
+                  operator: (binary_operator)
+                  right: (function_call
+                    name: (function_name)))
+                operator: (binary_operator)
+                right: (function_call
+                  name: (function_name)))
+              operator: (binary_operator)
+              right: (function_call
+                name: (function_name)))
+            operator: (binary_operator)
+            right: (function_call
+              name: (function_name)))
+          operator: (binary_operator)
+          right: (function_call
+            name: (function_name)))
+        operator: (binary_operator)
+        right: (function_call
+          name: (function_name))))))
+
+==================
+Longer names are not partially tokenized
+:error
+==================
+
+a |android b
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))))
+  (ERROR
+    (function_call
+      name: (function_name))))

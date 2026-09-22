@@ -204,7 +204,7 @@ a |NAND b |AND c |NOR d |OR e |NXOR f |XOR g
 Complementary shorthand whitespace variants
 ==================
 
-a|NAND b |NORc  |NXOR  d
+a|NAND b |NOR c  |NXOR  d
 
 ---
 
@@ -439,11 +439,12 @@ Binary shorthand requires a left operand
 ---
 
 (source_file
-  (ERROR)
   (root_expression
     (open_expression
+      (MISSING pair_component_access)
       (function_call
-        (function_name)))))
+        (function_name))))
+  (ERROR))
 
 ==================
 Malformed binary shorthand operator
@@ -504,11 +505,12 @@ Complementary binary shorthand requires a left operand
 ---
 
 (source_file
-  (ERROR)
   (root_expression
     (open_expression
+      (MISSING pair_component_access)
       (function_call
-        (function_name)))))
+        (function_name))))
+  (ERROR))
 
 ==================
 Malformed complementary binary shorthand operator

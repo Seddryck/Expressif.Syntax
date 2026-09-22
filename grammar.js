@@ -30,7 +30,12 @@ export default grammar({
     $.block_comment,
   ],
 
-  externals: ($) => [$._binding_prefix_tilde, $._binding_postfix_name, $._tagged_record_name],
+  externals: ($) => [
+    $._binding_prefix_tilde,
+    $._binding_postfix_name,
+    $._tagged_record_name,
+    $._boolean_operator,
+  ],
 
   supertypes: ($) => [
     $.value,
@@ -135,10 +140,9 @@ export default grammar({
       field("right", $._shorthand_operand),
     )),
 
-    binary_operator: (_) => choice(
+    binary_operator: ($) => choice(
       "->",
-      "|AND", "|OR", "|XOR",
-      "|NAND", "|NOR", "|NXOR",
+      $._boolean_operator,
     ),
 
     conditional_expression: ($) => seq(
