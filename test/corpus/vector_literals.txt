@@ -1,0 +1,54 @@
+==================
+Empty vector literal
+==================
+
+V()
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (vector_literal))))
+
+==================
+Vector elements and spread
+==================
+
+V(1, -2.5, ...V(3, 4))
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (vector_literal
+        (vector_element
+          expression: (numeric_literal))
+        (vector_element
+          expression: (numeric_literal))
+        (vector_element
+          expression: (vector_literal
+            (vector_element
+              expression: (numeric_literal))
+            (vector_element
+              expression: (numeric_literal))))))))
+
+==================
+Vector in a pipeline
+==================
+
+V(3, 4) | magnitude
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (vector_literal
+        (vector_element
+          expression: (numeric_literal))
+        (vector_element
+          expression: (numeric_literal)))
+      (function_call
+        name: (function_name)))))

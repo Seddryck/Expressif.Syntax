@@ -142,6 +142,7 @@ export default grammar({
       $.null_literal,
       $.quoted_literal,
       $.temporal_literal,
+      $.vector_literal,
       $.tuple_literal,
       $.pair_literal,
       $.grouping_literal,
@@ -430,6 +431,7 @@ export default grammar({
       $.quoted_literal,
       $.temporal_literal,
       $.array_literal,
+      $.vector_literal,
       $.tuple_literal,
       $.pair_literal,
       $.grouping_literal,
@@ -533,6 +535,7 @@ export default grammar({
       $.quoted_literal,
       $.temporal_literal,
       $.array_literal,
+      $.vector_literal,
       $.tuple_literal,
       $.pair_literal,
       $.grouping_literal,
@@ -576,6 +579,28 @@ export default grammar({
       field("spread", "..."),
       field("expression", optional($._positional_spread_operand)),
     )),
+
+    vector_literal: ($) => seq(
+      "V",
+      "(",
+      optional(seq(
+        $.vector_element,
+        repeat(seq(",", $.vector_element)),
+      )),
+      ")",
+    ),
+
+    vector_element: ($) => choice(
+      seq(
+        field("spread", "..."),
+        field("expression", optional($._positional_spread_operand)),
+      ),
+      field("expression", choice(
+        alias($._tuple_binding_open_expression, $.open_expression),
+        alias($._array_closed_expression, $.closed_expression),
+        $._compound_value,
+      )),
+    ),
 
     _tuple_binding_open_expression: ($) => seq($.tuple_binding_shorthand),
 

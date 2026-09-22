@@ -156,6 +156,10 @@
       {
         "type": "variable",
         "named": true
+      },
+      {
+        "type": "vector_literal",
+        "named": true
       }
     ]
   },
@@ -311,6 +315,10 @@
           },
           {
             "type": "variable",
+            "named": true
+          },
+          {
+            "type": "vector_literal",
             "named": true
           }
         ]
@@ -1298,6 +1306,10 @@
           {
             "type": "variable",
             "named": true
+          },
+          {
+            "type": "vector_literal",
+            "named": true
           }
         ]
       }
@@ -1611,6 +1623,10 @@
           {
             "type": "variable",
             "named": true
+          },
+          {
+            "type": "vector_literal",
+            "named": true
           }
         ]
       },
@@ -1788,6 +1804,10 @@
           {
             "type": "variable",
             "named": true
+          },
+          {
+            "type": "vector_literal",
+            "named": true
           }
         ]
       },
@@ -1807,6 +1827,151 @@
     "type": "unquoted_argument_name",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "vector_element",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "all_literal",
+            "named": true
+          },
+          {
+            "type": "array_literal",
+            "named": true
+          },
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "boolean_literal",
+            "named": true
+          },
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "constant_reference",
+            "named": true
+          },
+          {
+            "type": "dictionary_literal",
+            "named": true
+          },
+          {
+            "type": "grouping_literal",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "incoming_value",
+            "named": true
+          },
+          {
+            "type": "interval_literal",
+            "named": true
+          },
+          {
+            "type": "null_literal",
+            "named": true
+          },
+          {
+            "type": "numeric_literal",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "ordering_literal",
+            "named": true
+          },
+          {
+            "type": "pair_literal",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "quoted_literal",
+            "named": true
+          },
+          {
+            "type": "record_access",
+            "named": true
+          },
+          {
+            "type": "record_literal",
+            "named": true
+          },
+          {
+            "type": "tagged_record_literal",
+            "named": true
+          },
+          {
+            "type": "temporal_literal",
+            "named": true
+          },
+          {
+            "type": "tuple_literal",
+            "named": true
+          },
+          {
+            "type": "type_literal",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "variable",
+            "named": true
+          },
+          {
+            "type": "vector_literal",
+            "named": true
+          }
+        ]
+      },
+      "spread": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "...",
+            "named": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "vector_literal",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "vector_element",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "!{",
@@ -1930,6 +2095,10 @@
   },
   {
     "type": "T",
+    "named": false
+  },
+  {
+    "type": "V",
     "named": false
   },
   {
