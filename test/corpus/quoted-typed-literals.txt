@@ -1,0 +1,76 @@
+==================
+Untyped quoted representation
+==================
+
+#"Belgium"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (quoted_typed_literal
+        representation: (double_quoted_literal
+          (double_quoted_content))))))
+
+==================
+Typed quoted representation with escape
+==================
+
+#"say \"hello\"":text
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (quoted_typed_literal
+        representation: (double_quoted_literal
+          (double_quoted_content)
+          (escape_sequence)
+          (double_quoted_content)
+          (escape_sequence))
+        type: (type_literal)))))
+
+==================
+Quoted typed representations in containers and intervals
+==================
+
+{#"1":integer, I[#"A":text,#"Z":text]}
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (array_literal
+        (array_element
+          expression: (quoted_typed_literal
+            representation: (double_quoted_literal
+              (double_quoted_content))
+            type: (type_literal)))
+        (array_element
+          expression: (interval_literal
+            lower_bound: (interval_bound
+              (quoted_typed_literal
+                representation: (double_quoted_literal
+                  (double_quoted_content))
+                type: (type_literal)))
+            upper_bound: (interval_bound
+              (quoted_typed_literal
+                representation: (double_quoted_literal
+                  (double_quoted_content))
+                type: (type_literal)))))))))
+
+==================
+Temporal representation remains specialized
+==================
+
+#"2025-12-17"
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (date_literal))))
