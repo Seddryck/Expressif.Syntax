@@ -551,6 +551,10 @@
         {
           "type": "value",
           "named": true
+        },
+        {
+          "type": "value_reference_stage",
+          "named": true
         }
       ]
     }
@@ -965,6 +969,10 @@
         },
         {
           "type": "record_access",
+          "named": true
+        },
+        {
+          "type": "value_reference_stage",
           "named": true
         }
       ]
@@ -1867,6 +1875,22 @@
     "type": "unquoted_argument_name",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "value_reference_stage",
+    "named": true,
+    "fields": {
+      "reference": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "variable",
+            "named": true
+          }
+        ]
+      }
+    }
   },
   {
     "type": "vector_element",

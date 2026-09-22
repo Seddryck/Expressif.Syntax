@@ -188,7 +188,13 @@ export default grammar({
     ),
 
     // Binding stages are only reachable after an authored pipe and a source.
-    _pipeline_stage: ($) => choice($._pipeline_expression, $.input_binding_expression),
+    _pipeline_stage: ($) => choice(
+      $._pipeline_expression,
+      $.input_binding_expression,
+      $.value_reference_stage,
+    ),
+
+    value_reference_stage: ($) => field("reference", $.variable),
 
     _pipeline_expression: ($) => choice(
       $.binary_expression,

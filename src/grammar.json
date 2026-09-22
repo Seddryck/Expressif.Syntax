@@ -764,8 +764,20 @@
         {
           "type": "SYMBOL",
           "name": "input_binding_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "value_reference_stage"
         }
       ]
+    },
+    "value_reference_stage": {
+      "type": "FIELD",
+      "name": "reference",
+      "content": {
+        "type": "SYMBOL",
+        "name": "variable"
+      }
     },
     "_pipeline_expression": {
       "type": "CHOICE",

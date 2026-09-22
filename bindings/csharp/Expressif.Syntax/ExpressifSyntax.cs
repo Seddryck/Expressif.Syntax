@@ -194,6 +194,12 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, BindOpen(expression));
     }
 
+    private static ValueReferenceStageSyntax BindValueReferenceStage(TsNode node)
+    {
+        var reference = node.GetChildForField("reference") ?? throw Unknown(node);
+        return new(Span(node), node.Text, (VariableSyntax)BindValue(reference));
+    }
+
     private static GroupingMapShorthandSyntax BindGroupingMapShorthand(TsNode node)
     {
         var expression = node.GetChildForField("expression") ?? throw Unknown(node);
@@ -259,6 +265,7 @@ public static class ExpressifSyntax
         "parenthesized_expression" => BindParenthesizedExpression(node),
         "tuple_projection" => BindTupleProjection(node),
         "unary_expression" => BindUnaryExpression(node),
+        "value_reference_stage" => BindValueReferenceStage(node),
         _ => BindValue(node),
     };
 

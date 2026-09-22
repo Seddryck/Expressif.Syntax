@@ -57,6 +57,7 @@ public enum SyntaxKind
     BinaryExpression,
     BinaryOperator,
     InputBindingExpression,
+    ValueReferenceStage,
     BindingName,
     PositionalBindingPattern,
     TupleBindingShorthand,
@@ -265,6 +266,16 @@ public sealed class MapShorthandSyntax : ExpressionSyntax
         => Expression = expression;
 
     public OpenExpressionSyntax Expression { get; }
+}
+
+/// <summary>An authored value reference used as a pipeline application stage.</summary>
+public sealed class ValueReferenceStageSyntax : ExpressionSyntax
+{
+    internal ValueReferenceStageSyntax(SourceSpan span, string text, VariableSyntax reference)
+        : base(SyntaxKind.ValueReferenceStage, span, text, [reference])
+        => Reference = reference;
+
+    public VariableSyntax Reference { get; }
 }
 
 public sealed class GroupingMapShorthandSyntax : ExpressionSyntax

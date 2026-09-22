@@ -1,0 +1,64 @@
+==================
+Value reference pipeline stage
+==================
+
+source | @transform
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))
+      (value_reference_stage
+        reference: (variable)))))
+
+==================
+Chained value reference stages
+==================
+
+1 | @first | @second | finish
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (numeric_literal)
+      (value_reference_stage
+        reference: (variable))
+      (value_reference_stage
+        reference: (variable))
+      (function_call
+        name: (function_name)))))
+
+==================
+Comments before value reference stage
+==================
+
+source | /* apply */ @transform
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (function_call
+        name: (function_name))
+      (block_comment)
+      (value_reference_stage
+        reference: (variable)))))
+
+==================
+Standalone variable remains a value
+==================
+
+@transform
+
+---
+
+(source_file
+  (root_expression
+    (closed_expression
+      (variable))))
