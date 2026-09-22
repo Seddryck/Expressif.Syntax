@@ -458,7 +458,7 @@ Compound reports missing array comma
         (array_element
           (numeric_literal))
         (ERROR
-          (numeric_literal))))))
+          (UNEXPECTED '2'))))))
 
 ==================
 Compound reports malformed record field
