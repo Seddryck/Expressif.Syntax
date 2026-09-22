@@ -349,6 +349,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "conditional_expression"
+        },
+        {
+          "type": "SYMBOL",
           "name": "binary_expression"
         },
         {
@@ -470,6 +474,48 @@
         {
           "type": "STRING",
           "value": "|NXOR"
+        }
+      ]
+    },
+    "conditional_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "left",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_shorthand_operand"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "operator",
+          "content": {
+            "type": "SYMBOL",
+            "name": "conditional_operator"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "right",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_shorthand_operand"
+          }
+        }
+      ]
+    },
+    "conditional_operator": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "?>"
+        },
+        {
+          "type": "STRING",
+          "value": "<?"
         }
       ]
     },
@@ -782,6 +828,10 @@
     "_pipeline_expression": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "SYMBOL",
+          "name": "conditional_expression"
+        },
         {
           "type": "SYMBOL",
           "name": "binary_expression"
@@ -1437,6 +1487,10 @@
         {
           "type": "SYMBOL",
           "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "conditional_expression"
         }
       ]
     },
@@ -1533,6 +1587,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "conditional_expression"
+        },
+        {
+          "type": "SYMBOL",
           "name": "binary_expression"
         },
         {
@@ -1612,6 +1670,10 @@
                 {
                   "type": "SYMBOL",
                   "name": "binary_expression"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "conditional_expression"
                 },
                 {
                   "type": "SYMBOL",
@@ -2633,6 +2695,10 @@
         {
           "type": "SYMBOL",
           "name": "binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "conditional_expression"
         }
       ]
     },

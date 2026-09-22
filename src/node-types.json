@@ -8,6 +8,10 @@
         "named": true
       },
       {
+        "type": "conditional_expression",
+        "named": true
+      },
+      {
         "type": "function_call",
         "named": true
       },
@@ -235,6 +239,10 @@
           },
           {
             "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
             "named": true
           },
           {
@@ -509,6 +517,10 @@
           "named": true
         },
         {
+          "type": "conditional_expression",
+          "named": true
+        },
+        {
           "type": "function_call",
           "named": true
         },
@@ -558,6 +570,119 @@
         }
       ]
     }
+  },
+  {
+    "type": "conditional_expression",
+    "named": true,
+    "fields": {
+      "left": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "grouping_map_shorthand",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_binding_shorthand",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "operator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "conditional_operator",
+            "named": true
+          }
+        ]
+      },
+      "right": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "grouping_map_shorthand",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "map_shorthand",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_binding_shorthand",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "conditional_operator",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "dictionary_literal",
@@ -916,6 +1041,10 @@
             "named": true
           },
           {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
             "type": "guarded_expression",
             "named": true
           },
@@ -1096,6 +1225,10 @@
         },
         {
           "type": "closed_expression",
+          "named": true
+        },
+        {
+          "type": "conditional_expression",
           "named": true
         },
         {
@@ -1473,6 +1606,10 @@
             "named": true
           },
           {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
             "type": "guarded_expression",
             "named": true
           },
@@ -1582,6 +1719,10 @@
           },
           {
             "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
             "named": true
           },
           {
@@ -1921,6 +2062,10 @@
             "named": true
           },
           {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
             "type": "constant_reference",
             "named": true
           },
@@ -2150,7 +2295,15 @@
     "named": false
   },
   {
+    "type": "<?",
+    "named": false
+  },
+  {
     "type": "=>",
+    "named": false
+  },
+  {
+    "type": "?>",
     "named": false
   },
   {

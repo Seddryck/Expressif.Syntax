@@ -56,6 +56,8 @@ public enum SyntaxKind
     GuardedExpression,
     BinaryExpression,
     BinaryOperator,
+    ConditionalExpression,
+    ConditionalOperator,
     InputBindingExpression,
     ValueReferenceStage,
     BindingName,
@@ -342,6 +344,41 @@ public sealed class BinaryExpressionSyntax : ExpressionSyntax
 
     public ExpressionSyntax Left { get; }
     public BinaryOperatorSyntax Operator { get; }
+    public ExpressionSyntax Right { get; }
+}
+
+public enum ConditionalDirection
+{
+    Forward,
+    Backward,
+}
+
+public sealed class ConditionalOperatorSyntax : SyntaxNode
+{
+    internal ConditionalOperatorSyntax(SourceSpan span, string text, ConditionalDirection direction)
+        : base(SyntaxKind.ConditionalOperator, span, text)
+        => Direction = direction;
+
+    public ConditionalDirection Direction { get; }
+}
+
+public sealed class ConditionalExpressionSyntax : ExpressionSyntax
+{
+    internal ConditionalExpressionSyntax(
+        SourceSpan span,
+        string text,
+        ExpressionSyntax left,
+        ConditionalOperatorSyntax @operator,
+        ExpressionSyntax right)
+        : base(SyntaxKind.ConditionalExpression, span, text, [left, @operator, right])
+    {
+        Left = left;
+        Operator = @operator;
+        Right = right;
+    }
+
+    public ExpressionSyntax Left { get; }
+    public ConditionalOperatorSyntax Operator { get; }
     public ExpressionSyntax Right { get; }
 }
 
