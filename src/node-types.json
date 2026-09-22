@@ -12,6 +12,10 @@
         "named": true
       },
       {
+        "type": "grouping_map_shorthand",
+        "named": true
+      },
+      {
         "type": "guarded_expression",
         "named": true
       },
@@ -382,6 +386,10 @@
             "named": true
           },
           {
+            "type": "grouping_map_shorthand",
+            "named": true
+          },
+          {
             "type": "guarded_expression",
             "named": true
           },
@@ -431,6 +439,10 @@
         "types": [
           {
             "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "grouping_map_shorthand",
             "named": true
           },
           {
@@ -498,6 +510,10 @@
         },
         {
           "type": "function_call",
+          "named": true
+        },
+        {
+          "type": "grouping_map_shorthand",
           "named": true
         },
         {
@@ -620,6 +636,22 @@
     }
   },
   {
+    "type": "grouping_map_shorthand",
+    "named": true,
+    "fields": {
+      "expression": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "open_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "guarded_expression",
     "named": true,
     "fields": {
@@ -629,6 +661,10 @@
         "types": [
           {
             "type": "function_call",
+            "named": true
+          },
+          {
+            "type": "grouping_map_shorthand",
             "named": true
           },
           {
@@ -1730,6 +1766,10 @@
             "named": true
           },
           {
+            "type": "grouping_map_shorthand",
+            "named": true
+          },
+          {
             "type": "incoming_value",
             "named": true
           },
@@ -2221,6 +2261,10 @@
   },
   {
     "type": "|",
+    "named": false
+  },
+  {
+    "type": "|#>",
     "named": false
   },
   {
