@@ -8,7 +8,7 @@ public static class ExpressifSyntax
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
         "all_literal", "array_literal", "boolean_literal", "constant_reference", "incoming_value", "null_literal", "numeric_literal", "ordering_literal", "type_literal",
-        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "tagged_record_literal", "temporal_literal", "tuple_literal", "variable",
+        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "tagged_record_literal", "temporal_literal", "tuple_literal", "variable", "vector_literal",
     };
 
     public static RootExpressionSyntax Parse(string source)
@@ -305,6 +305,7 @@ public static class ExpressifSyntax
             "time_literal" => new TimeLiteralSyntax(Span(node), node.Text),
             "array_literal" => new ArrayLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindArrayElement).ToArray()),
             "tuple_literal" => new TupleLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindTupleElement).ToArray()),
+            "vector_literal" => new VectorLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindVectorElement).ToArray()),
             "pair_literal" => BindPairLiteral(node),
             "grouping_literal" => new GroupingLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindPairLiteral).ToArray()),
             "dictionary_literal" => new DictionaryLiteralSyntax(Span(node), node.Text, StructuralChildren(node).Select(BindPairLiteral).ToArray()),
@@ -320,6 +321,15 @@ public static class ExpressifSyntax
         var key = node.GetChildForField("key") ?? throw Unknown(node);
         var value = node.GetChildForField("value") ?? throw Unknown(node);
         return new(Span(node), node.Text, BindPairOperand(key), BindPairOperand(value));
+    }
+
+    private static VectorElementSyntax BindVectorElement(TsNode node)
+    {
+        if (node.Type != "vector_element")
+            throw Unknown(node);
+
+        var expression = node.GetChildForField("expression");
+        return new(Span(node), node.Text, expression is null ? null : BindExpression(expression), node.GetChildForField("spread") is not null);
     }
 
     private static ExpressionSyntax BindPairOperand(TsNode node)

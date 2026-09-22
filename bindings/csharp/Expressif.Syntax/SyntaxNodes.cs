@@ -33,6 +33,8 @@ public enum SyntaxKind
     RecordAccess,
     ArrayLiteral,
     ArrayElement,
+    VectorLiteral,
+    VectorElement,
     TupleLiteral,
     TupleElement,
     PairLiteral,
@@ -501,6 +503,24 @@ public sealed class TupleLiteralSyntax : ValueSyntax
         => Elements = Array.AsReadOnly(elements);
 
     public IReadOnlyList<TupleElementSyntax> Elements { get; }
+}
+
+public sealed class VectorLiteralSyntax : ValueSyntax
+{
+    internal VectorLiteralSyntax(SourceSpan span, string text, IEnumerable<VectorElementSyntax> elements)
+        : this(span, text, elements.ToArray()) { }
+
+    private VectorLiteralSyntax(SourceSpan span, string text, VectorElementSyntax[] elements)
+        : base(SyntaxKind.VectorLiteral, span, text, elements)
+        => Elements = Array.AsReadOnly(elements);
+
+    public IReadOnlyList<VectorElementSyntax> Elements { get; }
+}
+
+public sealed class VectorElementSyntax : PositionalElementSyntax
+{
+    internal VectorElementSyntax(SourceSpan span, string text, ExpressionSyntax? expression, bool isSpread)
+        : base(SyntaxKind.VectorElement, span, text, expression, isSpread) { }
 }
 
 public sealed class TupleElementSyntax : PositionalElementSyntax
