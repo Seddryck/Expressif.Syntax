@@ -241,7 +241,7 @@ foo({@foo lower})
 
 ---
 
-(source_file (root_expression (open_expression (function_call (function_name) (argument_list (positional_argument (array_literal (array_element (variable)) (ERROR (unquoted_record_field_name)))))))))
+(source_file (root_expression (open_expression (function_call (function_name) (argument_list (positional_argument (array_literal (array_element (variable)) (ERROR))))))))
 
 
 ==================

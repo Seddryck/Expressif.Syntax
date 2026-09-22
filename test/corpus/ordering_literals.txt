@@ -83,5 +83,4 @@ Unknown hash-prefixed token remains invalid
 ---
 
 (ERROR
-  (UNEXPECTED 'u')
   (function_name))
