@@ -15,12 +15,28 @@ branches:
     is-main-branch: true
     increment: Patch
     mode: ContinuousDeployment
+  v1:
+    label: beta
+    regex: ^feat/v1\.0$
+    increment: Major
+    source-branches:
+    - main
+    is-source-branch-for:
+    - feature
+    - pull-request
   feature:
     label: beta.{BranchName}
-    regex: ^(feat(ure)?s?)[/-](?<BranchName>.+)
+    regex: ^(feat(ure)?s?)[/-](?!v1\.0$)(?<BranchName>.+)
     increment: Minor
     source-branches:
     - main
+    - v1
+    - feature
+  pull-request:
+    source-branches:
+    - main
+    - release
+    - v1
     - feature
 ignore:
   sha: []

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/v1.0
   pull_request:
   workflow_dispatch:
 
@@ -39,6 +40,17 @@ jobs:
         uses: gittools/actions/gitversion/execute@v4
         with:
           useConfigFile: true
+
+      - name: Verify v1 beta version
+        if: github.ref == 'refs/heads/feat/v1.0'
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.gitversion.outputs.semVer }}
+        run: |
+          if ($env:VERSION -notmatch '^1\.0\.0-beta\.[1-9][0-9]*$') {
+            throw "Expected a 1.0.0-beta.N version on feat/v1.0, calculated '$env:VERSION'."
+          }
+          Write-Output "Validated v1 beta version $env:VERSION."
 
   parser:
     name: Test Tree-sitter parser
@@ -332,8 +344,10 @@ jobs:
           if-no-files-found: error
 
   publish:
-    name: Publish patch-zero release
-    if: github.ref == 'refs/heads/main' && needs.version.outputs.patch == '0'
+    name: Publish release
+    if: >-
+      (github.ref == 'refs/heads/main' && needs.version.outputs.patch == '0') ||
+      (github.ref == 'refs/heads/feat/v1.0' && startsWith(needs.version.outputs.semver, '1.0.0-beta.'))
     needs: [version, collect]
     runs-on: ubuntu-latest
     permissions:
@@ -349,9 +363,11 @@ jobs:
           ref: ${{ github.sha }}
 
       # Every registry or release publication step must remain below this guard.
-      - name: Enforce main-only publication
+      - name: Enforce publication policy
+        env:
+          VERSION: ${{ needs.version.outputs.semver }}
         shell: pwsh
-        run: ./scripts/Assert-MainPublication.ps1
+        run: ./scripts/Assert-Publication.ps1
 
       - name: Download validated release packages
         uses: actions/download-artifact@v8
@@ -388,10 +404,16 @@ jobs:
             }
           }
 
+          $releaseOptions = @()
+          if ($env:GITHUB_REF -eq 'refs/heads/feat/v1.0') {
+            $releaseOptions += '--prerelease'
+          }
+
           gh release create $tag @assetPaths `
             --target $env:RELEASE_SHA `
             --title $tag `
-            --generate-notes
+            --generate-notes `
+            @releaseOptions
           if ($LASTEXITCODE -ne 0) { throw "GitHub release '$tag' creation failed." }
 
       - name: Log in to NuGet with trusted publishing
