@@ -2133,7 +2133,7 @@ public class SyntaxBindingTests
     [TestCase("foo(5,,6)", false)]
     [TestCase("!", false)]
     [TestCase("foo |AND", true)]
-    [TestCase("|AND foo", false)]
+    [TestCase("|AND foo", true)]
     [TestCase("foo |BAD bar", false)]
     [TestCase("(foo |AND bar", false)]
     [TestCase("....", false)]

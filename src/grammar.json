@@ -456,28 +456,8 @@
           "value": "->"
         },
         {
-          "type": "STRING",
-          "value": "|AND"
-        },
-        {
-          "type": "STRING",
-          "value": "|OR"
-        },
-        {
-          "type": "STRING",
-          "value": "|XOR"
-        },
-        {
-          "type": "STRING",
-          "value": "|NAND"
-        },
-        {
-          "type": "STRING",
-          "value": "|NOR"
-        },
-        {
-          "type": "STRING",
-          "value": "|NXOR"
+          "type": "SYMBOL",
+          "name": "_boolean_operator"
         }
       ]
     },
@@ -4079,6 +4059,10 @@
     {
       "type": "SYMBOL",
       "name": "_tagged_record_name"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_boolean_operator"
     }
   ],
   "inline": [],
