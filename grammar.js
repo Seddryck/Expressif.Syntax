@@ -166,6 +166,7 @@ export default grammar({
       $.numeric_literal,
       $.boolean_literal,
       $.ordering_literal,
+      $.quoted_typed_literal,
       $.all_literal,
       $.null_literal,
       $.quoted_literal,
@@ -471,6 +472,7 @@ export default grammar({
       $.ordering_literal,
       $.all_literal,
       $.null_literal,
+      $.quoted_typed_literal,
       $.quoted_literal,
       $.temporal_literal,
       $.array_literal,
@@ -501,6 +503,7 @@ export default grammar({
     interval_bound: ($) => choice(
       $.numeric_literal,
       $.boolean_literal,
+      $.quoted_typed_literal,
       $.quoted_literal,
       $.temporal_literal,
       $.infinite_bound,
@@ -578,6 +581,7 @@ export default grammar({
       $.ordering_literal,
       $.all_literal,
       $.null_literal,
+      $.quoted_typed_literal,
       $.quoted_literal,
       $.temporal_literal,
       $.array_literal,
@@ -785,6 +789,12 @@ export default grammar({
     type_literal: (_) => token(seq(":", /[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*/)),
 
     null_literal: (_) => "#null",
+
+    quoted_typed_literal: ($) => seq(
+      "#",
+      field("representation", $.double_quoted_literal),
+      field("type", optional($.type_literal)),
+    ),
 
     quoted_literal: ($) => choice(
       $.double_quoted_literal,

@@ -22,6 +22,7 @@ public enum SyntaxKind
     AllLiteral,
     NullLiteral,
     QuotedLiteral,
+    QuotedTypedLiteral,
     DateLiteral,
     DateTimeLiteral,
     TimeLiteral,
@@ -799,6 +800,27 @@ public sealed class QuotedLiteralSyntax : ValueSyntax
 
     public QuotingStyle QuotingStyle { get; }
     public string Value { get; }
+}
+
+public sealed class QuotedTypedLiteralSyntax : ValueSyntax
+{
+    internal QuotedTypedLiteralSyntax(
+        SourceSpan span,
+        string text,
+        QuotedLiteralSyntax representation,
+        TypeLiteralSyntax? type)
+        : base(
+            SyntaxKind.QuotedTypedLiteral,
+            span,
+            text,
+            type is null ? [representation] : [representation, type])
+    {
+        Representation = representation;
+        Type = type;
+    }
+
+    public QuotedLiteralSyntax Representation { get; }
+    public TypeLiteralSyntax? Type { get; }
 }
 
 public abstract class TemporalLiteralSyntax : ValueSyntax

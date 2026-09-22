@@ -8,7 +8,7 @@ public static class ExpressifSyntax
     internal static IReadOnlySet<string> SupportedValueNodeTypes { get; } = new HashSet<string>
     {
         "all_literal", "array_literal", "boolean_literal", "constant_reference", "incoming_value", "null_literal", "numeric_literal", "ordering_literal", "type_literal",
-        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "record_access", "record_literal", "tagged_record_literal", "temporal_literal", "tuple_literal", "variable", "vector_literal",
+        "dictionary_literal", "grouping_literal", "interval_literal", "pair_literal", "quoted_literal", "quoted_typed_literal", "record_access", "record_literal", "tagged_record_literal", "temporal_literal", "tuple_literal", "variable", "vector_literal",
     };
 
     public static RootExpressionSyntax Parse(string source)
@@ -332,6 +332,7 @@ public static class ExpressifSyntax
             "ordering_literal" => new OrderingLiteralSyntax(Span(node), node.Text),
             "all_literal" => new AllLiteralSyntax(Span(node), node.Text),
             "null_literal" => new NullLiteralSyntax(Span(node), node.Text),
+            "quoted_typed_literal" => BindQuotedTypedLiteral(node),
             "double_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.DoubleQuote),
             "backtick_quoted_literal" => new QuotedLiteralSyntax(Span(node), node.Text, QuotingStyle.Backtick),
             "date_literal" => new DateLiteralSyntax(Span(node), node.Text),
@@ -349,6 +350,17 @@ public static class ExpressifSyntax
             "value" or "quoted_literal" or "temporal_literal" => BindValue(SingleNamedChild(node, node.Type)),
             _ => throw Unknown(node),
         });
+
+    private static QuotedTypedLiteralSyntax BindQuotedTypedLiteral(TsNode node)
+    {
+        var representation = node.GetChildForField("representation") ?? throw Unknown(node);
+        var type = node.GetChildForField("type");
+        return new(
+            Span(node),
+            node.Text,
+            new QuotedLiteralSyntax(Span(representation), representation.Text, QuotingStyle.DoubleQuote),
+            type is null ? null : new TypeLiteralSyntax(Span(type), type.Text));
+    }
 
     private static PairLiteralSyntax BindPairLiteral(TsNode node)
     {
