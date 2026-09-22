@@ -236,6 +236,25 @@ public static class ExpressifSyntax
             BindExpression(right));
     }
 
+    private static ConditionalExpressionSyntax BindConditionalExpression(TsNode node)
+    {
+        var left = node.GetChildForField("left") ?? throw Unknown(node);
+        var @operator = node.GetChildForField("operator") ?? throw Unknown(node);
+        var right = node.GetChildForField("right") ?? throw Unknown(node);
+        var direction = @operator.Text switch
+        {
+            "?>" => ConditionalDirection.Forward,
+            "<?" => ConditionalDirection.Backward,
+            _ => throw Unknown(@operator),
+        };
+        return new(
+            Span(node),
+            node.Text,
+            BindExpression(left),
+            new ConditionalOperatorSyntax(Span(@operator), @operator.Text, direction),
+            BindExpression(right));
+    }
+
     private static RootExpressionSyntax BindRootExpression(TsNode node)
     {
         if (node.Type == "root_expression")
@@ -253,6 +272,7 @@ public static class ExpressifSyntax
     {
         "closed_expression" => BindClosed(node),
         "binary_expression" => BindBinaryExpression(node),
+        "conditional_expression" => BindConditionalExpression(node),
         "function_call" => BindFunctionCall(node),
         "tuple_binding_shorthand" => BindTupleBindingShorthand(node),
         "guarded_expression" => BindGuardedExpression(node),

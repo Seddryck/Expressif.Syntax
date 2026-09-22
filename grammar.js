@@ -121,6 +121,7 @@ export default grammar({
     ),
 
     expression: ($) => choice(
+      $.conditional_expression,
       $.binary_expression,
       $.guarded_expression,
       $.unary_expression,
@@ -138,6 +139,14 @@ export default grammar({
       "|AND", "|OR", "|XOR",
       "|NAND", "|NOR", "|NXOR",
     ),
+
+    conditional_expression: ($) => seq(
+      field("left", $._shorthand_operand),
+      field("operator", $.conditional_operator),
+      field("right", $._shorthand_operand),
+    ),
+
+    conditional_operator: (_) => choice("?>", "<?"),
 
     unary_expression: ($) => prec.right(2, seq(
       field("operator", $.unary_operator),
@@ -197,6 +206,7 @@ export default grammar({
     value_reference_stage: ($) => field("reference", $.variable),
 
     _pipeline_expression: ($) => choice(
+      $.conditional_expression,
       $.binary_expression,
       $.guarded_expression,
       $.unary_expression,
@@ -314,6 +324,7 @@ export default grammar({
       $.guarded_expression,
       $.unary_expression,
       $.binary_expression,
+      $.conditional_expression,
     ),
 
     named_argument: ($) => seq(
@@ -342,6 +353,7 @@ export default grammar({
     ),
 
     _argument_value: ($) => choice(
+      $.conditional_expression,
       $.binary_expression,
       $.guarded_expression,
       $.unary_expression,
@@ -359,7 +371,7 @@ export default grammar({
     _nested_open_expression: ($) => choice(
       alias($._leading_positional_binding_expression, $.input_binding_expression),
       seq(
-        choice($.parenthesized_expression, $.unary_expression, $.binary_expression, $.guarded_expression),
+        choice($.parenthesized_expression, $.unary_expression, $.binary_expression, $.conditional_expression, $.guarded_expression),
         "|",
         $._pipeline_stage,
         repeat(seq("|", $._pipeline_stage)),
@@ -552,6 +564,7 @@ export default grammar({
       $.guarded_expression,
       $.unary_expression,
       $.binary_expression,
+      $.conditional_expression,
     ),
 
     _compound_value: ($) => choice(
