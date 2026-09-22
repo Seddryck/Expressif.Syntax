@@ -50,6 +50,7 @@ public enum SyntaxKind
     ParenthesizedExpression,
     IntervalLiteral,
     MapShorthand,
+    GroupingMapShorthand,
     UnaryExpression,
     UnaryOperator,
     GuardedExpression,
@@ -261,6 +262,15 @@ public sealed class MapShorthandSyntax : ExpressionSyntax
 {
     internal MapShorthandSyntax(SourceSpan span, string text, OpenExpressionSyntax expression)
         : base(SyntaxKind.MapShorthand, span, text, [expression])
+        => Expression = expression;
+
+    public OpenExpressionSyntax Expression { get; }
+}
+
+public sealed class GroupingMapShorthandSyntax : ExpressionSyntax
+{
+    internal GroupingMapShorthandSyntax(SourceSpan span, string text, OpenExpressionSyntax expression)
+        : base(SyntaxKind.GroupingMapShorthand, span, text, [expression])
         => Expression = expression;
 
     public OpenExpressionSyntax Expression { get; }

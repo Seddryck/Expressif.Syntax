@@ -102,6 +102,15 @@
                       },
                       "named": true,
                       "value": "map_shorthand"
+                    },
+                    {
+                      "type": "ALIAS",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "_pipeline_grouping_map_shorthand"
+                      },
+                      "named": true,
+                      "value": "grouping_map_shorthand"
                     }
                   ]
                 }
@@ -156,6 +165,15 @@
                   },
                   "named": true,
                   "value": "map_shorthand"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_pipeline_grouping_map_shorthand"
+                  },
+                  "named": true,
+                  "value": "grouping_map_shorthand"
                 }
               ]
             }
@@ -169,6 +187,28 @@
         {
           "type": "STRING",
           "value": "|>"
+        },
+        {
+          "type": "FIELD",
+          "name": "expression",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_map_shorthand_expression"
+            },
+            "named": true,
+            "value": "open_expression"
+          }
+        }
+      ]
+    },
+    "grouping_map_shorthand": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "|#>"
         },
         {
           "type": "FIELD",
@@ -251,6 +291,59 @@
         }
       ]
     },
+    "_pipeline_grouping_map_shorthand": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "PREC",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "|#>"
+              },
+              {
+                "type": "FIELD",
+                "name": "expression",
+                "content": {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "parenthesized_open_expression"
+                  },
+                  "named": true,
+                  "value": "open_expression"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "|#>"
+            },
+            {
+              "type": "FIELD",
+              "name": "expression",
+              "content": {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_map_shorthand_expression"
+                },
+                "named": true,
+                "value": "open_expression"
+              }
+            }
+          ]
+        }
+      ]
+    },
     "expression": {
       "type": "CHOICE",
       "members": [
@@ -280,6 +373,10 @@
             {
               "type": "SYMBOL",
               "name": "map_shorthand"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "grouping_map_shorthand"
             },
             {
               "type": "SYMBOL",
@@ -414,6 +511,10 @@
                     {
                       "type": "SYMBOL",
                       "name": "map_shorthand"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "grouping_map_shorthand"
                     },
                     {
                       "type": "SYMBOL",
@@ -569,6 +670,10 @@
                     },
                     {
                       "type": "SYMBOL",
+                      "name": "grouping_map_shorthand"
+                    },
+                    {
+                      "type": "SYMBOL",
                       "name": "tuple_projection"
                     },
                     {
@@ -620,6 +725,10 @@
             {
               "type": "SYMBOL",
               "name": "map_shorthand"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "grouping_map_shorthand"
             },
             {
               "type": "SYMBOL",
@@ -1553,6 +1662,31 @@
           "type": "SEQ",
           "members": [
             {
+              "type": "SYMBOL",
+              "name": "grouping_map_shorthand"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "|"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_pipeline_stage"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
               "type": "CHOICE",
               "members": [
                 {
@@ -1682,6 +1816,15 @@
               },
               "named": true,
               "value": "map_shorthand"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_pipeline_grouping_map_shorthand"
+              },
+              "named": true,
+              "value": "grouping_map_shorthand"
             }
           ]
         },
@@ -1711,6 +1854,15 @@
                 },
                 "named": true,
                 "value": "map_shorthand"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_pipeline_grouping_map_shorthand"
+                },
+                "named": true,
+                "value": "grouping_map_shorthand"
               }
             ]
           }
@@ -2384,6 +2536,15 @@
                 },
                 "named": true,
                 "value": "map_shorthand"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_pipeline_grouping_map_shorthand"
+                },
+                "named": true,
+                "value": "grouping_map_shorthand"
               }
             ]
           },
@@ -2413,6 +2574,15 @@
                   },
                   "named": true,
                   "value": "map_shorthand"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_pipeline_grouping_map_shorthand"
+                  },
+                  "named": true,
+                  "value": "grouping_map_shorthand"
                 }
               ]
             }

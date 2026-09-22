@@ -11,6 +11,7 @@ const ordinaryExpression = ($) => choice(
   $.function_call,
   $.tuple_binding_shorthand,
   $.map_shorthand,
+  $.grouping_map_shorthand,
   $.tuple_projection,
   prec(-1, $.pair_component_access),
   $.parenthesized_expression,
@@ -64,6 +65,7 @@ export default grammar({
         repeat(choice(
           seq("|", $._pipeline_stage),
           alias($._pipeline_map_shorthand, $.map_shorthand),
+          alias($._pipeline_grouping_map_shorthand, $.grouping_map_shorthand),
         )),
       ),
       alias($._leading_positional_binding_expression, $.input_binding_expression),
@@ -74,11 +76,17 @@ export default grammar({
       repeat(choice(
         seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
+        alias($._pipeline_grouping_map_shorthand, $.grouping_map_shorthand),
       )),
     )),
 
     map_shorthand: ($) => seq(
       "|>",
+      field("expression", alias($._map_shorthand_expression, $.open_expression)),
+    ),
+
+    grouping_map_shorthand: ($) => seq(
+      "|#>",
       field("expression", alias($._map_shorthand_expression, $.open_expression)),
     ),
 
@@ -97,6 +105,17 @@ export default grammar({
       )),
       seq(
         "|>",
+        field("expression", alias($._map_shorthand_expression, $.open_expression)),
+      ),
+    ),
+
+    _pipeline_grouping_map_shorthand: ($) => choice(
+      prec(1, seq(
+        "|#>",
+        field("expression", alias($.parenthesized_open_expression, $.open_expression)),
+      )),
+      seq(
+        "|#>",
         field("expression", alias($._map_shorthand_expression, $.open_expression)),
       ),
     ),
@@ -344,6 +363,10 @@ export default grammar({
         repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
+        $.grouping_map_shorthand,
+        repeat(seq("|", $._pipeline_stage)),
+      ),
+      seq(
         choice($.function_call, $.tuple_binding_shorthand),
         repeat(seq("|", $._pipeline_stage)),
       ),
@@ -370,10 +393,12 @@ export default grammar({
       choice(
         seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
+        alias($._pipeline_grouping_map_shorthand, $.grouping_map_shorthand),
       ),
       repeat(choice(
         seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
+        alias($._pipeline_grouping_map_shorthand, $.grouping_map_shorthand),
       )),
     ),
 
@@ -505,10 +530,12 @@ export default grammar({
       choice(
         seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
+        alias($._pipeline_grouping_map_shorthand, $.grouping_map_shorthand),
       ),
       repeat(choice(
         seq("|", $._pipeline_stage),
         alias($._pipeline_map_shorthand, $.map_shorthand),
+        alias($._pipeline_grouping_map_shorthand, $.grouping_map_shorthand),
       )),
     )),
 

@@ -194,6 +194,12 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, BindOpen(expression));
     }
 
+    private static GroupingMapShorthandSyntax BindGroupingMapShorthand(TsNode node)
+    {
+        var expression = node.GetChildForField("expression") ?? throw Unknown(node);
+        return new(Span(node), node.Text, BindOpen(expression));
+    }
+
     private static UnaryExpressionSyntax BindUnaryExpression(TsNode node)
     {
         var @operator = node.GetChildForField("operator") ?? throw Unknown(node);
@@ -244,6 +250,7 @@ public static class ExpressifSyntax
         "function_call" => BindFunctionCall(node),
         "tuple_binding_shorthand" => BindTupleBindingShorthand(node),
         "guarded_expression" => BindGuardedExpression(node),
+        "grouping_map_shorthand" => BindGroupingMapShorthand(node),
         "input_binding_expression" => BindInputBindingExpression(node),
         "map_shorthand" => BindMapShorthand(node),
         "open_expression" => BindOpen(node),
