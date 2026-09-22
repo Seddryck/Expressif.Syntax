@@ -115,6 +115,31 @@ public static class ExpressifSyntax
         return new(Span(node), node.Text, name.Text, suffix.StartsWith("("), arguments);
     }
 
+    private static ControlFlowCallSyntax BindControlFlowCall(TsNode node)
+    {
+        var name = node.GetChildForField("name") ?? throw Unknown(node);
+        var branchList = StructuralChildren(node).FirstOrDefault(child => child.Type == "control_flow_branch_list")
+            ?? throw Unknown(node);
+        return new(
+            Span(node),
+            node.Text,
+            name.Text,
+            StructuralChildren(branchList).Select(BindControlFlowBranch).ToArray());
+    }
+
+    private static ControlFlowBranchSyntax BindControlFlowBranch(TsNode node)
+    {
+        var action = node.GetChildForField("action") ?? throw Unknown(node);
+        if (node.Type == "control_flow_fallback")
+            return new ControlFlowFallbackSyntax(Span(node), node.Text, BindExpression(action));
+
+        var condition = node.GetChildForField("condition") ?? throw Unknown(node);
+        return node.Type == "control_flow_branch"
+            ? new ConditionalControlFlowBranchSyntax(
+                Span(node), node.Text, BindExpression(condition), BindExpression(action))
+            : throw Unknown(node);
+    }
+
     private static ArgumentSyntax BindArgument(TsNode node) => node.Type switch
     {
         "positional_argument" => BindPositionalArgument(node),
@@ -271,6 +296,7 @@ public static class ExpressifSyntax
     private static ExpressionSyntax BindExpression(TsNode node) => node.Type switch
     {
         "closed_expression" => BindClosed(node),
+        "control_flow_call" => BindControlFlowCall(node),
         "binary_expression" => BindBinaryExpression(node),
         "conditional_expression" => BindConditionalExpression(node),
         "function_call" => BindFunctionCall(node),
