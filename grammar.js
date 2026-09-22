@@ -8,6 +8,7 @@
 // @ts-check
 
 const ordinaryExpression = ($) => choice(
+  $.control_flow_call,
   $.function_call,
   $.tuple_binding_shorthand,
   $.map_shorthand,
@@ -211,6 +212,7 @@ export default grammar({
       $.binary_expression,
       $.guarded_expression,
       $.unary_expression,
+      $.control_flow_call,
       $.function_call,
       $.tuple_binding_shorthand,
       prec(1, $.record_access),
@@ -386,7 +388,7 @@ export default grammar({
         repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
-        choice($.function_call, $.tuple_binding_shorthand),
+        choice($.control_flow_call, $.function_call, $.tuple_binding_shorthand),
         repeat(seq("|", $._pipeline_stage)),
       ),
       seq(
@@ -650,6 +652,36 @@ export default grammar({
         alias($._array_closed_expression, $.closed_expression),
         $._compound_value,
       )),
+    ),
+
+    control_flow_call: ($) => prec(2, seq(
+      field("name", $.control_flow_name),
+      "(",
+      $.control_flow_branch_list,
+      ")",
+    )),
+
+    control_flow_name: (_) => token(prec(2, choice(
+      /[Ss][Ww][Ii][Tt][Cc][Hh]/,
+      /[Tt][Rr][Yy]/,
+    ))),
+
+    control_flow_branch_list: ($) => seq(
+      choice($.control_flow_branch, $.control_flow_fallback),
+      repeat(seq(",", choice($.control_flow_branch, $.control_flow_fallback))),
+      optional(","),
+    ),
+
+    control_flow_branch: ($) => seq(
+      field("condition", $._argument_value),
+      "=>",
+      field("action", $._argument_value),
+    ),
+
+    control_flow_fallback: ($) => seq(
+      "_",
+      "=>",
+      field("action", $._argument_value),
     ),
 
     _tuple_binding_open_expression: ($) => seq($.tuple_binding_shorthand),

@@ -368,6 +368,10 @@
           "members": [
             {
               "type": "SYMBOL",
+              "name": "control_flow_call"
+            },
+            {
+              "type": "SYMBOL",
               "name": "function_call"
             },
             {
@@ -548,6 +552,10 @@
                   "members": [
                     {
                       "type": "SYMBOL",
+                      "name": "control_flow_call"
+                    },
+                    {
+                      "type": "SYMBOL",
                       "name": "function_call"
                     },
                     {
@@ -708,6 +716,10 @@
                   "members": [
                     {
                       "type": "SYMBOL",
+                      "name": "control_flow_call"
+                    },
+                    {
+                      "type": "SYMBOL",
                       "name": "function_call"
                     },
                     {
@@ -764,6 +776,10 @@
         {
           "type": "CHOICE",
           "members": [
+            {
+              "type": "SYMBOL",
+              "name": "control_flow_call"
+            },
             {
               "type": "SYMBOL",
               "name": "function_call"
@@ -847,6 +863,10 @@
         {
           "type": "SYMBOL",
           "name": "unary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "control_flow_call"
         },
         {
           "type": "SYMBOL",
@@ -1767,6 +1787,10 @@
             {
               "type": "CHOICE",
               "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "control_flow_call"
+                },
                 {
                   "type": "SYMBOL",
                   "name": "function_call"
@@ -3101,6 +3125,156 @@
                 "name": "_compound_value"
               }
             ]
+          }
+        }
+      ]
+    },
+    "control_flow_call": {
+      "type": "PREC",
+      "value": 2,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "name",
+            "content": {
+              "type": "SYMBOL",
+              "name": "control_flow_name"
+            }
+          },
+          {
+            "type": "STRING",
+            "value": "("
+          },
+          {
+            "type": "SYMBOL",
+            "name": "control_flow_branch_list"
+          },
+          {
+            "type": "STRING",
+            "value": ")"
+          }
+        ]
+      }
+    },
+    "control_flow_name": {
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 2,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "[Ss][Ww][Ii][Tt][Cc][Hh]"
+            },
+            {
+              "type": "PATTERN",
+              "value": "[Tt][Rr][Yy]"
+            }
+          ]
+        }
+      }
+    },
+    "control_flow_branch_list": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "control_flow_branch"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "control_flow_fallback"
+            }
+          ]
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ","
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "control_flow_branch"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "control_flow_fallback"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": ","
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "control_flow_branch": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "condition",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_argument_value"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": "=>"
+        },
+        {
+          "type": "FIELD",
+          "name": "action",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_argument_value"
+          }
+        }
+      ]
+    },
+    "control_flow_fallback": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "_"
+        },
+        {
+          "type": "STRING",
+          "value": "=>"
+        },
+        {
+          "type": "FIELD",
+          "name": "action",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_argument_value"
           }
         }
       ]

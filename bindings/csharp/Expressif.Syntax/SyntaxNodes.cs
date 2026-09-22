@@ -11,6 +11,9 @@ public enum SyntaxKind
     OpenExpression,
     ClosedExpression,
     FunctionCall,
+    ControlFlowCall,
+    ControlFlowBranch,
+    ControlFlowFallback,
     PositionalArgument,
     SpreadArgument,
     NamedArgument,
@@ -198,6 +201,61 @@ public sealed class FunctionCallSyntax : ExpressionSyntax
     public string Name { get; }
     public bool HasParentheses { get; }
     public IReadOnlyList<ArgumentSyntax> Arguments { get; }
+}
+
+public abstract class ControlFlowBranchSyntax : SyntaxNode
+{
+    protected ControlFlowBranchSyntax(
+        SyntaxKind kind,
+        SourceSpan span,
+        string text,
+        IEnumerable<SyntaxNode> children)
+        : base(kind, span, text, children) { }
+
+    public abstract ExpressionSyntax Action { get; }
+}
+
+public sealed class ConditionalControlFlowBranchSyntax : ControlFlowBranchSyntax
+{
+    internal ConditionalControlFlowBranchSyntax(
+        SourceSpan span,
+        string text,
+        ExpressionSyntax condition,
+        ExpressionSyntax action)
+        : base(SyntaxKind.ControlFlowBranch, span, text, [condition, action])
+    {
+        Condition = condition;
+        Action = action;
+    }
+
+    public ExpressionSyntax Condition { get; }
+    public override ExpressionSyntax Action { get; }
+}
+
+public sealed class ControlFlowFallbackSyntax : ControlFlowBranchSyntax
+{
+    internal ControlFlowFallbackSyntax(SourceSpan span, string text, ExpressionSyntax action)
+        : base(SyntaxKind.ControlFlowFallback, span, text, [action])
+        => Action = action;
+
+    public override ExpressionSyntax Action { get; }
+}
+
+public sealed class ControlFlowCallSyntax : ExpressionSyntax
+{
+    internal ControlFlowCallSyntax(
+        SourceSpan span,
+        string text,
+        string name,
+        IEnumerable<ControlFlowBranchSyntax> branches)
+        : base(SyntaxKind.ControlFlowCall, span, text, branches)
+    {
+        Name = name;
+        Branches = Array.AsReadOnly(branches.ToArray());
+    }
+
+    public string Name { get; }
+    public IReadOnlyList<ControlFlowBranchSyntax> Branches { get; }
 }
 
 /// <summary>A pipeline stage that binds its preceding value and preserves its complete authored body.</summary>

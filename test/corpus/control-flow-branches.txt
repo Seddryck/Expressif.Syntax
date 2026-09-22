@@ -1,0 +1,98 @@
+==================
+Switch branches and fallback
+==================
+
+switch(is-positive => 1, is-negative => -1, _ => 0)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (control_flow_call
+        name: (control_flow_name)
+        (control_flow_branch_list
+          (control_flow_branch
+            condition: (open_expression
+              (function_call
+                name: (function_name)))
+            action: (numeric_literal))
+          (control_flow_branch
+            condition: (open_expression
+              (function_call
+                name: (function_name)))
+            action: (numeric_literal))
+          (control_flow_fallback
+            action: (numeric_literal)))))))
+
+==================
+Try branch with pipelines and quoted delimiters
+==================
+
+try(value | absolute => test(")", I[0,10]) | finish, _ => #"none":text)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (control_flow_call
+        name: (control_flow_name)
+        (control_flow_branch_list
+          (control_flow_branch
+            condition: (open_expression
+              (function_call
+                name: (function_name))
+              (function_call
+                name: (function_name)))
+            action: (open_expression
+              (function_call
+                name: (function_name)
+                (argument_list
+                  (positional_argument
+                    (double_quoted_literal
+                      (double_quoted_content)))
+                  (positional_argument
+                    (interval_literal
+                      lower_bound: (interval_bound
+                        (numeric_literal))
+                      upper_bound: (interval_bound
+                        (numeric_literal))))))
+              (function_call
+                name: (function_name))))
+          (control_flow_fallback
+            action: (quoted_typed_literal
+              representation: (double_quoted_literal
+                (double_quoted_content))
+              type: (type_literal))))))))
+
+==================
+Nested control flow and comments
+==================
+
+SWITCH(/* condition */ #true => try(absolute => 1, _ => 0), _ => 2)
+
+---
+
+(source_file
+  (root_expression
+    (open_expression
+      (control_flow_call
+        name: (control_flow_name)
+        (block_comment)
+        (control_flow_branch_list
+          (control_flow_branch
+            condition: (boolean_literal)
+            action: (open_expression
+              (control_flow_call
+                name: (control_flow_name)
+                (control_flow_branch_list
+                  (control_flow_branch
+                    condition: (open_expression
+                      (function_call
+                        name: (function_name)))
+                    action: (numeric_literal))
+                  (control_flow_fallback
+                    action: (numeric_literal))))))
+          (control_flow_fallback
+            action: (numeric_literal)))))))

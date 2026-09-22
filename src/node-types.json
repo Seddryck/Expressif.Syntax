@@ -12,6 +12,10 @@
         "named": true
       },
       {
+        "type": "control_flow_call",
+        "named": true
+      },
+      {
         "type": "function_call",
         "named": true
       },
@@ -398,6 +402,10 @@
             "named": true
           },
           {
+            "type": "control_flow_call",
+            "named": true
+          },
+          {
             "type": "function_call",
             "named": true
           },
@@ -453,6 +461,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "control_flow_call",
+            "named": true
+          },
           {
             "type": "function_call",
             "named": true
@@ -529,6 +541,10 @@
           "named": true
         },
         {
+          "type": "control_flow_call",
+          "named": true
+        },
+        {
           "type": "function_call",
           "named": true
         },
@@ -588,6 +604,10 @@
         "required": true,
         "types": [
           {
+            "type": "control_flow_call",
+            "named": true
+          },
+          {
             "type": "function_call",
             "named": true
           },
@@ -644,6 +664,10 @@
         "required": true,
         "types": [
           {
+            "type": "control_flow_call",
+            "named": true
+          },
+          {
             "type": "function_call",
             "named": true
           },
@@ -691,6 +715,213 @@
     "type": "conditional_operator",
     "named": true,
     "fields": {}
+  },
+  {
+    "type": "control_flow_branch",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
+            "type": "parameterized_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      },
+      "condition": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
+            "type": "parameterized_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "control_flow_branch_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "control_flow_branch",
+          "named": true
+        },
+        {
+          "type": "control_flow_fallback",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "control_flow_call",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "control_flow_name",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "control_flow_branch_list",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "control_flow_fallback",
+    "named": true,
+    "fields": {
+      "action": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "binary_expression",
+            "named": true
+          },
+          {
+            "type": "closed_expression",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "guarded_expression",
+            "named": true
+          },
+          {
+            "type": "open_expression",
+            "named": true
+          },
+          {
+            "type": "pair_component_access",
+            "named": true
+          },
+          {
+            "type": "parameterized_expression",
+            "named": true
+          },
+          {
+            "type": "parenthesized_expression",
+            "named": true
+          },
+          {
+            "type": "tuple_projection",
+            "named": true
+          },
+          {
+            "type": "unary_expression",
+            "named": true
+          },
+          {
+            "type": "value",
+            "named": true
+          }
+        ]
+      }
+    }
   },
   {
     "type": "dictionary_literal",
@@ -796,6 +1027,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "control_flow_call",
+            "named": true
+          },
           {
             "type": "function_call",
             "named": true
@@ -1949,6 +2184,10 @@
             "named": true
           },
           {
+            "type": "control_flow_call",
+            "named": true
+          },
+          {
             "type": "dictionary_literal",
             "named": true
           },
@@ -2385,6 +2624,10 @@
     "named": false
   },
   {
+    "type": "_",
+    "named": false
+  },
+  {
     "type": "`",
     "named": false
   },
@@ -2403,6 +2646,10 @@
   },
   {
     "type": "constant_reference",
+    "named": true
+  },
+  {
+    "type": "control_flow_name",
     "named": true
   },
   {
